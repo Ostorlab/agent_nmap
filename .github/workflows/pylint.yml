@@ -33,6 +33,6 @@ jobs:
         python -m pip install -r tests/test-requirement.txt
     - name: Runnning linter.
       run: |
-        pylint --load-plugins pylint_quotes --rcfile=.pylintrc --ignore=tests/ src/
+        pylint --load-plugins pylint_quotes --rcfile=.pylintrc --ignore=tests/ agent/
         pylint --load-plugins pylint_quotes --rcfile=.pylintrc -d C0103,W0613 tests/
 
