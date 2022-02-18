@@ -6,7 +6,6 @@ in_selectors:
   - v3.asset.ip.v4
   - v3.asset.ip.v6
 out_selectors: 
-  - v3.asset.ip.port
   - v3.asset.ip.port.service
   - v3.report.vulnerability
 docker_file_path : Dockerfile
