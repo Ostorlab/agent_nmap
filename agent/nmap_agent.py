@@ -55,7 +55,7 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
 
         self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                   technical_detail=technical_detail,
-                                  risk_rating=agent_report_vulnerability_mixin.RiskRating.INFO, dna='')
+                                  risk_rating=agent_report_vulnerability_mixin.RiskRating.INFO)
 
 
 if __name__ == '__main__':
