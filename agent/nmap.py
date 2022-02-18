@@ -71,8 +71,8 @@ class NmapWrapper:
         Returns:
             result of the scan.
         """
-        process = subprocess.Popen(self.command, stdout=subprocess.PIPE)
-        xml_output = process.communicate()[0]
-        xml_output= xml_output.decode(encoding='utf-8')
-        scan_results = self._parse_output_to_json(xml_output)
-        return scan_results
+        with subprocess.Popen(self.command, stdout=subprocess.PIPE) as process:
+            xml_output = process.communicate()[0]
+            xml_output= xml_output.decode(encoding='utf-8')
+            scan_results = self._parse_output_to_json(xml_output)
+            return scan_results
