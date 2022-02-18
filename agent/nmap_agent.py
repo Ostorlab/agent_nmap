@@ -1,6 +1,6 @@
 """Nmap agent : Responsible for running scans on IP assets with Nmap Security Scanner.
 Expects messages of type v3.asset.ip, and emits back messages of type
-v3.asset.ip.port.service, and finally emits message of type v3.report.vulnerability with a technical report of the scan.
+v3.asset.ip.v[4,6].port.service, and finally emits messages of type v3.report.vulnerability with a technical report of the scan.
 """
 
 import logging
