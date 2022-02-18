@@ -32,7 +32,7 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
 
             ports = host.get('ports', {}).get('port', [])
             # nmap returns a list of ports, however in the case of only one, it returns it as a dict.
-            #  thus the lines below.
+            # thus the lines below.
             if isinstance(ports, dict):
                 ports = [ports]
 
