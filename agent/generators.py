@@ -23,7 +23,10 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
         for host in up_hosts:
             data = {}
             data['host'] = host.get('address', {}).get('@addr')
-            data['version'] = host.get('address', {}).get('@addrtype')
+            ip_version = host.get('address', {}).get('@addrtype')
+            ip_versions = {'ipv4':4, 'ipv6':6}
+            data['version'] = ip_versions.get(ip_version)
+
             open_ports = host.get('ports', {}).get('port', [])
             if isinstance(open_ports, dict):
                 open_ports = [open_ports]
