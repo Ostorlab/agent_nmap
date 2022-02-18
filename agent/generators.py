@@ -7,7 +7,7 @@ from typing import Dict, Iterator
 logger = logging.getLogger(__name__)
 
 def get_services(scan_result: Dict) -> Iterator[Dict]:
-    """Generator of data for messages of type v3.asset.ip.port.service
+    """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
 
     Args:
        scan_result: dictionary of the result of the nmap scan.
