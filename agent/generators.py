@@ -4,10 +4,12 @@ import logging
 
 from typing import Dict, Iterator
 
+IP_VERSIONS = {'ipv4':4, 'ipv6':6}
+
 logger = logging.getLogger(__name__)
 
 def get_services(scan_result: Dict) -> Iterator[Dict]:
-    """Generator of data for messages of type v3.asset.ip.port.service
+    """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
 
     Args:
        scan_result: dictionary of the result of the nmap scan.
@@ -17,6 +19,7 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
 
     try:
         up_hosts = scan_result['nmaprun'].get('host', [])
+        # nmap returns a list of hosts, however in the case of only one, it returns it as a dict. thus the lines below.
         if isinstance(up_hosts, dict):
             up_hosts = [up_hosts]
 
@@ -24,19 +27,20 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
             data = {}
             data['host'] = host.get('address', {}).get('@addr')
             ip_version = host.get('address', {}).get('@addrtype')
-            ip_versions = {'ipv4':4, 'ipv6':6}
-            data['version'] = ip_versions.get(ip_version)
 
-            open_ports = host.get('ports', {}).get('port', [])
-            if isinstance(open_ports, dict):
-                open_ports = [open_ports]
+            data['version'] = IP_VERSIONS.get(ip_version)
 
-            for port in open_ports:
-                if port['state']['@state'] == 'open':
-                    data['port'] = port.get('@portid')
-                    data['protocol'] = port.get('@protocol')
-                    data['state'] = port.get('state', {}).get('@state', 'closed')
-                    data['service'] = port.get('service', {}).get('@name', '')
-                    yield data
+            ports = host.get('ports', {}).get('port', [])
+            # nmap returns a list of ports, however in the case of only one, it returns it as a dict.
+            # thus the lines below.
+            if isinstance(ports, dict):
+                ports = [ports]
+
+            for port in ports:
+                data['port'] = port.get('@portid')
+                data['protocol'] = port.get('@protocol')
+                data['state'] = port.get('state', {}).get('@state', 'closed')
+                data['service'] = port.get('service', {}).get('@name', '')
+                yield data
     except KeyError as e:
         logger.error(e)
