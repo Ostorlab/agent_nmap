@@ -1,6 +1,7 @@
 """Nmap agent : Responsible for running scans on IP assets with Nmap Security Scanner.
 Expects messages of type v3.asset.ip, and emits back messages of type
-v3.asset.ip.v[4,6].port.service, and finally emits messages of type v3.report.vulnerability with a technical report of the scan.
+v3.asset.ip.v[4,6].port.service, and finally emits messages of type 
+v3.report.vulnerability with a technical report of the scan.
 """
 
 import logging
@@ -45,8 +46,9 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         else:
             raise ValueError(f'Incorrect ip version {version}')
 
-        nmap_scanner = nmap.NmapWrapper(hosts=hosts, mask=mask, ip_version=version)
-        scan_results = nmap_scanner.scan()
+        nmap_options = nmap.NmapOptions(dns_resolution=True, ports='8080,22', timing_template=4)
+        nmap_wrapper = nmap.NmapWrapper(nmap_options)
+        scan_results = nmap_wrapper.scan(hosts=hosts, mask=mask)
 
         for data in generators.get_services(scan_results):
             self.emit(selector, data)
