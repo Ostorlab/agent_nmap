@@ -1,6 +1,6 @@
 
 # Nmap agent 
-![enter image description here](https://github.com/Ostorlab/agent_nmap/blob/README/images/logo.png)
+![enter image description here](https://github.com/Ostorlab/agent_nmap/blob/main/images/logo.png)
 An implementation of [Osorlab Agent]((https://pypi.org/project/ostorlab/) for the [Nmap](https://nmap.org/).    
   
 ## Usage  
