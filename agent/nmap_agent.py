@@ -5,6 +5,7 @@ v3.report.vulnerability with a technical report of the scan.
 """
 
 import logging
+import json
 
 from rich import logging as rich_logging
 from ostorlab.agent import agent
@@ -39,7 +40,11 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         hosts = message.data['host']
         mask = message.data.get('mask', '32')
 
-        nmap_options = nmap.NmapOptions(dns_resolution=True, ports='8080,22', timing_template=4, enable_version=True)
+        timing_template = nmap.NmapTimingTemplate.T3
+        nmap_options = nmap.NmapOptions(dns_resolution=True,
+                                        ports='8080,22',
+                                        timing_template=timing_template,
+                                        enable_version_detection=True)
         nmap_wrapper = nmap.NmapWrapper(nmap_options)
         scan_results = nmap_wrapper.scan(hosts=hosts, mask=mask)
 
@@ -53,7 +58,7 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         #     raise ValueError(f'Incorrect ip version {version}')
         # for data in generators.get_services(scan_results):
         #     self.emit(selector, data)
-
+        scan_results = json.dumps(scan_results, indent=4, sort_keys=True)
         technical_detail = f'```json\n{scan_results}\n```'
 
         self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
