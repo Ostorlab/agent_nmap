@@ -17,7 +17,7 @@ class NmapOptions:
     """Storing the options of the nmap scan."""
     dns_resolution: bool = True
     dns_servers: List[str] = None
-    ports: str = None
+    ports: Optional[str] = None
     timing_template: int = 3
     enable_version: bool = True
     command_options: List[str] = dataclasses.field(default_factory=list)
