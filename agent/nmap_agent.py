@@ -13,7 +13,7 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 
 from agent import nmap
-from agent import generators
+# from agent import generators
 
 
 logging.basicConfig(
@@ -38,20 +38,21 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         """
         hosts = message.data['host']
         mask = message.data.get('mask', '32')
-        version = message.data['version']
-        if version==4:
-            selector = 'v3.asset.ip.v4.port.service'
-        elif version==6:
-            selector = 'v3.asset.ip.v6.port.service'
-        else:
-            raise ValueError(f'Incorrect ip version {version}')
+        # version = message.data['version']
 
         nmap_options = nmap.NmapOptions(dns_resolution=True, ports='8080,22', timing_template=4)
         nmap_wrapper = nmap.NmapWrapper(nmap_options)
         scan_results = nmap_wrapper.scan(hosts=hosts, mask=mask)
 
-        for data in generators.get_services(scan_results):
-            self.emit(selector, data)
+        # TODO (Abderrahim) : Commented till resolving the messages loops.
+        # if version==4:
+        #     selector = 'v3.asset.ip.v4.port.service'
+        # elif version==6:
+        #     selector = 'v3.asset.ip.v6.port.service'
+        # else:
+        #     raise ValueError(f'Incorrect ip version {version}')
+        # for data in generators.get_services(scan_results):
+        #     self.emit(selector, data)
 
         technical_detail = f'```json\n{scan_results}\n```'
 
