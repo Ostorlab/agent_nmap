@@ -12,7 +12,7 @@ _Nmap is an agent responsible for network discovery and security auditing (wraps
 ---
 
 <p align="center">
-<img src="https://github.com/Ostorlab/agent_nmap/blob/main/images/logo.png" alt="agent-tsunami" />
+<img src="https://github.com/Ostorlab/agent_nmap/blob/main/images/logo.png" alt="agent-nmap" />
 </p>
 
 This repository is an implementation of [Ostorlab Agent](https://pypi.org/project/ostorlab/) for [Nmap](https://nmap.org/) (the Network Mapper).
