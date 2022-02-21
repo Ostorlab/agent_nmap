@@ -38,13 +38,13 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         """
         hosts = message.data['host']
         mask = message.data.get('mask', '32')
-        # version = message.data['version']
 
         nmap_options = nmap.NmapOptions(dns_resolution=True, ports='8080,22', timing_template=4)
         nmap_wrapper = nmap.NmapWrapper(nmap_options)
         scan_results = nmap_wrapper.scan(hosts=hosts, mask=mask)
 
         # TODO (Abderrahim) : Commented till resolving the messages loops.
+        # version = message.data['version']
         # if version==4:
         #     selector = 'v3.asset.ip.v4.port.service'
         # elif version==6:
