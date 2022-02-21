@@ -16,30 +16,44 @@ logger = logging.getLogger(__name__)
 class NmapOptions:
     """Storing the options of the nmap scan."""
     dns_resolution: bool = True
-    dns_servers: List = None
+    dns_servers: List[str] = None
     ports: str = None
     timing_template: int = 3
+    enable_version: bool = True
+    command_options: List[str] = dataclasses.field(default_factory=list)
 
-    def get_command_options(self) -> List[str]:
-        """Returns a list of nmap options."""
-        command_options = []
+    def _get_version_option(self):
+        if self.enable_version is True:
+            self.command_options.append('-V')
+            self.command_options.append('--script=banner')
+
+    def _get_dns_resolution_option(self):
         if self.dns_resolution is True:
-            command_options.append('-R')
+            self.command_options.append('-R')
             if self.dns_servers:
                 dns_servers = ','.join([str(dns) for dns in self.dns_servers])
-                command_options.append(f'--dns-servers {dns_servers}')
+                self.command_options.append(f'--dns-servers {dns_servers}')
         else:
-            command_options.append('-n')
+            self.command_options.append('-n')
 
+    def _get_ports_option(self):
         ports = f'-p {self.ports}' * (self.ports is not None)
-        command_options.append(ports)
+        self.command_options.append(ports)
 
+    def _get_timing_option(self):
         if self.timing_template > 5 or self.timing_template < 0:
             logger.warning('The timing template should be between 0 and 5. The scan will use the default T3.')
         else:
-            command_options.append('-T' + str(self.timing_template))
+            self.command_options.append('-T' + str(self.timing_template))
 
-        return command_options
+    def get_command_options(self) -> List[str]:
+        """Returns a list of nmap options."""
+        self._get_version_option()
+        self._get_dns_resolution_option()
+        self._get_ports_option()
+        self._get_timing_option()
+
+        return self.command_options
 
 
 class NmapWrapper:
@@ -70,9 +84,7 @@ class NmapWrapper:
         hosts_and_mask = ip_version_option + host + f'/{mask}' * (mask != '')
 
         command = ['nmap',
-                   '-sV',
                    *command_options,
-                   '--script=banner',
                    '-oX',
                    '-',
                    hosts_and_mask]
