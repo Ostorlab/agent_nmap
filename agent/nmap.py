@@ -1,6 +1,6 @@
 """Wrapper for Nmap Security Scanner."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import dataclasses
 import ipaddress
 import logging
