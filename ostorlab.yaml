@@ -7,7 +7,7 @@ description: |
   ## Getting Started
   To perform your first scan, simply run the following command:
   ```shell
-  ostorlab scan run --install --agents agent/ostorlab/nmap ip 8.8.8.8
+  ostorlab scan run --install --agent agent/ostorlab/nmap ip 8.8.8.8
   ```
   This command will download and install `agent/ostorlab/nmap` and target the ip `8.8.8.8`.
   For more information, please refer to the [Ostorlab Documentation](https://github.com/Ostorlab/ostorlab/blob/main/README.md)
@@ -19,7 +19,7 @@ description: |
    ```
   You can then run the agent with the following command:
   ```shell
-  ostorlab scan run --agents agent/ostorlab/nmap ip 8.8.8.8
+  ostorlab scan run --agent agent/ostorlab/nmap ip 8.8.8.8
   ```
   ### Build directly from the repository
    1. To build the nmap agent you need to have [ostorlab](https://pypi.org/project/ostorlab/) installed in your machine.  if you have already installed ostorlab, you can skip this step.
@@ -38,11 +38,11 @@ description: |
    4. Run the agent using on of the following commands:
      * If you did not specify an organization when building the image:
       ```shell
-      ostorlab scan run --agents agent//nmap ip 8.8.8.8
+      ostorlab scan run --agent agent//nmap ip 8.8.8.8
       ```
      * If you specified an organization when building the image:
       ```shell
-      ostorlab scan run --agents agent/[ORGANIZATION]/nmap ip 8.8.8.8
+      ostorlab scan run --agent agent/[ORGANIZATION]/nmap ip 8.8.8.8
       ```
   ## License
   [Apache](./LICENSE)
