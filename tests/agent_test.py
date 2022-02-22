@@ -1,11 +1,12 @@
-"""Unittests for agent."""
+"""Unittests for Nmap agent."""
 
-from ostorlab.agent import message
-from ostorlab.agent import definitions as agent_definitions
-from ostorlab.runtimes import definitions as runtime_definitions
 import pytest
+from ostorlab.agent import definitions as agent_definitions
+from ostorlab.agent import message
+from ostorlab.runtimes import definitions as runtime_definitions
 
 from agent import nmap_agent
+
 
 @pytest.mark.skip(reason='This will be part of the v2 nmap agent.')
 def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock, mocker):
@@ -13,17 +14,17 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabilit
     the agents emits back messages of type service, and of type vulnerability.
     """
     scan_output = {
-        'nmaprun':{
-            'host':{
-                'address':{'@addr': '127.0.0.1', '@addrtype': 'ipv4'},
-                'ports':{
-                    'port':{
+        'nmaprun': {
+            'host': {
+                'address': {'@addr': '127.0.0.1', '@addrtype': 'ipv4'},
+                'ports': {
+                    'port': {
                         '@portid': '21',
                         '@protocol': 'tcp',
                         'state': {
                             '@state': 'open'
-	  	                },
-                        'service':{
+                        },
+                        'service': {
                             '@name': 'ssh'
                         }
                     }
@@ -35,7 +36,7 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabilit
 
     msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
 
-    out_selectors=['v3.report.vulnerability', 'v3.asset.ip.v4.port.service']
+    out_selectors = ['v3.report.vulnerability', 'v3.asset.ip.v4.port.service']
     definition = agent_definitions.AgentDefinition(name='nmap_agent', out_selectors=out_selectors)
     settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap')
     test_agent = nmap_agent.NmapAgent(definition, settings)
@@ -55,17 +56,17 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
     the agents emits back messages of type vulnerability.
     """
     scan_output = {
-        'nmaprun':{
-            'host':{
-                'address':{'@addr': '127.0.0.1', '@addrtype': 'ipv4'},
-                'ports':{
-                    'port':{
+        'nmaprun': {
+            'host': {
+                'address': {'@addr': '127.0.0.1', '@addrtype': 'ipv4'},
+                'ports': {
+                    'port': {
                         '@portid': '21',
                         '@protocol': 'tcp',
                         'state': {
                             '@state': 'open'
-	  	                },
-                        'service':{
+                        },
+                        'service': {
                             '@name': 'ssh'
                         }
                     }
@@ -77,7 +78,7 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
 
     msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
 
-    out_selectors=['v3.report.vulnerability']
+    out_selectors = ['v3.report.vulnerability']
     definition = agent_definitions.AgentDefinition(name='nmap_agent', out_selectors=out_selectors)
     settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap')
     test_agent = nmap_agent.NmapAgent(definition, settings)
@@ -89,5 +90,3 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
     assert agent_mock[0].data['risk_rating'] == 'INFO'
     assert agent_mock[0].data['title'] == 'Network Port Scan'
     assert agent_mock[0].data['short_description'] == 'List of open network ports.'
-
-
