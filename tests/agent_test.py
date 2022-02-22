@@ -32,7 +32,7 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabilit
             }
         }
     }
-    mocker.patch('agent.nmap.NmapWrapper.scan', return_value=scan_output)
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan', return_value=scan_output)
 
     msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
 
@@ -74,7 +74,7 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
             }
         }
     }
-    mocker.patch('agent.nmap.NmapWrapper.scan', return_value=scan_output)
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan', return_value=scan_output)
 
     msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
 
