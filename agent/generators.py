@@ -4,9 +4,10 @@ import logging
 
 from typing import Dict, Iterator
 
-IP_VERSIONS = {'ipv4':4, 'ipv6':6}
+IP_VERSIONS = {'ipv4': 4, 'ipv6': 6}
 
 logger = logging.getLogger(__name__)
+
 
 def get_services(scan_result: Dict) -> Iterator[Dict]:
     """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
