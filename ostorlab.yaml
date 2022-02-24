@@ -45,8 +45,8 @@ description: |
       ostorlab scan run --agent agent/[ORGANIZATION]/nmap ip 8.8.8.8
       ```
   ## License
-  [Apache](./LICENSE)
-license: Apache
+  [Apache-2.0](./LICENSE)
+license: Apache-2.0
 source: https://github.com/Ostorlab/agent_nmap
 in_selectors:
   - v3.asset.ip.v4
