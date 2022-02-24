@@ -17,10 +17,12 @@ from agent import generators
 from agent import nmap_options
 from agent import nmap_wrapper
 
+
 logging.basicConfig(
     format='%(message)s',
     datefmt='[%X]',
-    handlers=[rich_logging.RichHandler(rich_tracebacks=True)]
+    handlers=[rich_logging.RichHandler(rich_tracebacks=True)],
+    force=True
 )
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,7 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         Args:
             message: message containing the IP to scan, the mask & the version.
         """
+        logger.info('processing message of selector : %s', message.selector)
         hosts = message.data['host']
         mask = message.data.get('mask', '32')
 
