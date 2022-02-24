@@ -70,6 +70,7 @@ class NmapWrapper:
         Returns:
             result of the scan.
         """
+        logger.info('running the nmap scan')
         command = self._construct_command(hosts, mask)
         with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
             xml_output = process.communicate()[0]
