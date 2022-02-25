@@ -22,6 +22,7 @@ logging.basicConfig(
     format='%(message)s',
     datefmt='[%X]',
     handlers=[rich_logging.RichHandler(rich_tracebacks=True)],
+    level='INFO',
     force=True
 )
 logger = logging.getLogger(__name__)
@@ -77,5 +78,5 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
 
 
 if __name__ == '__main__':
-    logger.debug('Nmap Agent starting..')
+    logger.info('starting agent ...')
     NmapAgent.main()
