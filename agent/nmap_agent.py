@@ -46,13 +46,15 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         logger.info('processing message of selector : %s', message.selector)
         hosts = message.data['host']
         mask = message.data.get('mask', '32')
-
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports='0-65535',
                                            timing_template=nmap_options.TimingTemplate.T5,
                                            version_detection=True)
         client = nmap_wrapper.NmapWrapper(options)
+
+        logger.info('scanning target %s/%s with options %s', hosts, mask, options)
         scan_results = client.scan(hosts=hosts, mask=mask)
+        logger.info('scan results %s', scan_results)
 
         if ENABLE_SERVICE_MESSAGES is True:
             self._emit_services(message, scan_results)
