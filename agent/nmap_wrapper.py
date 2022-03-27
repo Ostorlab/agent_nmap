@@ -36,7 +36,7 @@ class NmapWrapper:
         """
         self._options = options
 
-    def _construct_command(self, host: str, mask: str = '32') -> List[str]:
+    def _construct_command_host(self, host: str, mask: str = '32') -> List[str]:
         """
         Construct the Nmap command to be run.
 
@@ -60,7 +60,24 @@ class NmapWrapper:
                    hosts_and_mask]
         return command
 
-    def scan(self, hosts: str, mask: str = '') -> Dict[str, Any]:
+    def _construct_command_domain(self, domain_name: str) -> List[str]:
+        """
+        Construct the Nmap command to be run.
+
+        Args:
+            domain: which domain to be scanned.
+
+        Returns:
+            list of the arguments that will be used to run the scan process.
+        """
+        command = ['nmap',
+                   *self._options.command_options,
+                   '-oX',
+                   '-',
+                   domain_name]
+        return command
+
+    def scan_hosts(self, hosts: str, mask: str = '') -> Dict[str, Any]:
         """Run the scan with nmap.
 
         Args:
@@ -71,7 +88,25 @@ class NmapWrapper:
             result of the scan.
         """
         logger.info('running the nmap scan')
-        command = self._construct_command(hosts, mask)
+        command = self._construct_command_host(hosts, mask)
+        with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
+            xml_output = process.communicate()[0]
+            xml_output = xml_output.decode(encoding='utf-8')
+            scan_results = _parse_output(xml_output)
+            return scan_results
+
+
+    def scan_domain(self, domain_name: str) -> Dict[str, Any]:
+        """Run the scan with nmap.
+
+        Args:
+            domain_name: which domain name to be scanned.
+
+        Returns:
+            result of the scan.
+        """
+        logger.info('running the nmap scan')
+        command = self._construct_command_domain(domain_name)
         with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
             xml_output = process.communicate()[0]
             xml_output = xml_output.decode(encoding='utf-8')
