@@ -1,6 +1,6 @@
 kind: Agent
 name: nmap
-version: 0.0.5
+version: 0.0.6
 image: images/logo.png 
 description: |
   This repository is an implementation of [Ostorlab Agent](https://pypi.org/project/ostorlab/) for the [Nmap Scanner](https://github.com/projectdiscovery/nmap) by Project Discovery.
@@ -51,6 +51,7 @@ source: https://github.com/Ostorlab/agent_nmap
 in_selectors:
   - v3.asset.ip.v4
   - v3.asset.ip.v6
+  - v3.asset.domain_name
 out_selectors:
   - v3.asset.ip.v4.port.service
   - v3.asset.ip.v6.port.service
