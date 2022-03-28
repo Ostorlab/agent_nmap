@@ -77,7 +77,7 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
         }
     }
 
-    human_output = '''
+    human_output = """
 # Nmap 7.92 scan initiated Mon Mar 28 15:05:11 2022 as: nmap -sV --script=banner -n "-p 0-65535" -T5 -oX /tmp/xmloutput -oN /tmp/normal 8.8.8.8                                                                 │ │
 Warning: 8.8.8.8 giving up on port because retransmission cap hit (2).                                                                                                                                                   │ │
 Nmap scan report for 8.8.8.8 (8.8.8.8)                                                                                                                                                                     │ │
@@ -87,7 +87,7 @@ Not shown: 65532 filtered tcp ports (no-response)                               
 PORT     STATE  SERVICE  VERSION                                                                                                                                                                                              │ │
 22/tcp   closed ssh                                                                                                                                                                                                           │ │
 80/tcp   open   http     awselb/2.0   
-'''
+"""
 
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(scan_output, human_output))
 
