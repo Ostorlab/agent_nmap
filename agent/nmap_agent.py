@@ -4,7 +4,6 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 `v3.asset.ip.v[4,6].port.service`, and `v3.report.vulnerability` with a technical report of the scan.
 """
 
-import json
 import logging
 
 from ostorlab.agent import agent
@@ -16,7 +15,6 @@ from rich import logging as rich_logging
 from agent import generators
 from agent import nmap_options
 from agent import nmap_wrapper
-
 
 logging.basicConfig(
     format='%(message)s',
@@ -48,28 +46,29 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         mask = message.data.get('mask', '32')
         domain_name = message.data.get('name')
         options = nmap_options.NmapOptions(dns_resolution=False,
-                                           ports='0-65535',
-                                           timing_template=nmap_options.TimingTemplate.T5,
+                                           ports=self.args.get('ports'),
+                                           timing_template=nmap_options.TimingTemplate[
+                                               self.args.get('timing_template')],
                                            version_detection=True)
         client = nmap_wrapper.NmapWrapper(options)
-        scan_results = None
         if hosts is not None:
             logger.info('scanning target %s/%s with options %s', hosts, mask, options)
-            scan_results = client.scan_hosts(hosts=hosts, mask=mask)
+            scan_results, normal_results = client.scan_hosts(hosts=hosts, mask=mask)
         elif domain_name is not None:
             logger.info('scanning domain %s with options %s', domain_name, options)
-            scan_results = client.scan_domain(domain_name=domain_name)
+            scan_results, normal_results = client.scan_domain(domain_name=domain_name)
+        else:
+            raise ValueError()
 
         logger.info('scan results %s', scan_results)
 
         if ENABLE_SERVICE_MESSAGES is True:
             self._emit_services(message, scan_results)
-        self._emit_network_scan_finding(scan_results)
+        self._emit_network_scan_finding(normal_results)
 
-    def _emit_network_scan_finding(self, scan_results):
-        if scan_results is not None:
-            scan_results = json.dumps(scan_results, indent=4, sort_keys=True)
-            technical_detail = f'```json\n{scan_results}\n```'
+    def _emit_network_scan_finding(self, results):
+        if results is not None:
+            technical_detail = f'```\n{results}\n```'
             self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                       technical_detail=technical_detail,
                                       risk_rating=agent_report_vulnerability_mixin.RiskRating.INFO)

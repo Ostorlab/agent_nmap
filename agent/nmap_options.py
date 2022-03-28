@@ -49,17 +49,15 @@ class NmapOptions:
 
     def _set_ports_option(self):
         """Appends the ports option to the list of nmap options."""
-        command_options = []
         if self.ports is not None:
-            ports = f'-p {self.ports}'
-            command_options.append(ports)
-        return command_options
+            return ['-p', self.ports]
+        else:
+            return []
+
 
     def _set_timing_option(self):
         """Appends the timing template option to the list of nmap options."""
-        command_options = []
-        command_options.append(self.timing_template.value)
-        return command_options
+        return [self.timing_template.value]
 
     @property
     def command_options(self) -> List[str]:
