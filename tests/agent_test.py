@@ -92,7 +92,7 @@ PORT     STATE  SERVICE  VERSION                                                
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(scan_output, human_output))
 
     msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
-    with open(OSTORLAB_YAML_PATH, 'r') as o:
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
         settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap')
         test_agent = nmap_agent.NmapAgent(definition, settings)

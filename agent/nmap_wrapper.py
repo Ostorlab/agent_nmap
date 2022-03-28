@@ -99,10 +99,10 @@ class NmapWrapper:
 
         subprocess.run(command, check=True)
 
-        with open(XML_OUTPUT_PATH, 'r') as o:
+        with open(XML_OUTPUT_PATH, 'r', encoding='utf-8') as o:
             scan_results = _parse_output(o.read())
 
-        with open(NORMAL_OUTPUT_PATH, 'r') as o:
+        with open(NORMAL_OUTPUT_PATH, 'r', encoding='utf-8') as o:
             normal_results = o.read()
 
         return scan_results, normal_results
@@ -120,10 +120,10 @@ class NmapWrapper:
         command = self._construct_command_domain(domain_name)
         subprocess.run(command, check=True)
 
-        with open(XML_OUTPUT_PATH, 'r') as o:
+        with open(XML_OUTPUT_PATH, 'r', encoding='utf-8') as o:
             scan_results = _parse_output(o.read())
 
-        with open(NORMAL_OUTPUT_PATH, 'r') as o:
+        with open(NORMAL_OUTPUT_PATH, 'r', encoding='utf-8') as o:
             normal_results = o.read()
 
         return scan_results, normal_results
