@@ -58,3 +58,13 @@ out_selectors:
   - v3.report.vulnerability
 docker_file_path : Dockerfile
 docker_build_root : .
+args:
+  - name: "ports"
+    type: "string"
+    description: "List of ports to scan."
+    value: "0-65535"
+  - name: "timing_template"
+    type: "string"
+    description: "Template of timing settings (T0, T1, ... T5)."
+    value: "T4"
+

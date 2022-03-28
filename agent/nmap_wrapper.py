@@ -3,11 +3,14 @@
 import ipaddress
 import logging
 import subprocess
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
+
+import xmltodict
 
 from agent import nmap_options
 
-import xmltodict
+XML_OUTPUT_PATH = '/tmp/xmloutput'
+NORMAL_OUTPUT_PATH = '/tmp/normal'
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +59,9 @@ class NmapWrapper:
         command = ['nmap',
                    *self._options.command_options,
                    '-oX',
-                   '-',
+                   XML_OUTPUT_PATH,
+                   '-oN',
+                   NORMAL_OUTPUT_PATH,
                    hosts_and_mask]
         return command
 
@@ -73,11 +78,13 @@ class NmapWrapper:
         command = ['nmap',
                    *self._options.command_options,
                    '-oX',
-                   '-',
+                   XML_OUTPUT_PATH,
+                   '-oN',
+                   NORMAL_OUTPUT_PATH,
                    domain_name]
         return command
 
-    def scan_hosts(self, hosts: str, mask: str = '') -> Dict[str, Any]:
+    def scan_hosts(self, hosts: str, mask: str = '') -> Tuple[Dict[str, Any], str]:
         """Run the scan with nmap.
 
         Args:
@@ -89,14 +96,18 @@ class NmapWrapper:
         """
         logger.info('running the nmap scan')
         command = self._construct_command_host(hosts, mask)
-        with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
-            xml_output = process.communicate()[0]
-            xml_output = xml_output.decode(encoding='utf-8')
-            scan_results = _parse_output(xml_output)
-            return scan_results
 
+        subprocess.run(command, check=True)
 
-    def scan_domain(self, domain_name: str) -> Dict[str, Any]:
+        with open(XML_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+            scan_results = _parse_output(o.read())
+
+        with open(NORMAL_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+            normal_results = o.read()
+
+        return scan_results, normal_results
+
+    def scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
         """Run the scan with nmap.
 
         Args:
@@ -107,8 +118,12 @@ class NmapWrapper:
         """
         logger.info('running the nmap scan')
         command = self._construct_command_domain(domain_name)
-        with subprocess.Popen(command, stdout=subprocess.PIPE) as process:
-            xml_output = process.communicate()[0]
-            xml_output = xml_output.decode(encoding='utf-8')
-            scan_results = _parse_output(xml_output)
-            return scan_results
+        subprocess.run(command, check=True)
+
+        with open(XML_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+            scan_results = _parse_output(o.read())
+
+        with open(NORMAL_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+            normal_results = o.read()
+
+        return scan_results, normal_results
