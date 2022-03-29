@@ -3,6 +3,7 @@ from typing import Dict, List
 import io
 
 from pytablewriter import MarkdownTableWriter
+
 from agent import generators
 
 def prepare_data_for_markdown_formatting(scans: Dict) -> List[List[str]]:
@@ -16,7 +17,7 @@ def prepare_data_for_markdown_formatting(scans: Dict) -> List[List[str]]:
     scan_data = []
     if scans is not None:
         for data in generators.get_services(scans):
-            row = [data['host'], data['port'], data['version'], data['protocol'], data['state'], data['service']]
+            row = list(data.values())
             scan_data.append(row)
     return scan_data
 
