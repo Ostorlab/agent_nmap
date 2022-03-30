@@ -2,7 +2,7 @@
 from typing import Dict, List
 import io
 
-from pytablewriter import MarkdownTableWriter
+import pytablewriter
 
 from agent import generators
 
@@ -30,7 +30,7 @@ def table_markdown(data: List[List[str]]) -> str:
         table: Complete markdown table
     """
     headers = ['Host', 'Port', 'Version', 'Protocol', 'State', 'Service']
-    markdown_writer = MarkdownTableWriter(
+    markdown_writer = pytablewriter.MarkdownTableWriter(
         headers=headers,
         value_matrix=data
     )
