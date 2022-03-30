@@ -15,6 +15,7 @@ from rich import logging as rich_logging
 from agent import generators
 from agent import nmap_options
 from agent import nmap_wrapper
+from agent import process_scans
 
 logging.basicConfig(
     format='%(message)s',
@@ -64,11 +65,12 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
 
         if ENABLE_SERVICE_MESSAGES is True:
             self._emit_services(message, scan_results)
-        self._emit_network_scan_finding(normal_results)
+        self._emit_network_scan_finding(scan_results, normal_results)
 
-    def _emit_network_scan_finding(self, results):
-        if results is not None:
-            technical_detail = f'```\n{results}\n```'
+    def _emit_network_scan_finding(self, scan_results, normal_results):
+        scan_result_technical_detail = process_scans.get_technical_details(scan_results)
+        if normal_results is not None:
+            technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
             self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                       technical_detail=technical_detail,
                                       risk_rating=agent_report_vulnerability_mixin.RiskRating.INFO)

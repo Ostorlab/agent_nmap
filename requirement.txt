@@ -1,3 +1,4 @@
 ostorlab[agent]
 xmltodict
+pytablewriter
 rich
