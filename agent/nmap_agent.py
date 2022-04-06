@@ -52,10 +52,6 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         logger.info('processing message of selector : %s', message.selector)
         hosts = message.data.get('host')
         mask = message.data.get('mask', '32')
-        if not self.set_add('agent_nmap_asset', f'{hosts}/{mask}'):
-            logger.info('target %s/%s was processed before, exiting', hosts, mask)
-            return
-
         domain_name = message.data.get('name')
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
@@ -65,9 +61,15 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         client = nmap_wrapper.NmapWrapper(options)
         if hosts is not None:
             logger.info('scanning target %s/%s with options %s', hosts, mask, options)
+            if not self.set_add('agent_nmap_asset', f'{hosts}/{mask}'):
+                logger.info('target %s/%s was processed before, exiting', hosts, mask)
+                return
             scan_results, normal_results = client.scan_hosts(hosts=hosts, mask=mask)
         elif domain_name is not None:
             logger.info('scanning domain %s with options %s', domain_name, options)
+            if not self.set_add('agent_nmap_asset', domain_name):
+                logger.info('target %s was processed before, exiting', domain_name)
+                return
             scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         else:
             raise ValueError()

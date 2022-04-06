@@ -9,26 +9,25 @@ from agent import nmap_agent
 
 OSTORLAB_YAML_PATH = (pathlib.Path(__file__).parent.parent / 'ostorlab.yaml').absolute()
 
-
 JSON_OUTPUT = {
-        'nmaprun': {
-            'host': {
-                'address': {'@addr': '127.0.0.1', '@addrtype': 'ipv4'},
-                'ports': {
-                    'port': {
-                        '@portid': '21',
-                        '@protocol': 'tcp',
-                        'state': {
-                            '@state': 'open'
-                        },
-                        'service': {
-                            '@name': 'ssh'
-                        }
+    'nmaprun': {
+        'host': {
+            'address': {'@addr': '127.0.0.1', '@addrtype': 'ipv4'},
+            'ports': {
+                'port': {
+                    '@portid': '21',
+                    '@protocol': 'tcp',
+                    'state': {
+                        '@state': 'open'
+                    },
+                    'service': {
+                        '@name': 'ssh'
                     }
                 }
             }
         }
     }
+}
 
 HUMAN_OUTPUT = """
 # Nmap 7.92 scan initiated Mon Mar 28 15:05:11 2022 as: nmap -sV --script=banner -n "-p 0-65535" -T5 -oX /tmp/xmloutput -oN /tmp/normal 8.8.8.8                                                                 │ │
@@ -43,7 +42,8 @@ PORT     STATE  SERVICE  VERSION                                                
 """
 
 
-def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock, agent_persist_mock, mocker):
+def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability( \
+        agent_mock, agent_persist_mock, mocker):
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service, and of type vulnerability.
     """
