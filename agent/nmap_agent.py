@@ -6,10 +6,12 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 
 import logging
 
-from ostorlab.agent import agent
+from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent import message as msg
 from ostorlab.agent.kb import kb
-from ostorlab.agent.mixins import agent_report_vulnerability_mixin
+from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
+from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
+from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
 from agent import generators
@@ -26,13 +28,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# TODO (Abderrahim) : Disable till resolving the messages loops by adding the seen message mixin.
-ENABLE_SERVICE_MESSAGES = False
-
-
-class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMixin):
+class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.AgentPersistMixin):
     """Agent responsible for running scans over IP assets with Nmap Security Scanner.
        For more visit https://github.com/Ostorlab/ostorlab."""
+
+
+
+    def __init__(self, agent_definition: agent_definitions.AgentDefinition,
+                 agent_settings: runtime_definitions.AgentSettings) -> None:
+        agent.Agent.__init__(self, agent_definition, agent_settings)
+        vuln_mixin.AgentReportVulnMixin.__init__(self)
+        persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
+
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -54,17 +61,22 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
         client = nmap_wrapper.NmapWrapper(options)
         if hosts is not None:
             logger.info('scanning target %s/%s with options %s', hosts, mask, options)
+            if not self.set_add('agent_nmap_asset', f'{hosts}/{mask}'):
+                logger.info('target %s/%s was processed before, exiting', hosts, mask)
+                return
             scan_results, normal_results = client.scan_hosts(hosts=hosts, mask=mask)
         elif domain_name is not None:
             logger.info('scanning domain %s with options %s', domain_name, options)
+            if not self.set_add('agent_nmap_asset', domain_name):
+                logger.info('target %s was processed before, exiting', domain_name)
+                return
             scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         else:
             raise ValueError()
 
         logger.info('scan results %s', scan_results)
 
-        if ENABLE_SERVICE_MESSAGES is True:
-            self._emit_services(message, scan_results)
+        self._emit_services(message, scan_results)
         self._emit_network_scan_finding(scan_results, normal_results)
 
     def _emit_network_scan_finding(self, scan_results, normal_results):
@@ -73,7 +85,7 @@ class NmapAgent(agent.Agent, agent_report_vulnerability_mixin.AgentReportVulnMix
             technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
             self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                       technical_detail=technical_detail,
-                                      risk_rating=agent_report_vulnerability_mixin.RiskRating.INFO)
+                                      risk_rating=vuln_mixin.RiskRating.INFO)
 
     def _emit_services(self, message, scan_results):
         if scan_results is not None:
