@@ -3,7 +3,7 @@
 
 <p align="center">
 <img src="https://img.shields.io/badge/License-Apache_2.0-brightgreen.svg">
-<img src="https://img.shields.io/github/languages/top/ostorlab/agent_tsunami">
+<img src="https://img.shields.io/github/languages/top/ostorlab/agent_nmap">
 <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg">
 </p>
 
