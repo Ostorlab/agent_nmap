@@ -76,7 +76,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
         logger.info('scan results %s', scan_results)
 
-        self._emit_services(message, scan_results)
+        self._emit_services(scan_results)
         self._emit_network_scan_finding(scan_results, normal_results)
 
     def _emit_network_scan_finding(self, scan_results, normal_results):
@@ -87,12 +87,12 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                       technical_detail=technical_detail,
                                       risk_rating=vuln_mixin.RiskRating.INFO)
 
-    def _emit_services(self, message, scan_results):
+    def _emit_services(self, scan_results):
         if scan_results is not None:
-            version = message.data['version']
-            if version == 4:
+            version = scan_results['nmaprun']['host']['address']['@addrtype']
+            if version == 'ipv4':
                 selector = 'v3.asset.ip.v4.port.service'
-            elif version == 6:
+            elif version == 'ipv6':
                 selector = 'v3.asset.ip.v6.port.service'
             else:
                 raise ValueError(f'Incorrect ip version {version}')
