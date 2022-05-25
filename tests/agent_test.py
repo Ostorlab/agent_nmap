@@ -82,3 +82,27 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
         assert agent_mock[1].data['risk_rating'] == 'INFO'
         assert agent_mock[1].data['title'] == 'Network Port Scan'
         assert agent_mock[1].data['short_description'] == 'List of open network ports.'
+
+
+def testAgentLifeCyle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock,
+                                                                                              agent_persist_mock,
+                                                                                              mocker):
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service, and of type vulnerability.
+    """
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(JSON_OUTPUT, HUMAN_OUTPUT))
+    msg = message.Message.from_data(selector='v3.asset.link', data={'url': 'https://test.ostorlab.co',
+                                                                    'method': 'GET'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        assert len(agent_mock) == 2
+        assert agent_mock[0].selector == 'v3.asset.ip.v4.port.service'
+        assert agent_mock[1].selector == 'v3.report.vulnerability'
+        assert agent_mock[1].data['risk_rating'] == 'INFO'
+        assert agent_mock[1].data['title'] == 'Network Port Scan'
+        assert agent_mock[1].data['short_description'] == 'List of open network ports.'

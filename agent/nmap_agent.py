@@ -5,6 +5,7 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 
 import logging
+from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent import message as msg
@@ -52,7 +53,8 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         logger.info('processing message of selector : %s', message.selector)
         hosts = message.data.get('host')
         mask = message.data.get('mask', '32')
-        domain_name = message.data.get('name')
+        domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url') )
+
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
                                            timing_template=nmap_options.TimingTemplate[
@@ -78,6 +80,13 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
         self._emit_services(scan_results)
         self._emit_network_scan_finding(scan_results, normal_results)
+
+    def _prepare_domain_name(self, domain_name, url):
+        """Prepare domain name based on type, if a url is provided, return its domain."""
+        if domain_name is not None:
+            return domain_name
+        elif url is not None:
+            return parse.urlparse(url).netloc
 
     def _emit_network_scan_finding(self, scan_results, normal_results):
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
