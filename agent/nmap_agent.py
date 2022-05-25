@@ -53,7 +53,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         logger.info('processing message of selector : %s', message.selector)
         hosts = message.data.get('host')
         mask = message.data.get('mask', '32')
-        domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url') )
+        domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
 
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
