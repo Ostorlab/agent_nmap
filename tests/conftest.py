@@ -1,3 +1,4 @@
+""" conftest for tests."""
 import os
 
 import pytest
