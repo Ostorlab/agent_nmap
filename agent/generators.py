@@ -55,8 +55,7 @@ def get_banner(port: Dict) -> Optional[str]:
     Args:
         port: port dictionary.
 
-    Returns:
-        banner string."""
+    Returns: banner string."""
 
     try:
         # check if script is present and then have multiple scripts
