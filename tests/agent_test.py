@@ -42,8 +42,8 @@ PORT     STATE  SERVICE  VERSION                                                
 """
 
 
-def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability( \
-        agent_mock, agent_persist_mock, mocker):
+def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock, agent_persist_mock,
+                                                                                  mocker):
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service, and of type vulnerability.
     """
@@ -82,3 +82,25 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
         assert agent_mock[1].data['risk_rating'] == 'INFO'
         assert agent_mock[1].data['title'] == 'Network Port Scan'
         assert agent_mock[1].data['short_description'] == 'List of open network ports.'
+
+
+def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsgWithBanner(agent_mock, agent_persist_mock,
+                                                                                    mocker, fake_output):
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type vulnerability.
+    """
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(fake_output, HUMAN_OUTPUT))
+    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        assert len(agent_mock) == 4
+        # check string in banner
+        assert 'Dummy Banner 1' in agent_mock[0].data['banner']
+        assert 'Dummy Banner 2' in agent_mock[1].data['banner']
+        # check banner is None for last port
+        assert agent_mock[2].data.get('banner', None) is None

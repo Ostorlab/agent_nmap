@@ -9,8 +9,8 @@ import logging
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent import message as msg
 from ostorlab.agent.kb import kb
-from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
+from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -28,18 +28,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.AgentPersistMixin):
     """Agent responsible for running scans over IP assets with Nmap Security Scanner.
        For more visit https://github.com/Ostorlab/ostorlab."""
-
-
 
     def __init__(self, agent_definition: agent_definitions.AgentDefinition,
                  agent_settings: runtime_definitions.AgentSettings) -> None:
         agent.Agent.__init__(self, agent_definition, agent_settings)
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
