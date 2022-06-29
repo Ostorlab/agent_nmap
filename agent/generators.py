@@ -62,11 +62,11 @@ def get_banner(port: Dict) -> Optional[str]:
         if 'script' in port:
             if isinstance(port['script'], list):
                 for script in port['script']:
-                    if script['@id'] == 'banner':
-                        return script['@output']
+                    if script.get('@id') == 'banner':
+                        return script.get('@output')
             else:
-                if port['script']['@id'] == 'banner':
-                    return port['script']['@output']
+                if port['script'].get('@id') == 'banner':
+                    return port['script'].get('@output')
     except KeyError as e:
         logger.error(e)
     return None
