@@ -2,7 +2,7 @@
 
 import logging
 
-from typing import Dict, Iterator
+from typing import Dict, Iterator, Optional
 
 IP_VERSIONS = {'ipv4': 4, 'ipv6': 6}
 
@@ -42,6 +42,31 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
                 data['protocol'] = port.get('@protocol')
                 data['state'] = port.get('state', {}).get('@state', 'closed')
                 data['service'] = port.get('service', {}).get('@name', '')
+                data['banner'] = get_banner(port)
                 yield data
     except KeyError as e:
         logger.error(e)
+
+
+# get banner from script
+def get_banner(port: Dict) -> Optional[str]:
+    """Get the banner from the port.
+
+    Args:
+        port: port dictionary.
+
+    Returns: banner string."""
+
+    try:
+        # check if script is present and then have multiple scripts
+        if 'script' in port:
+            if isinstance(port['script'], list):
+                for script in port['script']:
+                    if script.get('@id') == 'banner':
+                        return script.get('@output')
+            else:
+                if port['script'].get('@id') == 'banner':
+                    return port['script'].get('@output')
+    except KeyError as e:
+        logger.error(e)
+    return None
