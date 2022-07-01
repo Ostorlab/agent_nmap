@@ -126,5 +126,30 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(agent_mock,
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[1].data['banner']
+
         # check banner is None for last port
         assert agent_mock[2].data.get('banner', None) is None
+
+
+
+def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(agent_mock, agent_persist_mock,
+                                                                                    mocker, fake_output):
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
+    msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        assert len(agent_mock) == 4
+        # check string in banner
+        assert 'Dummy Banner 1' in agent_mock[0].data['banner']
+        assert 'Dummy Banner 2' in agent_mock[1].data['banner']
+
+        # check banner is None for last port
+        assert agent_mock[2].data.get('banner') is None
