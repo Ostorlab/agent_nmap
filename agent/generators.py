@@ -42,17 +42,18 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
                 data['protocol'] = port.get('@protocol')
                 data['state'] = port.get('state', {}).get('@state', 'closed')
                 data['service'] = port.get('service', {}).get('@name', '')
-                data['banner'] = get_banner(port)
+                data['banner'] = get_script_by_name(name='banner', port=port)
                 yield data
     except KeyError as e:
         logger.error(e)
 
 
 # get banner from script
-def get_banner(port: Dict) -> Optional[str]:
+def get_script_by_name(name: str, port: Dict) -> Optional[str]:
     """Get the banner from the port.
 
     Args:
+        name: name of the script.
         port: port dictionary.
 
     Returns: banner string."""
@@ -62,10 +63,10 @@ def get_banner(port: Dict) -> Optional[str]:
         if 'script' in port:
             if isinstance(port['script'], list):
                 for script in port['script']:
-                    if script.get('@id') == 'banner':
+                    if script.get('@id') == name:
                         return script.get('@output')
             else:
-                if port['script'].get('@id') == 'banner':
+                if port['script'].get('@id') == name:
                     return port['script'].get('@output')
     except KeyError as e:
         logger.error(e)
