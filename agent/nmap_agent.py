@@ -107,7 +107,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                 self.emit(selector, data)
                 if domain_name is not None:
                     domain_name_service = {'name': domain_name, 'port': data.get('port'),
-                                           'schema': data.get('service', False)}
+                                           'schema': data.get('service')}
                     self.emit('v3.asset.domain_name.service', domain_name_service)
 
 if __name__ == '__main__':
