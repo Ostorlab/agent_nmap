@@ -76,7 +76,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
         logger.info('scan results %s', scan_results)
 
-        self._emit_services(scan_results)
+        self._emit_services(scan_results, domain_name)
         self._emit_network_scan_finding(scan_results, normal_results)
 
     def _prepare_domain_name(self, domain_name, url):
@@ -94,7 +94,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                       technical_detail=technical_detail,
                                       risk_rating=vuln_mixin.RiskRating.INFO)
 
-    def _emit_services(self, scan_results):
+    def _emit_services(self, scan_results, domain_name):
         if scan_results is not None:
             version = scan_results['nmaprun']['host']['address']['@addrtype']
             if version == 'ipv4':
@@ -105,7 +105,9 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                 raise ValueError(f'Incorrect ip version {version}')
             for data in generators.get_services(scan_results):
                 self.emit(selector, data)
-
+                if domain_name is not None:
+                    domain_name_service = {'name': domain_name, 'port': data.get('port'), 'tls': data.get('tls', False)}
+                    self.emit('v3.asset.domain_name.service', domain_name_service)
 
 if __name__ == '__main__':
     logger.info('starting agent ...')
