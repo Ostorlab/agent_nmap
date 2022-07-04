@@ -173,7 +173,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(agent_mock,
 
         assert len(agent_mock) == 7
         # check string in banner
-        agent_mock[1].selector == 'v3.asset.domain_name.service'
-        agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
+        assert agent_mock[1].selector == 'v3.asset.domain_name.service'
+        assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
         assert '80' in agent_mock[1].data['port']
         assert agent_mock[1].data['schema'] == 'http'
