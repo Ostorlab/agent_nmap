@@ -106,7 +106,7 @@ def testAgentLifeCyle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAnd
         assert agent_mock[1].selector == 'v3.asset.domain_name.service'
         assert agent_mock[1].data['name'] == 'test.ostorlab.co'
         assert '21' in agent_mock[1].data['port']
-        assert agent_mock[1].data['tls'] == False
+        assert agent_mock[1].data['schema'] == 'ssh'
 
         assert agent_mock[2].selector == 'v3.report.vulnerability'
         assert agent_mock[2].data['risk_rating'] == 'INFO'
@@ -176,4 +176,4 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(agent_mock,
         agent_mock[1].selector == 'v3.asset.domain_name.service'
         agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
         assert '80' in agent_mock[1].data['port']
-        assert agent_mock[1].data['tls'] == False
+        assert agent_mock[1].data['schema'] == 'http'
