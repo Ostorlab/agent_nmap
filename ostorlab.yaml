@@ -56,6 +56,7 @@ in_selectors:
 out_selectors:
   - v3.asset.ip.v4.port.service
   - v3.asset.ip.v6.port.service
+  - v3.asset.domain_name.service
   - v3.report.vulnerability
 docker_file_path : Dockerfile
 docker_build_root : .
@@ -68,4 +69,3 @@ args:
     type: "string"
     description: "Template of timing settings (T0, T1, ... T5)."
     value: "T4"
-
