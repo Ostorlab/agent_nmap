@@ -43,7 +43,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
         emits messages of type : `v3.asset.ip.port.service` and message of type `v3.report.vulnerability` with the
-         technical report of the scan.
+        technical report of the scan.
 
         Args:
             message: message containing the IP to scan, the mask & the version.
