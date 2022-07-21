@@ -38,7 +38,7 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
                 ports = [ports]
 
             for port in ports:
-                data['port'] = port.get('@portid')
+                data['port'] = int(port.get('@portid'))
                 data['protocol'] = port.get('@protocol')
                 data['state'] = port.get('state', {}).get('@state', 'closed')
                 data['service'] = port.get('service', {}).get('@name', '')
