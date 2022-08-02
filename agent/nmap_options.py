@@ -74,4 +74,5 @@ class NmapOptions:
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
+        command_options.extend(self._set_script())
         return command_options
