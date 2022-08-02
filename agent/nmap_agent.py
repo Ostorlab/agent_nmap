@@ -57,6 +57,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                            ports=self.args.get('ports'),
                                            timing_template=nmap_options.TimingTemplate[
                                                self.args.get('timing_template')],
+                                           script=self.args.get('script'),
                                            version_detection=True)
         client = nmap_wrapper.NmapWrapper(options)
         if hosts is not None:

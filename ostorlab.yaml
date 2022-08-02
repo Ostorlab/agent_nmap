@@ -69,3 +69,7 @@ args:
     type: "string"
     description: "Template of timing settings (T0, T1, ... T5)."
     value: "T4"
+  - name: "script"
+    type: "string"
+    description: "script to scan remotely"
+    value: "script"

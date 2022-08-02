@@ -25,6 +25,7 @@ class NmapOptions:
     dns_servers: List[str] = None
     ports: Optional[str] = None
     timing_template: TimingTemplate = TimingTemplate.T3
+    script: Optional[str] = None
     version_detection: bool = True
 
     def _set_version_detection_option(self):
@@ -54,10 +55,16 @@ class NmapOptions:
         else:
             return []
 
-
     def _set_timing_option(self):
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
+
+    def _set_script(self):
+        """Appends the  option to the list of nmap options."""
+        if self.script is not None:
+            return ['--script', self.script]
+        else:
+            return []
 
     @property
     def command_options(self) -> List[str]:
@@ -68,4 +75,3 @@ class NmapOptions:
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
         return command_options
-
