@@ -1,5 +1,6 @@
 """Unittests for Nmap agent."""
 import pathlib
+from unittest import mock
 
 from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent import message
@@ -177,3 +178,15 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(agent_mock,
         assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
         assert agent_mock[1].data['port'] == 80
         assert agent_mock[1].data['schema'] == 'http'
+
+
+# @mock.patch('agent.nmap_wrapper.XML_OUTPUT_PATH', './tests/fake_output.xml')
+def testAgentNmap_whenUrlsScriptsGivent_RunScan(scan_message, nmap_agent_args, agent_persist_mock, mocker,fake_output):
+    run_command_mock = mocker.patch('subprocess.run', return_value=None)
+    mock_report_vulnerability = mocker.patch('agent.nmap_agent.NmapAgent.report_vulnerability', return_value=None)
+    nmap_agent_args.process(scan_message)
+
+    run_command_mock.assert_called()
+    run_command_args = run_command_mock.call_args_list
+    print("#################",run_command_args)
+    mock_report_vulnerability.assert_called()

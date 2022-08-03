@@ -7,10 +7,11 @@ from typing import List, Optional
 
 import tempfile
 import pathlib
+import requests
 
 logger = logging.getLogger(__name__)
 
-OUTPUT_PATH = '/tmp/result_nmap.json'
+
 class TimingTemplate(enum.Enum):
     """Timing config template"""
     T0 = '-T0'
@@ -63,41 +64,34 @@ class NmapOptions:
         return [self.timing_template.value]
 
     def _set_scripts(self):
-        if self.scripts is not None:
+        if self.scripts is not None and len(self.scripts) > 0:
             self._run_scripts_command(self.scripts)
         else:
             return []
 
     def _run_scripts_command(self, scripts: List[str]):
         """Run nmap scan on the provided scripts"""
-        scripts_temp = []
         # create scripts
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            path = pathlib.Path(tmp_dir)
-            for script in scripts:
-                temp_path = (path / script)
-                content = ""
-                with pathlib.Path(script).open(mode='rb') as r:
-                    content = r.read()
-                with temp_path.open(mode='wb') as f:
-                    f.write(content)
-                scripts_temp.append(str(temp_path))
-
-                # build commands
-                if len(scripts_temp) > 0:
-                    command = ['--script']
-                    if scripts_temp is not None:
-                        for script in scripts_temp:
-                            command.extend([script])
-                    return command
+        tmp_dir = tempfile.TemporaryDirectory().name
+        path = pathlib.Path(tmp_dir)
+        for script_url in scripts:
+            temp_path = (path / script_url.split('/')[-1])
+            r = requests.get(script_url, allow_redirects=True)
+            with temp_path.open(mode='wb') as f:
+                f.write(r.content)
+        command = ['--script', tmp_dir]
+        return command
 
     @property
     def command_options(self) -> List[str]:
         """Computes the list of nmap options."""
         command_options = []
-        command_options.extend(self._set_version_detection_option())
-        command_options.extend(self._set_dns_resolution_option())
-        command_options.extend(self._set_ports_option())
-        command_options.extend(self._set_timing_option())
-        command_options.extend(self._set_scripts())
+        try:
+            command_options.extend(self._set_version_detection_option())
+            command_options.extend(self._set_dns_resolution_option())
+            command_options.extend(self._set_ports_option())
+            command_options.extend(self._set_timing_option())
+            command_options.extend(self._set_scripts())
+        except Exception as e :
+            logger.error("command_options", e)
         return command_options
