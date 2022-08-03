@@ -208,7 +208,6 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock, agent
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock, agent_persist_mock, mocker,
                                                        fake_output):
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
-    msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
         settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis', args=[
