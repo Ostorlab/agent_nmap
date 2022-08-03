@@ -3,9 +3,15 @@
 import dataclasses
 import enum
 import logging
+import os
 from typing import List, Optional
 
+import pathlib
+import requests
+
 logger = logging.getLogger(__name__)
+
+SCRIPTS_PATH = '/tmp/scripts'
 
 
 class TimingTemplate(enum.Enum):
@@ -25,6 +31,7 @@ class NmapOptions:
     dns_servers: List[str] = None
     ports: Optional[str] = None
     timing_template: TimingTemplate = TimingTemplate.T3
+    scripts: List[str] = None
     version_detection: bool = True
 
     def _set_version_detection_option(self):
@@ -54,10 +61,28 @@ class NmapOptions:
         else:
             return []
 
-
     def _set_timing_option(self):
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
+
+    def _set_scripts(self):
+        if self.scripts is not None and len(self.scripts) > 0:
+            return self._run_scripts_command(self.scripts)
+        else:
+            return []
+
+    def _run_scripts_command(self, scripts: List[str]):
+        """Run nmap scan on the provided scripts"""
+        path = pathlib.Path(SCRIPTS_PATH)
+        if not pathlib.Path.exists(path):
+            os.mkdir(SCRIPTS_PATH)
+        for script_url in scripts:
+            temp_path = (path / script_url.split('/')[-1])
+            r = requests.get(script_url, allow_redirects=True)
+            with temp_path.open(mode='wb') as f:
+                f.write(r.content)
+        command = ['--script', SCRIPTS_PATH]
+        return command
 
     @property
     def command_options(self) -> List[str]:
@@ -67,5 +92,5 @@ class NmapOptions:
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
+        command_options.extend(self._set_scripts())
         return command_options
-

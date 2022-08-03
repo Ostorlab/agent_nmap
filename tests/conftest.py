@@ -1,7 +1,7 @@
-""" conftest for tests."""
+"""Pytest fixture for the nmap agent."""
 import os
-
 import pytest
+
 import xmltodict
 
 

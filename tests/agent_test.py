@@ -1,11 +1,14 @@
 """Unittests for Nmap agent."""
 import pathlib
+import json
 
 from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent import message
+from ostorlab.utils import defintions as utils_definitions
 from ostorlab.runtimes import definitions as runtime_definitions
 
 from agent import nmap_agent
+from agent import nmap_options
 
 OSTORLAB_YAML_PATH = (pathlib.Path(__file__).parent.parent / 'ostorlab.yaml').absolute()
 
@@ -177,3 +180,52 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(agent_mock,
         assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
         assert agent_mock[1].data['port'] == 80
         assert agent_mock[1].data['schema'] == 'http'
+
+
+def testAgentNmap_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock, agent_persist_mock, mocker, fake_output):
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
+    msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis', args=[
+            utils_definitions.Arg(
+                name='scripts',
+                type='array',
+                value=json.dumps(['https://raw.githubusercontent.com/nmap-scripts/main/test1',
+                                  'https://raw.githubusercontent.com/nmap-scripts/main/test2']).encode())]
+                                                     )
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+        requests_mock.get('https://raw.githubusercontent.com/nmap-scripts/main/test1', content=b'test1')
+        requests_mock.get('https://raw.githubusercontent.com/nmap-scripts/main/test2', content=b'test2')
+        test_agent.process(msg)
+    # check string in banner
+    assert agent_mock[1].selector == 'v3.asset.domain_name.service'
+    assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
+    assert agent_mock[1].data['port'] == 80
+    assert agent_mock[1].data['schema'] == 'http'
+
+
+def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock, agent_persist_mock, mocker,
+                                                       fake_output):
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis', args=[
+            utils_definitions.Arg(
+                name='scripts',
+                type='array',
+                value=json.dumps(['https://raw.githubusercontent.com/nmap-scripts/main/test1',
+                                  'https://raw.githubusercontent.com/nmap-scripts/main/test2']).encode())]
+                                                     )
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+        requests_mock.get('https://raw.githubusercontent.com/nmap-scripts/main/test1', content=b'test1')
+        requests_mock.get('https://raw.githubusercontent.com/nmap-scripts/main/test2', content=b'test2')
+        options = nmap_options.NmapOptions(dns_resolution=False,
+                                           ports=test_agent.args.get('ports'),
+                                           timing_template=nmap_options.TimingTemplate[
+                                               test_agent.args.get('timing_template')],
+                                           scripts=test_agent.args.get('scripts'),
+                                           version_detection=True)
+        # check string in banner
+        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T4', '--script',
+                                           '/tmp/scripts']

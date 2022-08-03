@@ -69,3 +69,6 @@ args:
     type: "string"
     description: "Template of timing settings (T0, T1, ... T5)."
     value: "T4"
+  - name: "scripts"
+    type: "array"
+    description: "list of scripts to run using Nmap"
