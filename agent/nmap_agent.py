@@ -6,9 +6,7 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 
 import logging
 from urllib import parse
-import tempfile
-import pathlib
-from typing import List
+
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent import message as msg
@@ -55,7 +53,6 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         hosts = message.data.get('host')
         mask = message.data.get('mask', '32')
         domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
-        scripts = self.args.get('scripts')
 
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
