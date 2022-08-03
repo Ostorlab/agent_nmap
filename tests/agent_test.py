@@ -182,7 +182,6 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(agent_mock,
         assert agent_mock[1].data['schema'] == 'http'
 
 
-# @mock.patch('agent.nmap_wrapper.XML_OUTPUT_PATH', './tests/fake_output.xml')
 def testAgentNmap_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock, agent_persist_mock, mocker,fake_output):
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
     msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})

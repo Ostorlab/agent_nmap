@@ -71,4 +71,4 @@ args:
     value: "T4"
   - name: "scripts"
     type: "array"
-    description: "list of scripts to scan remotely"
+    description: "list of scripts to run using Nmap"
