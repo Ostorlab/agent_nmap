@@ -96,7 +96,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
     def _emit_services(self, scan_results, domain_name):
         if scan_results is not None:
-            version = scan_results['nmaprun']['host']['address']['@addrtype']
+            version = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addrtype')
             if version == 'ipv4':
                 selector = 'v3.asset.ip.v4.port.service'
             elif version == 'ipv6':
