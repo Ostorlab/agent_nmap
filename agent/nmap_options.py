@@ -11,7 +11,8 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-SCRIPTS_PATH = "/tmp/scripts"
+SCRIPTS_PATH = '/tmp/scripts'
+
 
 class TimingTemplate(enum.Enum):
     """Timing config template"""
