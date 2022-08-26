@@ -229,3 +229,29 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock
         # check string in banner
         assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T4', '--script',
                                            '/tmp/scripts']
+
+
+def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock, agent_mock, agent_persist_mock, mocker,
+                                                       fake_output_range):
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output_range, HUMAN_OUTPUT))
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis', args=[
+            utils_definitions.Arg(
+                name='scripts',
+                type='array',
+                value=json.dumps(['https://raw.githubusercontent.com/nmap-scripts/main/test1',
+                                  'https://raw.githubusercontent.com/nmap-scripts/main/test2']).encode())]
+                                                     )
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+        requests_mock.get('https://raw.githubusercontent.com/nmap-scripts/main/test1', content=b'test1')
+        requests_mock.get('https://raw.githubusercontent.com/nmap-scripts/main/test2', content=b'test2')
+        options = nmap_options.NmapOptions(dns_resolution=False,
+                                           ports=test_agent.args.get('ports'),
+                                           timing_template=nmap_options.TimingTemplate[
+                                               test_agent.args.get('timing_template')],
+                                           scripts=test_agent.args.get('scripts'),
+                                           version_detection=True)
+        # check string in banner
+        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T4', '--script',
+                                           '/tmp/scripts']

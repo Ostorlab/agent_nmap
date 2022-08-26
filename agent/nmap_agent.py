@@ -5,6 +5,7 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 
 import logging
+from typing import Optional
 from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
@@ -57,7 +58,6 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         else:
             mask = message.data.get('mask', '64')
 
-
         domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
 
         if host is not None:
@@ -72,7 +72,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         self._emit_services(scan_results, domain_name)
         self._emit_network_scan_finding(scan_results, normal_results)
 
-    def _scan_host(self, host, mask):
+    def _scan_host(self, host: str, mask: str):
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
                                            timing_template=nmap_options.TimingTemplate[
@@ -88,7 +88,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
-    def _scan_domain(self, domain_name):
+    def _scan_domain(self, domain_name: str):
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
                                            timing_template=nmap_options.TimingTemplate[
@@ -103,7 +103,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
 
-    def _prepare_domain_name(self, domain_name, url):
+    def _prepare_domain_name(self, domain_name: Optional[str], url: Optional[str]):
         """Prepare domain name based on type, if a url is provided, return its domain."""
         if domain_name is not None:
             return domain_name
