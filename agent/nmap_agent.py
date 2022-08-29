@@ -61,8 +61,14 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
 
         if host is not None:
+            if not self.set_add(b'agent_nmap_asset', f'{host}/{mask}'):
+                logger.info('target %s/%s was processed before, exiting', host, mask)
+                return
             scan_results, normal_results = self._scan_host(host, mask)
         elif domain_name is not None:
+            if not self.set_add(b'agent_nmap_asset', domain_name):
+                logger.info('target %s was processed before, exiting', domain_name)
+                return
             scan_results, normal_results = self._scan_domain(domain_name)
         else:
             raise ValueError('not host or domain name are set')
@@ -82,9 +88,6 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         client = nmap_wrapper.NmapWrapper(options)
 
         logger.info('scanning target %s/%s with options %s', host, mask, options)
-        if not self.set_add(b'agent_nmap_asset', f'{host}/{mask}'):
-            logger.info('target %s/%s was processed before, exiting', host, mask)
-            return
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
@@ -97,9 +100,6 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                            version_detection=True)
         client = nmap_wrapper.NmapWrapper(options)
         logger.info('scanning domain %s with options %s', domain_name, options)
-        if not self.set_add(b'agent_nmap_asset', domain_name):
-            logger.info('target %s was processed before, exiting', domain_name)
-            return
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
 
@@ -120,7 +120,9 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
     def _emit_services(self, scan_results, domain_name):
         logger.info('sending results to %s', domain_name)
-        if scan_results is not None:
+        if scan_results is not None and\
+                scan_results.get('nmaprun') is not None and\
+                scan_results['nmaprun'].get('host') is not None:
             version = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addrtype')
             address = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addr')
             if version == 'ipv4':
