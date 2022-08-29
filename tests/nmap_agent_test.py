@@ -45,8 +45,8 @@ PORT     STATE  SERVICE  VERSION                                                
 """
 
 
-def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock, agent_persist_mock,
-                                                                                  mocker):
+def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock, agent_persist_mock,
+                                                                                   mocker):
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service, and of type vulnerability.
     """
@@ -67,7 +67,7 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabilit
         assert agent_mock[1].data['short_description'] == 'List of open network ports.'
 
 
-def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_mock, agent_persist_mock, mocker):
+def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_mock, agent_persist_mock, mocker):
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type vulnerability.
     """
@@ -87,9 +87,9 @@ def testAgentLifeCyle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_
         assert agent_mock[1].data['short_description'] == 'List of open network ports.'
 
 
-def testAgentLifeCyle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock,
-                                                                                              agent_persist_mock,
-                                                                                              mocker):
+def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(agent_mock,
+                                                                                               agent_persist_mock,
+                                                                                               mocker):
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service, and of type vulnerability.
     """
@@ -131,7 +131,7 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(agent_mock,
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 4
+        assert len(agent_mock) == 6
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[1].data['banner']
@@ -154,7 +154,7 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(a
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 7
+        assert len(agent_mock) == 9
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[2].data['banner']
@@ -174,7 +174,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(agent_mock,
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 7
+        assert len(agent_mock) == 9
         # check string in banner
         assert agent_mock[1].selector == 'v3.asset.domain_name.service'
         assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
@@ -232,7 +232,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock, agent_mock
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock, agent_mock, agent_persist_mock, mocker,
-                                                       fake_output_range):
+                                                        fake_output_range):
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output_range, HUMAN_OUTPUT))
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
@@ -255,3 +255,22 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock, agent_moc
         # check string in banner
         assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T4', '--script',
                                            '/tmp/scripts']
+
+
+def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(agent_mock, agent_persist_mock,
+                                                              mocker, fake_output):
+    """Test when nmap banner agent reports service, fingerprint is sent.
+    """
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
+    msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        assert 'v3.fingerprint.ip.v4.service.library' in [m.selector for m in agent_mock]
+        assert {'host': '45.33.32.156', 'mask': '32', 'version': 4, 'service': 'nping-echo', 'port': 9929,
+                'protocol': 'tcp', 'library_type': 'BACKEND_COMPONENT', 'library_name': 'Dummy Banner 2',
+                'detail': 'Dummy Banner 2'} in [m.data for m in agent_mock]

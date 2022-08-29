@@ -77,6 +77,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
         self._emit_services(scan_results, domain_name)
         self._emit_network_scan_finding(scan_results, normal_results)
+        self._emit_fingerprints(scan_results, domain_name)
 
     def _scan_host(self, host: str, mask: str):
         options = nmap_options.NmapOptions(dns_resolution=False,
@@ -142,6 +143,40 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                            'schema': data.get('service')}
                     logger.info('sending results to selector domain service selector')
                     self.emit('v3.asset.domain_name.service', domain_name_service)
+
+    def _emit_fingerprints(self, scan_results, domain_name):
+        logger.info('sending results to %s', domain_name)
+        if (scan_results is not None and
+                scan_results.get('nmaprun') is not None and
+                scan_results['nmaprun'].get('host') is not None):
+            version = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addrtype')
+            address = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addr')
+            if version == 'ipv4':
+                selector = 'v3.fingerprint.ip.v4.service.library'
+                default_mask = 32
+                self.set_add(b'agent_nmap_asset', f'{address}/32')
+            elif version == 'ipv6':
+                selector = 'v3.fingerprint.ip.v6.service.library'
+                default_mask = 164
+                self.set_add(b'agent_nmap_asset', f'{address}/64')
+            else:
+                raise ValueError(f'Incorrect ip version {version}')
+
+            for data in generators.get_services(scan_results):
+                if data.get('banner') is not None:
+                    logger.info('sending results to selector %s', selector)
+                    fingerprint_data = {
+                        'host': data.get('host'),
+                        'mask': data.get('mask', str(default_mask)),
+                        'version': data.get('version'),
+                        'library_type': 'BACKEND_COMPONENT',
+                        'service': data.get('service'),
+                        'port': data.get('port'),
+                        'protocol': data.get('protocol'),
+                        'library_name': data.get('banner'),
+                        'detail': data.get('banner'),
+                    }
+                    self.emit(selector, fingerprint_data)
 
 
 if __name__ == '__main__':

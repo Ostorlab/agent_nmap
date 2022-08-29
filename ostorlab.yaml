@@ -58,6 +58,8 @@ out_selectors:
   - v3.asset.ip.v6.port.service
   - v3.asset.domain_name.service
   - v3.report.vulnerability
+  - v3.fingerprint.ip.v4.service.library
+  - v3.fingerprint.ip.v6.service.library
 docker_file_path : Dockerfile
 docker_build_root : .
 args:
