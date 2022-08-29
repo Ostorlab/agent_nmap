@@ -120,9 +120,9 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
     def _emit_services(self, scan_results, domain_name):
         logger.info('sending results to %s', domain_name)
-        if scan_results is not None and\
-                scan_results.get('nmaprun') is not None and\
-                scan_results['nmaprun'].get('host') is not None:
+        if (scan_results is not None and
+                scan_results.get('nmaprun') is not None and
+                scan_results['nmaprun'].get('host') is not None):
             version = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addrtype')
             address = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addr')
             if version == 'ipv4':
