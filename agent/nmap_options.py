@@ -78,7 +78,7 @@ class NmapOptions:
             os.mkdir(SCRIPTS_PATH)
         for script_url in scripts:
             temp_path = (path / script_url.split('/')[-1])
-            r = requests.get(script_url, allow_redirects=True)
+            r = requests.get(script_url, allow_redirects=True, timeout=60)
             with temp_path.open(mode='wb') as f:
                 f.write(r.content)
         command = ['--script', SCRIPTS_PATH]
