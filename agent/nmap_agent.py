@@ -9,7 +9,7 @@ from typing import Optional
 from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
-from ostorlab.agent import message as msg
+from ostorlab.agent.message import message as msg
 from ostorlab.agent.kb import kb
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
