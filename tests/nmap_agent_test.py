@@ -3,7 +3,7 @@ import pathlib
 import json
 
 from ostorlab.agent import definitions as agent_definitions
-from ostorlab.agent import message
+from ostorlab.agent.message import message
 from ostorlab.utils import defintions as utils_definitions
 from ostorlab.runtimes import definitions as runtime_definitions
 
