@@ -1,12 +1,15 @@
 """Module responsible for markdown formatting."""
-from typing import Dict, List
+from typing import Dict, List, Optional
 import io
 
 import pytablewriter
 
 from agent import generators
 
-def prepare_data_for_markdown_formatting(scans: Dict) -> List[List[str]]:
+
+def prepare_data_for_markdown_formatting(
+        scans: Dict[str, Dict[str, List[Dict[str, Dict[str, str]]]
+                              | Dict[str, Dict[str, str]]]]) -> List[List[Optional[str]]]:
     """Method responsible for formatting the data into the correct form for the MarkdownTableWriter.
     Args:
         scans: Dictionary containing the scans, from the nmap scan response.
@@ -22,7 +25,7 @@ def prepare_data_for_markdown_formatting(scans: Dict) -> List[List[str]]:
     return scan_data
 
 
-def table_markdown(data: List[List[str]]) -> str:
+def table_markdown(data: List[List[Optional[str]]]) -> str:
     """Method responsible for generating a markdown table from a dictionary.
     Args:
         data: List of the data to be transformed into markdown table.

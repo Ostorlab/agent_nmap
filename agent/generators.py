@@ -2,14 +2,19 @@
 
 import logging
 
-from typing import Dict, Iterator, Optional
+from typing import Dict, Iterator, List, Optional, Any
 
 IP_VERSIONS = {'ipv4': 4, 'ipv6': 6}
 
 logger = logging.getLogger(__name__)
 
 
-def get_services(scan_result: Dict) -> Iterator[Dict]:
+def get_services(scan_result: Dict[str,
+                                   Dict[str,
+                                        List[Dict[str, Any]] |
+                                        Dict[str,
+                                             Dict[str, Any]]]]
+                 ) -> Iterator[Dict[str, Optional[str]]]:
     """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
 
     Args:
@@ -29,14 +34,16 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
             data['host'] = host.get('address', {}).get('@addr')
             ip_version = host.get('address', {}).get('@addrtype')
 
-            data['version'] = IP_VERSIONS.get(ip_version)
+            if ip_version in IP_VERSIONS:
+                data['version'] = IP_VERSIONS[ip_version]
+            else:
+                data['version'] = 4
 
             ports = host.get('ports', {}).get('port', [])
             # nmap returns a list of ports, however in the case of only one, it returns it as a dict.
             # thus the lines below.
             if isinstance(ports, dict):
                 ports = [ports]
-
             for port in ports:
                 data['port'] = int(port.get('@portid'))
                 data['protocol'] = port.get('@protocol')
@@ -49,7 +56,7 @@ def get_services(scan_result: Dict) -> Iterator[Dict]:
 
 
 # get banner from script
-def get_script_by_name(name: str, port: Dict) -> Optional[str]:
+def get_script_by_name(name: str, port: Dict[str, Dict[str, str] | List[Dict[str, str]]]) -> Optional[str]:
     """Get the banner from the port.
 
     Args:
@@ -64,10 +71,16 @@ def get_script_by_name(name: str, port: Dict) -> Optional[str]:
             if isinstance(port['script'], list):
                 for script in port['script']:
                     if script.get('@id') == name:
-                        return script.get('@output')
+                        if script.get('@output') is None:
+                            return None
+                        else:
+                            return str(script['@output'])
             else:
                 if port['script'].get('@id') == name:
-                    return port['script'].get('@output')
+                    if port['script'].get('@output') is None:
+                        return None
+                    else:
+                        return str(port['script']['@output'])
     except KeyError as e:
         logger.error(e)
     return None

@@ -15,7 +15,7 @@ NORMAL_OUTPUT_PATH = '/tmp/normal'
 logger = logging.getLogger(__name__)
 
 
-def _parse_output(xml_output: str) -> Dict[str, Any]:
+def _parse_output(xml_output: str) -> Any:
     """Parse the xml_output of the nmap scan command.
 
     Args:

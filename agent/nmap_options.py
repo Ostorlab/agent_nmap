@@ -28,13 +28,13 @@ class TimingTemplate(enum.Enum):
 class NmapOptions:
     """Storing the options of an Nmap scan."""
     dns_resolution: bool = True
-    dns_servers: List[str] = None
-    ports: Optional[str] = None
+    dns_servers: List[str] | None = None
+    ports: Optional[str] | None = None
     timing_template: TimingTemplate = TimingTemplate.T3
-    scripts: List[str] = None
+    scripts: List[str] | None = None
     version_detection: bool = True
 
-    def _set_version_detection_option(self):
+    def _set_version_detection_option(self) -> List[str]:
         """Appends the  option to the list of nmap options."""
         command_options = []
         if self.version_detection is True:
@@ -42,7 +42,7 @@ class NmapOptions:
             command_options.append('--script=banner')
         return command_options
 
-    def _set_dns_resolution_option(self):
+    def _set_dns_resolution_option(self) -> List[str]:
         """Appends the dns resolution option to the list of nmap options."""
         command_options = []
         if self.dns_resolution is True:
@@ -54,24 +54,24 @@ class NmapOptions:
             command_options.append('-n')
         return command_options
 
-    def _set_ports_option(self):
+    def _set_ports_option(self) -> List[str]:
         """Appends the ports option to the list of nmap options."""
         if self.ports is not None:
             return ['-p', self.ports]
         else:
             return []
 
-    def _set_timing_option(self):
+    def _set_timing_option(self) -> List[str]:
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
 
-    def _set_scripts(self):
+    def _set_scripts(self) -> List[str]:
         if self.scripts is not None and len(self.scripts) > 0:
             return self._run_scripts_command(self.scripts)
         else:
             return []
 
-    def _run_scripts_command(self, scripts: List[str]):
+    def _run_scripts_command(self, scripts: List[str]) -> List[str]:
         """Run nmap scan on the provided scripts"""
         path = pathlib.Path(SCRIPTS_PATH)
         if not pathlib.Path.exists(path):
