@@ -50,7 +50,7 @@ def get_services(scan_result: Dict[str,
                 data['state'] = port.get('state', {}).get('@state', 'closed')
                 data['service'] = port.get('service', {}).get('@name', '')
                 data['banner'] = get_script_by_name(name='banner', port=port)
-            yield data
+                yield data
     except KeyError as e:
         logger.error(e)
 
