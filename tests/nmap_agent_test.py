@@ -52,7 +52,8 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
                                                                                    agent_persist_mock:
                                                                                    Dict[Union[str, bytes],
                                                                                         Union[str, bytes]],
-                                                                                   mocker: plugin.MockerFixture) -> None:
+                                                                                   mocker: plugin.MockerFixture
+                                                                                   ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service, and of type vulnerability.
     """

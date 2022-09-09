@@ -1,7 +1,7 @@
 """Pytest fixture for the nmap agent."""
 import os
 import pytest
-from typing import Dict, Any
+from typing import Any
 
 import xmltodict
 
