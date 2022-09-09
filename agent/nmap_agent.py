@@ -5,9 +5,8 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 
 import logging
-from typing import Optional
 from urllib import parse
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.message import message as msg
@@ -127,25 +126,31 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         if (scan_results is not None and
                 scan_results.get('nmaprun') is not None and
                 scan_results['nmaprun'].get('host') is not None):
-            version = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addrtype')
-            address = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addr')
-            if version == 'ipv4':
-                selector = 'v3.asset.ip.v4.port.service'
-                self.set_add(b'agent_nmap_asset', f'{address}/32')
-            elif version == 'ipv6':
-                selector = 'v3.asset.ip.v6.port.service'
-                self.set_add(b'agent_nmap_asset', f'{address}/64')
-            else:
-                raise ValueError(f'Incorrect ip version {version}')
 
-            for data in generators.get_services(scan_results):
-                logger.info('sending results to selector %s', selector)
-                self.emit(selector, data)
-                if domain_name is not None:
-                    domain_name_service = {'name': domain_name, 'port': data.get('port'),
-                                           'schema': data.get('service')}
-                    logger.info('sending results to selector domain service selector')
-                    self.emit('v3.asset.domain_name.service', domain_name_service)
+            up_hosts = scan_results['nmaprun'].get('host', [])
+            if isinstance(up_hosts, dict):
+                up_hosts = [up_hosts]
+
+            for host in up_hosts:
+                version = host.get('address', {}).get('@addrtype')
+                address = host.get('address', {}).get('@addr')
+                if version == 'ipv4':
+                    selector = 'v3.asset.ip.v4.port.service'
+                    self.set_add(b'agent_nmap_asset', f'{address}/32')
+                elif version == 'ipv6':
+                    selector = 'v3.asset.ip.v6.port.service'
+                    self.set_add(b'agent_nmap_asset', f'{address}/64')
+                else:
+                    raise ValueError(f'Incorrect ip version {version}')
+
+                for data in generators.get_services(scan_results):
+                    logger.info('sending results to selector %s', selector)
+                    self.emit(selector, data)
+                    if domain_name is not None:
+                        domain_name_service = {'name': domain_name, 'port': data.get('port'),
+                                               'schema': data.get('service')}
+                        logger.info('sending results to selector domain service selector')
+                        self.emit('v3.asset.domain_name.service', domain_name_service)
 
     def _emit_fingerprints(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
         logger.info('sending results to %s', domain_name)

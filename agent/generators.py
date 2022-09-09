@@ -35,9 +35,9 @@ def get_services(scan_result: Dict[str,
             ip_version = host.get('address', {}).get('@addrtype')
 
             if ip_version in IP_VERSIONS:
-                data['version'] = str(IP_VERSIONS[ip_version])
+                data['version'] = IP_VERSIONS[ip_version]
             else:
-                data['version'] = '4'
+                data['version'] = 4
 
             ports = host.get('ports', {}).get('port', [])
             # nmap returns a list of ports, however in the case of only one, it returns it as a dict.
@@ -45,7 +45,7 @@ def get_services(scan_result: Dict[str,
             if isinstance(ports, dict):
                 ports = [ports]
             for port in ports:
-                data['port'] = str(port.get('@portid'))
+                data['port'] = int(port.get('@portid'))
                 data['protocol'] = port.get('@protocol')
                 data['state'] = port.get('state', {}).get('@state', 'closed')
                 data['service'] = port.get('service', {}).get('@name', '')
