@@ -3,14 +3,14 @@
 The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back messages of type
 `v3.asset.ip.v[4,6].port.service`, and `v3.report.vulnerability` with a technical report of the scan.
 """
-
+import ipaddress
 import logging
+from typing import Dict, Any, Tuple, Optional, List
 from urllib import parse
-from typing import Dict, Any, Tuple, Optional
 
 from ostorlab.agent import agent, definitions as agent_definitions
-from ostorlab.agent.message import message as msg
 from ostorlab.agent.kb import kb
+from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
 from ostorlab.runtimes import definitions as runtime_definitions
@@ -50,36 +50,54 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
             message: message containing the IP to scan, the mask & the version.
         """
         logger.info('processing message of selector : %s', message.selector)
-        host = message.data.get('host')
+        host = message.data.get('host', '')
+        hosts: List[Tuple[str, int]] = []
 
         # Differentiate between a single IP mask in IPv4 and IPv6.
         if 'v4' in message.selector:
-            mask = message.data.get('mask', '32')
-        else:
-            mask = message.data.get('mask', '64')
+            mask = int(message.data.get('mask', '32'))
+            max_mask = int(self.args.get('max_network_mask_ipv4', '32'))
+            if mask < max_mask:
+                for subnet in ipaddress.ip_network(f'{host}/{mask}').subnets(new_prefix=max_mask):
+                    hosts.append((str(subnet.network_address), max_mask))
+            else:
+                hosts = [(host, mask)]
+        elif 'v6' in message.selector:
+            mask = int(message.data.get('mask', '64'))
+            max_mask = int(self.args.get('max_network_mask_ipv6', '64'))
+            if mask < max_mask:
+                for subnet in ipaddress.ip_network(f'{host}/{mask}').subnets(new_prefix=max_mask):
+                    hosts.append((str(subnet.network_address), max_mask))
+            else:
+                hosts = [(host, mask)]
 
         domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
 
-        if host is not None:
-            if not self.set_add(b'agent_nmap_asset', f'{host}/{mask}'):
-                logger.info('target %s/%s was processed before, exiting', host, mask)
-                return
-            scan_results, normal_results = self._scan_host(host, mask)
+        if len(hosts) > 0:
+            for host, mask in hosts:
+                if not self.set_add(b'agent_nmap_asset', f'{host}/{mask}'):
+                    logger.info('target %s/%s was processed before, exiting', host, mask)
+                    return
+                scan_results, normal_results = self._scan_host(host, mask)
+                logger.info('scan results %s', scan_results)
+
+                self._emit_services(scan_results, domain_name)
+                self._emit_network_scan_finding(scan_results, normal_results)
+                self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
             if not self.set_add(b'agent_nmap_asset', domain_name):
                 logger.info('target %s was processed before, exiting', domain_name)
                 return
             scan_results, normal_results = self._scan_domain(domain_name)
+            logger.info('scan results %s', scan_results)
+
+            self._emit_services(scan_results, domain_name)
+            self._emit_network_scan_finding(scan_results, normal_results)
+            self._emit_fingerprints(scan_results, domain_name)
         else:
             raise ValueError('not host or domain name are set')
 
-        logger.info('scan results %s', scan_results)
-
-        self._emit_services(scan_results, domain_name)
-        self._emit_network_scan_finding(scan_results, normal_results)
-        self._emit_fingerprints(scan_results, domain_name)
-
-    def _scan_host(self, host: str, mask: str) -> Tuple[Dict[str, Any], str]:
+    def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
                                            timing_template=nmap_options.TimingTemplate[

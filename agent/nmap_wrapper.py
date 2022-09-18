@@ -39,7 +39,7 @@ class NmapWrapper:
         """
         self._options = options
 
-    def _construct_command_host(self, host: str, mask: str = '32') -> List[str]:
+    def _construct_command_host(self, host: str, mask: int) -> List[str]:
         """
         Construct the Nmap command to be run.
 
@@ -84,7 +84,7 @@ class NmapWrapper:
                    domain_name]
         return command
 
-    def scan_hosts(self, hosts: str, mask: str = '') -> Tuple[Dict[str, Any], str]:
+    def scan_hosts(self, hosts: str, mask: int) -> Tuple[Dict[str, Any], str]:
         """Run the scan with nmap.
 
         Args:

@@ -1,13 +1,13 @@
 """Unittests for Nmap agent."""
-import pathlib
 import json
+import pathlib
 from typing import List, Dict, Union
 
+import requests_mock as rq_mock
 from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent.message import message
-from ostorlab.utils import defintions as utils_definitions
 from ostorlab.runtimes import definitions as runtime_definitions
-import requests_mock as rq_mock
+from ostorlab.utils import defintions as utils_definitions
 from pytest_mock import plugin
 
 from agent import nmap_agent
@@ -251,8 +251,8 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock: rq_mock.mo
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
         # check string in banner
-        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T4', '--script',
-                                           '/tmp/scripts']
+        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn',
+                                           '--unprivileged', '--script', '/tmp/scripts']
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.mocker.Mocker,
@@ -280,8 +280,8 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.m
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
         # check string in banner
-        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T4', '--script',
-                                           '/tmp/scripts']
+        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn',
+                                           '--unprivileged', '--script', '/tmp/scripts']
 
 
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
@@ -303,3 +303,35 @@ def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
         assert {'host': '45.33.32.156', 'mask': '32', 'version': 4, 'service': 'nping-echo', 'port': 9929,
                 'protocol': 'tcp', 'library_type': 'BACKEND_COMPONENT', 'library_name': 'Dummy Banner 2',
                 'detail': 'Dummy Banner 2'} in [m.data for m in agent_mock]
+
+
+def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
+        agent_mock: List[message.Message],
+        agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+        mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(fake_output, HUMAN_OUTPUT))
+    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '192.168.0.0', 'mask': '30'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis',
+                                                     args=[
+                                                         utils_definitions.Arg(
+                                                             name='max_network_mask_ipv4',
+                                                             type='int',
+                                                             value=json.dumps('32').encode())]
+                                                     )
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        # 4 is count of IPs in a /30.
+        assert len(agent_mock) == 6 * 4
+        # check string in banner
+        assert 'Dummy Banner 1' in agent_mock[0].data['banner']
+        assert 'Dummy Banner 2' in agent_mock[1].data['banner']
+
+        # check banner is None for last port
+        assert agent_mock[2].data.get('banner', None) is None
