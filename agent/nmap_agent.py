@@ -5,7 +5,7 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 import ipaddress
 import logging
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, List
 from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
@@ -50,13 +50,13 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
             message: message containing the IP to scan, the mask & the version.
         """
         logger.info('processing message of selector : %s', message.selector)
-        host = message.data.get('host')
-        hosts = []
+        host = message.data.get('host', '')
+        hosts: List[Tuple[str, int]] = []
 
         # Differentiate between a single IP mask in IPv4 and IPv6.
         if 'v4' in message.selector:
             mask = int(message.data.get('mask', '32'))
-            max_mask = int(self.args.get('max_network_mask_ipv4'))
+            max_mask = int(self.args.get('max_network_mask_ipv4', '32'))
             if mask < max_mask:
                 for subnet in ipaddress.ip_network(f'{host}/{mask}').subnets(new_prefix=max_mask):
                     hosts.append((str(subnet.network_address), max_mask))
@@ -64,7 +64,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                 hosts = [(host, mask)]
         elif 'v6' in message.selector:
             mask = int(message.data.get('mask', '64'))
-            max_mask = int(self.args.get('max_network_mask_ipv6'))
+            max_mask = int(self.args.get('max_network_mask_ipv6', '64'))
             if mask < max_mask:
                 for subnet in ipaddress.ip_network(f'{host}/{mask}').subnets(new_prefix=max_mask):
                     hosts.append((str(subnet.network_address), max_mask))
