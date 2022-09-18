@@ -24,6 +24,23 @@ class TimingTemplate(enum.Enum):
     T5 = '-T5'
 
 
+class PortScanningTechnique(enum.Enum):
+    """Nmap multiple port scanning techniques."""
+    TCP_SYN = '-sS'
+    TCP_CONNECT = '-sT'
+    UDP = '-sU'
+    SCTP_INIT = '-sY'
+    TCP_FULL = '-sN'
+    TCP_FIN = '-sF'
+    XMAS = '-sX'
+    TCP_ACK = '-sA'
+    TCP_WINDOW = '-sW'
+    TCP_MAIMON = '-sM'
+    SCTP_COOKIE = '-sZ'
+
+
+
+
 @dataclasses.dataclass
 class NmapOptions:
     """Storing the options of an Nmap scan."""
@@ -31,8 +48,12 @@ class NmapOptions:
     dns_servers: List[str] | None = None
     ports: Optional[str] | None = None
     timing_template: TimingTemplate = TimingTemplate.T3
-    scripts: List[str] | None = None
+    scripts: List[str] | None = dataclasses.field(default_factory=lambda: ['script'])
     version_detection: bool = True
+    port_scanning_technique: PortScanningTechnique = PortScanningTechnique.TCP_CONNECT
+    no_ping: bool = True
+    privileged: Optional[bool] = False
+
 
     def _set_version_detection_option(self) -> List[str]:
         """Appends the  option to the list of nmap options."""
@@ -41,6 +62,20 @@ class NmapOptions:
             command_options.append('-sV')
             command_options.append('--script=banner')
         return command_options
+
+    def _set_no_ping_options(self) -> List[str]:
+        if self.no_ping is True:
+            return ['-Pn']
+        else:
+            return []
+
+    def _set_privileged(self) -> List[str]:
+        if self.privileged is True:
+            return ['--privileged']
+        elif self.privileged is False:
+            return ['--unprivileged']
+        else:
+            return []
 
     def _set_dns_resolution_option(self) -> List[str]:
         """Appends the dns resolution option to the list of nmap options."""
@@ -64,6 +99,10 @@ class NmapOptions:
     def _set_timing_option(self) -> List[str]:
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
+
+    def _set_port_scanning_technique(self) -> List[str]:
+        """Appends the port scanning technique to the list of nmap options."""
+        return [self.port_scanning_technique.value]
 
     def _set_scripts(self) -> List[str]:
         if self.scripts is not None and len(self.scripts) > 0:
@@ -92,5 +131,8 @@ class NmapOptions:
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
+        command_options.extend(self._set_port_scanning_technique())
+        command_options.extend(self._set_no_ping_options())
+        command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())
         return command_options
