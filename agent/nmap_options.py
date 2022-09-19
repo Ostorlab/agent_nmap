@@ -43,12 +43,14 @@ class PortScanningTechnique(enum.Enum):
 
 @dataclasses.dataclass
 class NmapOptions:
-    """Storing the options of an Nmap scan."""
+    """Storing the options of a Nmap scan."""
     dns_resolution: bool = True
     dns_servers: List[str] | None = None
     ports: Optional[str] | None = None
+    fast_mode: bool = False
     timing_template: TimingTemplate = TimingTemplate.T3
-    scripts: List[str] | None = dataclasses.field(default_factory=lambda: ['script'])
+    script_default: bool = False
+    scripts: List[str] | None = dataclasses.field(default_factory=lambda: ['default', 'banner'])
     version_detection: bool = True
     port_scanning_technique: PortScanningTechnique = PortScanningTechnique.TCP_CONNECT
     no_ping: bool = True
@@ -91,7 +93,9 @@ class NmapOptions:
 
     def _set_ports_option(self) -> List[str]:
         """Appends the ports option to the list of nmap options."""
-        if self.ports is not None:
+        if self.fast_mode is True:
+            return ['-F']
+        elif self.ports is not None:
             return ['-p', self.ports]
         else:
             return []
@@ -104,6 +108,11 @@ class NmapOptions:
         """Appends the port scanning technique to the list of nmap options."""
         return [self.port_scanning_technique.value]
 
+    def _set_script_default(self) -> List[str]:
+        if self.script_default is True:
+            return ['-sC']
+        else:
+            return []
     def _set_scripts(self) -> List[str]:
         if self.scripts is not None and len(self.scripts) > 0:
             return self._run_scripts_command(self.scripts)
@@ -112,14 +121,19 @@ class NmapOptions:
 
     def _run_scripts_command(self, scripts: List[str]) -> List[str]:
         """Run nmap scan on the provided scripts"""
+        command = []
         path = pathlib.Path(SCRIPTS_PATH)
         if not pathlib.Path.exists(path):
             os.mkdir(SCRIPTS_PATH)
         for script_url in scripts:
-            temp_path = (path / script_url.split('/')[-1])
-            r = requests.get(script_url, allow_redirects=True, timeout=60)
-            with temp_path.open(mode='wb') as f:
-                f.write(r.content)
+            if script_url.startswith('http'):
+                temp_path = (path / script_url.split('/')[-1])
+                r = requests.get(script_url, allow_redirects=True, timeout=60)
+                with temp_path.open(mode='wb') as f:
+                    f.write(r.content)
+            else:
+                command += ['--script', script_url]
+
         command = ['--script', SCRIPTS_PATH]
         return command
 
@@ -135,4 +149,5 @@ class NmapOptions:
         command_options.extend(self._set_no_ping_options())
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())
+        command_options.extend(self._set_script_default())
         return command_options

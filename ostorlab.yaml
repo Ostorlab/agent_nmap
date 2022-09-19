@@ -12,7 +12,19 @@ description: |
   This command will download and install `agent/ostorlab/nmap` and target the ip `8.8.8.8`.
   For more information, please refer to the [Ostorlab Documentation](https://github.com/Ostorlab/ostorlab/blob/main/README.md)
   ## Usage
-  Agent nmap can be installed directly from the ostorlab agent store or built from this repository.
+
+  Agent Nmap can be installed directly from the ostorlab agent store or built from this repository.
+  
+  Supported agent flags:
+  
+  * `fast_mode` (`-F`): Fast mode scans fewer ports than the default mode.
+  * `ports` (`-p`): List of ports to scan.
+  * `no_ping` (`-Pn`): Treat all hosts as online, skip host discovery.
+  * `version_info` (`-sV`): Probe open ports to determine service/version info.
+  * `timing_template` (`-Tx`): Template of timing settings (T0, T1, ... T5)..
+  * `script_default` (`-sC`): Script scan, equivalent to --script=default.
+  * `scripts` (`--script`): List of scripts to run using Nmap.
+  
    ### Install directly from ostorlab agent store
    ```shell
    ostorlab agent install agent/ostorlab/nmap
@@ -63,22 +75,38 @@ out_selectors:
 docker_file_path : Dockerfile
 docker_build_root : .
 args:
+  - name: "fast_mode"
+    description: "Fast mode scans fewer ports than the default mode."
+    type: "boolean"
+    value: true
   - name: "ports"
     type: "string"
     description: "List of ports to scan."
     value: "0-65535"
+  - name: "no_ping"
+    description: "Treat all hosts as online, skip host discovery."
+    type: "boolean"
+    value: false
+  - name: "version_info"
+    description: "Probe open ports to determine service/version info."
+    type: "boolean"
+    value: false
   - name: "timing_template"
     type: "string"
     description: "Template of timing settings (T0, T1, ... T5)."
     value: "T5"
+  - name: "script_default"
+    type: "bool"
+    description: "Script scan, equivalent to --script=default"
+    value: true
   - name: "scripts"
     type: "array"
-    description: "list of scripts to run using Nmap"
+    description: "List of scripts to run using Nmap"
   - name: "max_network_mask_ipv4"
     type: "int"
-    description: "when scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
-    value: "26"
+    description: "When scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
+    value: 26
   - name: "max_network_mask_ipv6"
     type: "int"
-    description: "when scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
-    value: "120"
+    description: "When scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
+    value: 120
