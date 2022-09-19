@@ -100,13 +100,13 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
     def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
-                                           fast_mode=self.args.get('fast_mode'),
-                                           no_ping=self.args.get('no_ping'),
+                                           fast_mode=self.args.get('fast_mode', False),
+                                           no_ping=self.args.get('no_ping', False),
                                            timing_template=nmap_options.TimingTemplate[
                                                self.args['timing_template']],
                                            scripts=self.args.get('scripts'),
-                                           script_default=self.args.get('script_default'),
-                                           version_detection=self.args.get('version_info'))
+                                           script_default=self.args.get('script_default', False),
+                                           version_detection=self.args.get('version_info', False))
         client = nmap_wrapper.NmapWrapper(options)
 
         logger.info('scanning target %s/%s with options %s', host, mask, options)
@@ -116,13 +116,13 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
     def _scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
-                                           fast_mode=self.args.get('fast_mode'),
-                                           no_ping=self.args.get('no_ping'),
+                                           fast_mode=self.args.get('fast_mode', False),
+                                           no_ping=self.args.get('no_ping', False),
                                            timing_template=nmap_options.TimingTemplate[
                                                self.args['timing_template']],
                                            scripts=self.args.get('scripts'),
-                                           script_default=self.args.get('script_default'),
-                                           version_detection=self.args.get('version_info'))
+                                           script_default=self.args.get('script_default', False),
+                                           version_detection=self.args.get('version_info', False))
         client = nmap_wrapper.NmapWrapper(options)
         logger.info('scanning domain %s with options %s', domain_name, options)
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
