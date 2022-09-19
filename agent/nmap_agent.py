@@ -175,34 +175,40 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         if (scan_results is not None and
                 scan_results.get('nmaprun') is not None and
                 scan_results['nmaprun'].get('host') is not None):
-            version = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addrtype')
-            address = scan_results['nmaprun'].get('host', {}).get('address', {}).get('@addr')
-            if version == 'ipv4':
-                selector = 'v3.fingerprint.ip.v4.service.library'
-                default_mask = 32
-                self.set_add(b'agent_nmap_asset', f'{address}/32')
-            elif version == 'ipv6':
-                selector = 'v3.fingerprint.ip.v6.service.library'
-                default_mask = 164
-                self.set_add(b'agent_nmap_asset', f'{address}/64')
-            else:
-                raise ValueError(f'Incorrect ip version {version}')
 
-            for data in generators.get_services(scan_results):
-                if data.get('banner') is not None:
-                    logger.info('sending results to selector %s', selector)
-                    fingerprint_data = {
-                        'host': data.get('host'),
-                        'mask': data.get('mask', str(default_mask)),
-                        'version': data.get('version'),
-                        'library_type': 'BACKEND_COMPONENT',
-                        'service': data.get('service'),
-                        'port': data.get('port'),
-                        'protocol': data.get('protocol'),
-                        'library_name': data.get('banner'),
-                        'detail': data.get('banner'),
-                    }
-                    self.emit(selector, fingerprint_data)
+            up_hosts = scan_results['nmaprun'].get('host', [])
+            if isinstance(up_hosts, dict):
+                up_hosts = [up_hosts]
+
+            for host in up_hosts:
+                version = host.get('address', {}).get('@addrtype')
+                address = host.get('address', {}).get('@addr')
+                if version == 'ipv4':
+                    selector = 'v3.fingerprint.ip.v4.service.library'
+                    default_mask = 32
+                    self.set_add(b'agent_nmap_asset', f'{address}/32')
+                elif version == 'ipv6':
+                    selector = 'v3.fingerprint.ip.v6.service.library'
+                    default_mask = 164
+                    self.set_add(b'agent_nmap_asset', f'{address}/64')
+                else:
+                    raise ValueError(f'Incorrect ip version {version}')
+
+                for data in generators.get_services(scan_results):
+                    if data.get('banner') is not None:
+                        logger.info('sending results to selector %s', selector)
+                        fingerprint_data = {
+                            'host': data.get('host'),
+                            'mask': data.get('mask', str(default_mask)),
+                            'version': data.get('version'),
+                            'library_type': 'BACKEND_COMPONENT',
+                            'service': data.get('service'),
+                            'port': data.get('port'),
+                            'protocol': data.get('protocol'),
+                            'library_name': data.get('banner'),
+                            'detail': data.get('banner'),
+                        }
+                        self.emit(selector, fingerprint_data)
 
 
 if __name__ == '__main__':
