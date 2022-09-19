@@ -31,6 +31,17 @@ For more information, please refer to the [Ostorlab Documentation](https://githu
 
 Agent Nmap can be installed directly from the ostorlab agent store or built from this repository.
 
+Supported agent flags:
+
+* `fast_mode` (`-F`): Fast mode scans fewer ports than the default mode.
+* `ports` (`-p`): List of ports to scan.
+* `no_ping` (`-Pn`): Treat all hosts as online, skip host discovery.
+* `version_info` (`-sV`): Probe open ports to determine service/version info.
+* `timing_template` (`-Tx`): Template of timing settings (T0, T1, ... T5)..
+* `script_default` (`-sC`): Script scan, equivalent to --script=default.
+* `scripts` (`--script`): List of scripts to run using Nmap.
+
+
  ### Install directly from ostorlab agent store
 
  ```shell
