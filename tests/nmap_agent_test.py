@@ -337,12 +337,13 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
         assert agent_mock[2].data.get('banner', None) is None
 
 
-def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslyScanned_subnetIsNotScanned(agent_mock: List[message.Message],
-                                                                                   agent_persist_mock:
-                                                                                   Dict[Union[str, bytes],
-                                                                                        Union[str, bytes]],
-                                                                                   mocker: plugin.MockerFixture
-                                                                                   ) -> None:
+def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslyScanned_subnetIsNotScanned(
+        agent_mock: List[message.Message],
+        agent_persist_mock:
+        Dict[Union[str, bytes],
+             Union[str, bytes]],
+        mocker: plugin.MockerFixture
+        ) -> None:
     """The agent must not scan subnets if a larger network has been scanned before.
     """
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(JSON_OUTPUT, HUMAN_OUTPUT))
@@ -364,5 +365,3 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
         test_agent.process(msg)
         # scan subnet must not send any extra messages.
         assert len(agent_mock) == 8
-
-
