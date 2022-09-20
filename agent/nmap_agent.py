@@ -75,7 +75,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
 
         if len(hosts) > 0:
             for host, mask in hosts:
-                if not self.set_add(b'agent_nmap_asset', f'{host}/{mask}'):
+                if not self.add_ip_network(b'agent_nmap_asset', ipaddress.ip_network(f'{host}/{mask}', strict=False)):
                     logger.info('target %s/%s was processed before, exiting', host, mask)
                     return
                 scan_results, normal_results = self._scan_host(host, mask)

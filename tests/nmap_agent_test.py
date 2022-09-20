@@ -58,7 +58,7 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
     the agents emits back messages of type service, and of type vulnerability.
     """
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(JSON_OUTPUT, HUMAN_OUTPUT))
-    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
+    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1', 'mask': '32'})
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
         settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
@@ -82,7 +82,7 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent
     the agents emits back messages of type vulnerability.
     """
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(JSON_OUTPUT, HUMAN_OUTPUT))
-    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
+    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1', 'mask': '32'})
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
         settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
@@ -136,7 +136,7 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
     the agents emits back messages of type service with banner.
     """
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(fake_output, HUMAN_OUTPUT))
-    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1'})
+    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '127.0.0.1', 'mask': '32'})
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
         settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
@@ -335,3 +335,33 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
 
         # check banner is None for last port
         assert agent_mock[2].data.get('banner', None) is None
+
+
+def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslyScanned_subnetIsNotScanned(
+        agent_mock: List[message.Message],
+        agent_persist_mock:
+        Dict[Union[str, bytes],
+             Union[str, bytes]],
+        mocker: plugin.MockerFixture
+        ) -> None:
+    """The agent must not scan subnets if a larger network has been scanned before.
+    """
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(JSON_OUTPUT, HUMAN_OUTPUT))
+
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        msg = message.Message.from_data(selector='v3.asset.ip.v4',
+                                        data={'version': 4, 'host': '10.10.10.0', 'mask': '24'})
+        test_agent.process(msg)
+        # first scan must pass.
+        assert len(agent_mock) == 8
+
+        # subnet /27 of /24.
+        msg = message.Message.from_data(selector='v3.asset.ip.v4',
+                                        data={'version': 4, 'host': '10.10.10.0', 'mask': '27'})
+        test_agent.process(msg)
+        # scan subnet must not send any extra messages.
+        assert len(agent_mock) == 8
