@@ -250,9 +250,8 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock: rq_mock.mo
                                                test_agent.args['timing_template']],
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
-        # check string in banner
-        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn',
-                                           '--unprivileged', '--script', '/tmp/scripts']
+        assert all(a in options.command_options for a in
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--unprivileged', '--script'])
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.mocker.Mocker,
@@ -279,9 +278,8 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.m
                                                test_agent.args['timing_template']],
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
-        # check string in banner
-        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn',
-                                           '--unprivileged', '--script', '/tmp/scripts']
+        assert all(a in options.command_options for a in
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--unprivileged', '--script'])
 
 
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
@@ -343,7 +341,7 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
         Dict[Union[str, bytes],
              Union[str, bytes]],
         mocker: plugin.MockerFixture
-        ) -> None:
+) -> None:
     """The agent must not scan subnets if a larger network has been scanned before.
     """
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(JSON_OUTPUT, HUMAN_OUTPUT))
