@@ -47,7 +47,8 @@ class NmapOptions:
     script_default: bool = False
     scripts: List[str] | None = dataclasses.field(default_factory=lambda: ['default', 'banner'])
     version_detection: bool = True
-    port_scanning_technique: PortScanningTechnique = PortScanningTechnique.TCP_CONNECT
+    port_scanning_techniques: List[PortScanningTechnique] = dataclasses.field(default_factory=lambda: [
+                                            PortScanningTechnique.TCP_CONNECT, PortScanningTechnique.UDP])
     no_ping: bool = True
     privileged: Optional[bool] = False
 
@@ -97,9 +98,9 @@ class NmapOptions:
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
 
-    def _set_port_scanning_technique(self) -> List[str]:
+    def _set_port_scanning_techniques(self) -> List[str]:
         """Appends the port scanning technique to the list of nmap options."""
-        return [self.port_scanning_technique.value]
+        return [tech.value for tech in self.port_scanning_techniques]
 
     def _set_script_default(self) -> List[str]:
         if self.script_default is True:
@@ -136,7 +137,7 @@ class NmapOptions:
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
-        command_options.extend(self._set_port_scanning_technique())
+        command_options.extend(self._set_port_scanning_techniques())
         command_options.extend(self._set_no_ping_options())
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())
