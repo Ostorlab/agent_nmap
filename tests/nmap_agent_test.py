@@ -367,11 +367,9 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
 
 def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
         agent_mock: List[message.Message],
-        agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
         mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
 
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(fake_output, HUMAN_OUTPUT))
-    msg = message.Message.from_data(selector='v3.asset.ip.v4', data={'version': 4, 'host': '192.168.0.0', 'mask': '32'})
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
         settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
