@@ -3,15 +3,12 @@
 import dataclasses
 import enum
 import logging
-import os
+import tempfile
 from typing import List, Optional
 
-import pathlib
 import requests
 
 logger = logging.getLogger(__name__)
-
-SCRIPTS_PATH = '/tmp/scripts'
 
 
 class TimingTemplate(enum.Enum):
@@ -39,8 +36,6 @@ class PortScanningTechnique(enum.Enum):
     SCTP_COOKIE = '-sZ'
 
 
-
-
 @dataclasses.dataclass
 class NmapOptions:
     """Storing the options of a Nmap scan."""
@@ -52,17 +47,16 @@ class NmapOptions:
     script_default: bool = False
     scripts: List[str] | None = dataclasses.field(default_factory=lambda: ['default', 'banner'])
     version_detection: bool = True
-    port_scanning_technique: PortScanningTechnique = PortScanningTechnique.TCP_CONNECT
+    port_scanning_techniques: List[PortScanningTechnique] = dataclasses.field(default_factory=lambda: [
+                                            PortScanningTechnique.TCP_CONNECT, PortScanningTechnique.UDP])
     no_ping: bool = True
     privileged: Optional[bool] = None
-
 
     def _set_version_detection_option(self) -> List[str]:
         """Appends the  option to the list of nmap options."""
         command_options = []
         if self.version_detection is True:
             command_options.append('-sV')
-            command_options.append('--script=banner')
         return command_options
 
     def _set_no_ping_options(self) -> List[str]:
@@ -104,15 +98,16 @@ class NmapOptions:
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
 
-    def _set_port_scanning_technique(self) -> List[str]:
+    def _set_port_scanning_techniques(self) -> List[str]:
         """Appends the port scanning technique to the list of nmap options."""
-        return [self.port_scanning_technique.value]
+        return [tech.value for tech in self.port_scanning_techniques]
 
     def _set_script_default(self) -> List[str]:
         if self.script_default is True:
             return ['-sC']
         else:
             return []
+
     def _set_scripts(self) -> List[str]:
         if self.scripts is not None and len(self.scripts) > 0:
             return self._run_scripts_command(self.scripts)
@@ -121,20 +116,17 @@ class NmapOptions:
 
     def _run_scripts_command(self, scripts: List[str]) -> List[str]:
         """Run nmap scan on the provided scripts"""
-        command = []
-        path = pathlib.Path(SCRIPTS_PATH)
-        if not pathlib.Path.exists(path):
-            os.mkdir(SCRIPTS_PATH)
-        for script_url in scripts:
-            if script_url.startswith('http'):
-                temp_path = (path / script_url.split('/')[-1])
-                r = requests.get(script_url, allow_redirects=True, timeout=60)
-                with temp_path.open(mode='wb') as f:
-                    f.write(r.content)
-            else:
-                command += ['--script', script_url]
 
-        command = ['--script', SCRIPTS_PATH]
+        command = []
+        for script in scripts:
+            if script.startswith('http'):
+                with tempfile.NamedTemporaryFile(delete=False) as t:
+                    r = requests.get(script, allow_redirects=True, timeout=60)
+                    t.write(r.content)
+                    command.extend(['--script', t.name])
+            else:
+                command += ['--script', script]
+
         return command
 
     @property
@@ -145,7 +137,7 @@ class NmapOptions:
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
-        command_options.extend(self._set_port_scanning_technique())
+        command_options.extend(self._set_port_scanning_techniques())
         command_options.extend(self._set_no_ping_options())
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())

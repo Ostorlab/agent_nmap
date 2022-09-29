@@ -250,9 +250,8 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock: rq_mock.mo
                                                test_agent.args['timing_template']],
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
-        # check string in banner
-        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn',
-                                           '--script', '/tmp/scripts']
+        assert all(a in options.command_options for a in
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--unprivileged', '--script'])
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.mocker.Mocker,
@@ -279,9 +278,8 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.m
                                                test_agent.args['timing_template']],
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
-        # check string in banner
-        assert options.command_options == ['-sV', '--script=banner', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn'
-            , '--script', '/tmp/scripts']
+        assert all(a in options.command_options for a in
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--unprivileged', '--script'])
 
 
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
@@ -365,3 +363,23 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
         test_agent.process(msg)
         # scan subnet must not send any extra messages.
         assert len(agent_mock) == 8
+
+
+def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
+        agent_mock: List[message.Message],
+        mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
+
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(fake_output, HUMAN_OUTPUT))
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+        options = nmap_options.NmapOptions(dns_resolution=False,
+                                           ports=test_agent.args.get('ports'),
+                                           timing_template=nmap_options.TimingTemplate[
+                                               test_agent.args['timing_template']],
+                                           scripts=test_agent.args['scripts'],
+                                           version_detection=True)
+        assert all(a in options.command_options for a in
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-sU', '-Pn', '--unprivileged', '--script', 'banner'])
+
