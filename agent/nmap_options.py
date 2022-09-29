@@ -50,7 +50,7 @@ class NmapOptions:
     port_scanning_techniques: List[PortScanningTechnique] = dataclasses.field(default_factory=lambda: [
                                             PortScanningTechnique.TCP_CONNECT, PortScanningTechnique.UDP])
     no_ping: bool = True
-    privileged: Optional[bool] = False
+    privileged: Optional[bool] = None
 
     def _set_version_detection_option(self) -> List[str]:
         """Appends the  option to the list of nmap options."""

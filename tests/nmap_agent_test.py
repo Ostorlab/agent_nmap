@@ -251,7 +251,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(requests_mock: rq_mock.mo
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
         assert all(a in options.command_options for a in
-                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--unprivileged', '--script'])
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--script'])
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.mocker.Mocker,
@@ -279,7 +279,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(requests_mock: rq_mock.m
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
         assert all(a in options.command_options for a in
-                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--unprivileged', '--script'])
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-Pn', '--script'])
 
 
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
@@ -381,5 +381,5 @@ def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
                                            scripts=test_agent.args['scripts'],
                                            version_detection=True)
         assert all(a in options.command_options for a in
-                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-sU', '-Pn', '--unprivileged', '--script', 'banner'])
+                   ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-sU', '-Pn', '--script', 'banner'])
 
