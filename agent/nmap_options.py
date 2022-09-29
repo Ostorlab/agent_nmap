@@ -54,7 +54,7 @@ class NmapOptions:
     version_detection: bool = True
     port_scanning_technique: PortScanningTechnique = PortScanningTechnique.TCP_CONNECT
     no_ping: bool = True
-    privileged: Optional[bool] = False
+    privileged: Optional[bool] = None
 
 
     def _set_version_detection_option(self) -> List[str]:
