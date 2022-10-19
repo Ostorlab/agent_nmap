@@ -15,6 +15,7 @@ from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
+from ostorlab.assets import ipv4, ipv6
 
 from agent import generators
 from agent import nmap_options
@@ -141,9 +142,24 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
             technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
-            self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
-                                      technical_detail=technical_detail,
-                                      risk_rating=vuln_mixin.RiskRating.INFO)
+            port = scan_results.get('nmaprun', {}).get('host', {}).get('@portid', '')
+            res = scan_results.get('nmaprun', {}).get('host', {}).get('address', '')
+            if res.get('@addrtype', '') == 'ipv4':
+                self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                          technical_detail=technical_detail,
+                                          risk_rating=vuln_mixin.RiskRating.INFO,
+                                          vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                              metadata=[],
+                                              asset=ipv4.IPv4(host=res.get('@addr', ''), mask=port)
+                                          ))
+            else:
+                self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                          technical_detail=technical_detail,
+                                          risk_rating=vuln_mixin.RiskRating.INFO,
+                                          vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                              metadata=[],
+                                              asset=ipv6.IPv6(host=res.get('@addr', ''), mask=port)
+                                          ))
 
     def _emit_services(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
         logger.info('sending results to %s', domain_name)
@@ -195,7 +211,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                     self.set_add(b'agent_nmap_asset', f'{address}/32')
                 elif version == 'ipv6':
                     selector = 'v3.fingerprint.ip.v6.service.library'
-                    default_mask = 164
+                    default_mask = 128
                     self.set_add(b'agent_nmap_asset', f'{address}/64')
                 else:
                     raise ValueError(f'Incorrect ip version {version}')
