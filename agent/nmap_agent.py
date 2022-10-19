@@ -13,9 +13,9 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
+from ostorlab.assets import ipv4, ipv6
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
-from ostorlab.assets import ipv4, ipv6
 
 from agent import generators
 from agent import nmap_options
