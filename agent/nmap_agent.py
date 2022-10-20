@@ -13,7 +13,7 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
-from ostorlab.assets import ipv4, ipv6
+from ostorlab.assets import ipv4, ipv6, domain_name
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -142,23 +142,41 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
             technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
-            port = scan_results.get('nmaprun', {}).get('host', {}).get('@portid', '')
-            res = scan_results.get('nmaprun', {}).get('host', {}).get('address', '')
-            if res.get('@addrtype', '') == 'ipv4':
+            domains = scan_results.get('nmaprun', {}).get('host', {}).get('hostnames', {})
+            port = scan_results.get('nmaprun', {}).get('host', {}).get('port', {}).get('@portid', '')
+            address = scan_results.get('nmaprun', {}).get('host', {}).get('address', '')
+            if domains:
+                domains = domains.get('hostname', {})
+                for domain_dict in domains:
+                    domain = domain_dict.get('@name', '')
+                    self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                              technical_detail=technical_detail,
+                                              risk_rating=vuln_mixin.RiskRating.INFO,
+                                              vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                                  metadata=[],
+                                                  asset=domain_name.DomainName(name=domain)
+                                              ))
+            elif address.get('@addrtype', '') == 'ipv4':
                 self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                           technical_detail=technical_detail,
                                           risk_rating=vuln_mixin.RiskRating.INFO,
                                           vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                              metadata=[],
-                                              asset=ipv4.IPv4(host=res.get('@addr', ''), mask=port)
+                                              metadata=[vuln_mixin.VulnerabilityLocationMetadata(
+                                                  type=vuln_mixin.MetadataType.PORT,
+                                                  value=port
+                                              )],
+                                              asset=ipv4.IPv4(host=address.get('@addr', ''))
                                           ))
-            else:
+            elif address.get('@addrtype', '') == 'ipv6':
                 self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                           technical_detail=technical_detail,
                                           risk_rating=vuln_mixin.RiskRating.INFO,
                                           vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                              metadata=[],
-                                              asset=ipv6.IPv6(host=res.get('@addr', ''), mask=port)
+                                              metadata=[vuln_mixin.VulnerabilityLocationMetadata(
+                                                  type=vuln_mixin.MetadataType.PORT,
+                                                  value=port
+                                              )],
+                                              asset=ipv6.IPv6(host=address.get('@addr', ''))
                                           ))
 
     def _emit_services(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:

@@ -144,7 +144,7 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 6
+        assert len(agent_mock) == 7
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[1].data['banner']
@@ -168,7 +168,7 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 9
+        assert len(agent_mock) == 10
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[2].data['banner']
@@ -191,7 +191,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 9
+        assert len(agent_mock) == 10
         # check string in banner
         assert agent_mock[1].selector == 'v3.asset.domain_name.service'
         assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
@@ -326,7 +326,7 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
         test_agent.process(msg)
 
         # 4 is count of IPs in a /30.
-        assert len(agent_mock) == 6 * 4
+        assert len(agent_mock) == 7 * 4
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[1].data['banner']
