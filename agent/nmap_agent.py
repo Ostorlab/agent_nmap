@@ -138,13 +138,30 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         else:
             return None
 
+    def _prepare_metadata(self, ports: Dict[str, Any] | List[Dict[str, Any]]) \
+            -> List[vuln_mixin.VulnerabilityLocationMetadata]:
+        ret = []
+        if isinstance(ports, List):
+            for port_dict in ports:
+                port = port_dict.get('@portid', '')
+                ret.append(vuln_mixin.VulnerabilityLocationMetadata(
+                    type=vuln_mixin.MetadataType.PORT,
+                    value=port))
+        elif isinstance(ports, Dict):
+            port = ports.get('@portid', '')
+            ret.append(vuln_mixin.VulnerabilityLocationMetadata(
+                type=vuln_mixin.MetadataType.PORT,
+                value=port))
+        return ret
+
     def _emit_network_scan_finding(self, scan_results: Dict[str, Any], normal_results: str) -> None:
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
             technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
-            domains = scan_results.get('nmaprun', {}).get('host', {}).get('hostnames', {})
-            port = scan_results.get('nmaprun', {}).get('host', {}).get('port', {}).get('@portid', '')
-            address = scan_results.get('nmaprun', {}).get('host', {}).get('address', '')
+            host = scan_results.get('nmaprun', {}).get('host', {})
+            domains = host.get('hostnames', {})
+            ports = host.get('ports', {}).get('port', '')
+            address = host.get('address', '')
             if domains:
                 domains = domains.get('hostname', {})
                 for domain_dict in domains:
@@ -153,7 +170,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                               technical_detail=technical_detail,
                                               risk_rating=vuln_mixin.RiskRating.INFO,
                                               vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                                  metadata=[],
+                                                  metadata=self._prepare_metadata(ports),
                                                   asset=domain_name.DomainName(name=domain)
                                               ))
             elif address.get('@addrtype', '') == 'ipv4':
@@ -161,10 +178,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                           technical_detail=technical_detail,
                                           risk_rating=vuln_mixin.RiskRating.INFO,
                                           vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                              metadata=[vuln_mixin.VulnerabilityLocationMetadata(
-                                                  type=vuln_mixin.MetadataType.PORT,
-                                                  value=port
-                                              )],
+                                              metadata=self._prepare_metadata(ports),
                                               asset=ipv4.IPv4(host=address.get('@addr', ''))
                                           ))
             elif address.get('@addrtype', '') == 'ipv6':
@@ -172,10 +186,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                           technical_detail=technical_detail,
                                           risk_rating=vuln_mixin.RiskRating.INFO,
                                           vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                              metadata=[vuln_mixin.VulnerabilityLocationMetadata(
-                                                  type=vuln_mixin.MetadataType.PORT,
-                                                  value=port
-                                              )],
+                                              metadata=self._prepare_metadata(ports),
                                               asset=ipv6.IPv6(host=address.get('@addr', ''))
                                           ))
 

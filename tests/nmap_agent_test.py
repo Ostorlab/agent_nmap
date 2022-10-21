@@ -72,6 +72,12 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
         assert agent_mock[1].data['risk_rating'] == 'INFO'
         assert agent_mock[1].data['title'] == 'Network Port Scan'
         assert agent_mock[1].data['short_description'] == 'List of open network ports.'
+        vulne_location = agent_mock[1].data['vulnerability_location']
+        assert vulne_location['ipv4']['host'] == '127.0.0.1'
+        assert vulne_location['ipv4']['version'] == 4
+        assert vulne_location['metadata'][0]['value'] == '21'
+        assert vulne_location['metadata'][0]['type'] == 'PORT'
+
 
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_mock: List[message.Message],
@@ -151,6 +157,13 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         # check banner is None for last port
         assert agent_mock[2].data.get('banner', None) is None
+        vulne_location = agent_mock[3].data['vulnerability_location']
+        assert vulne_location['domain_name']['name'] == 'scanme.nmap.org'
+        assert vulne_location['metadata'][0]['value'] == '80'
+        assert vulne_location['metadata'][1]['type'] == 'PORT'
+        assert vulne_location['metadata'][1]['value'] == '9929'
+        assert vulne_location['metadata'][2]['type'] == 'PORT'
+        assert vulne_location['metadata'][2]['value'] == '31337'
 
 
 def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
