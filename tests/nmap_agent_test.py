@@ -72,6 +72,12 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
         assert agent_mock[1].data['risk_rating'] == 'INFO'
         assert agent_mock[1].data['title'] == 'Network Port Scan'
         assert agent_mock[1].data['short_description'] == 'List of open network ports.'
+        vulne_location = agent_mock[1].data['vulnerability_location']
+        assert vulne_location['ipv4']['host'] == '127.0.0.1'
+        assert vulne_location['ipv4']['version'] == 4
+        assert vulne_location['metadata'][0]['value'] == '21'
+        assert vulne_location['metadata'][0]['type'] == 'PORT'
+
 
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_mock: List[message.Message],
@@ -144,13 +150,20 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 6
+        assert len(agent_mock) == 7
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[1].data['banner']
 
         # check banner is None for last port
         assert agent_mock[2].data.get('banner', None) is None
+        vulne_location = agent_mock[3].data['vulnerability_location']
+        assert vulne_location['domain_name']['name'] == 'scanme.nmap.org'
+        assert vulne_location['metadata'][0]['value'] == '80'
+        assert vulne_location['metadata'][1]['type'] == 'PORT'
+        assert vulne_location['metadata'][1]['value'] == '9929'
+        assert vulne_location['metadata'][2]['type'] == 'PORT'
+        assert vulne_location['metadata'][2]['value'] == '31337'
 
 
 def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
@@ -168,7 +181,7 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 9
+        assert len(agent_mock) == 10
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[2].data['banner']
@@ -191,7 +204,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 9
+        assert len(agent_mock) == 10
         # check string in banner
         assert agent_mock[1].selector == 'v3.asset.domain_name.service'
         assert agent_mock[1].data.get('name') == agent_mock[1].data.get('name')
@@ -326,7 +339,7 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
         test_agent.process(msg)
 
         # 4 is count of IPs in a /30.
-        assert len(agent_mock) == 6 * 4
+        assert len(agent_mock) == 7 * 4
         # check string in banner
         assert 'Dummy Banner 1' in agent_mock[0].data['banner']
         assert 'Dummy Banner 2' in agent_mock[1].data['banner']

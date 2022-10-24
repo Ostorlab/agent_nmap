@@ -13,6 +13,9 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
+from ostorlab.assets import ipv4 as ipv4_asset
+from ostorlab.assets import ipv6 as ipv6_asset
+from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -137,13 +140,57 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         else:
             return None
 
+    def _prepare_metadata(self, ports: Dict[str, Any] | List[Dict[str, Any]]) \
+            -> List[vuln_mixin.VulnerabilityLocationMetadata]:
+        ret = []
+        if isinstance(ports, List):
+            for port_dict in ports:
+                port = port_dict.get('@portid', '')
+                ret.append(vuln_mixin.VulnerabilityLocationMetadata(
+                    type=vuln_mixin.MetadataType.PORT,
+                    value=port))
+        elif isinstance(ports, Dict):
+            port = ports.get('@portid', '')
+            ret.append(vuln_mixin.VulnerabilityLocationMetadata(
+                type=vuln_mixin.MetadataType.PORT,
+                value=port))
+        return ret
+
     def _emit_network_scan_finding(self, scan_results: Dict[str, Any], normal_results: str) -> None:
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
             technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
-            self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
-                                      technical_detail=technical_detail,
-                                      risk_rating=vuln_mixin.RiskRating.INFO)
+            host = scan_results.get('nmaprun', {}).get('host', {})
+            domains = host.get('hostnames', {})
+            ports = host.get('ports', {}).get('port', '')
+            address = host.get('address', '')
+            if domains:
+                domains = domains.get('hostname', {})
+                for domain_dict in domains:
+                    domain = domain_dict.get('@name', '')
+                    self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                              technical_detail=technical_detail,
+                                              risk_rating=vuln_mixin.RiskRating.INFO,
+                                              vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                                  metadata=self._prepare_metadata(ports),
+                                                  asset=domain_name_asset.DomainName(name=domain)
+                                              ))
+            elif address.get('@addrtype', '') == 'ipv4':
+                self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                          technical_detail=technical_detail,
+                                          risk_rating=vuln_mixin.RiskRating.INFO,
+                                          vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                              metadata=self._prepare_metadata(ports),
+                                              asset=ipv4_asset.IPv4(host=address.get('@addr', ''))
+                                          ))
+            elif address.get('@addrtype', '') == 'ipv6':
+                self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                          technical_detail=technical_detail,
+                                          risk_rating=vuln_mixin.RiskRating.INFO,
+                                          vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                              metadata=self._prepare_metadata(ports),
+                                              asset=ipv6_asset.IPv6(host=address.get('@addr', ''))
+                                          ))
 
     def _emit_services(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
         logger.info('sending results to %s', domain_name)
@@ -195,7 +242,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                     self.set_add(b'agent_nmap_asset', f'{address}/32')
                 elif version == 'ipv6':
                     selector = 'v3.fingerprint.ip.v6.service.library'
-                    default_mask = 164
+                    default_mask = 128
                     self.set_add(b'agent_nmap_asset', f'{address}/64')
                 else:
                     raise ValueError(f'Incorrect ip version {version}')
