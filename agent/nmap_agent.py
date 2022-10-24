@@ -13,7 +13,9 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
-from ostorlab.assets import ipv4, ipv6, domain_name
+from ostorlab.assets import ipv4 as ipv4_asset
+from ostorlab.assets import ipv6 as ipv6_asset
+from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -72,7 +74,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
             else:
                 hosts = [(host, mask)]
 
-        name_domain = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
+        domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
 
         if len(hosts) > 0:
             for host, mask in hosts:
@@ -82,19 +84,19 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                 scan_results, normal_results = self._scan_host(host, mask)
                 logger.info('scan results %s', scan_results)
 
-                self._emit_services(scan_results, name_domain)
+                self._emit_services(scan_results, domain_name)
                 self._emit_network_scan_finding(scan_results, normal_results)
-                self._emit_fingerprints(scan_results, name_domain)
-        elif name_domain is not None:
-            if not self.set_add(b'agent_nmap_asset', name_domain):
-                logger.info('target %s was processed before, exiting', name_domain)
+                self._emit_fingerprints(scan_results, domain_name)
+        elif domain_name is not None:
+            if not self.set_add(b'agent_nmap_asset', domain_name):
+                logger.info('target %s was processed before, exiting', domain_name)
                 return
-            scan_results, normal_results = self._scan_domain(name_domain)
+            scan_results, normal_results = self._scan_domain(domain_name)
             logger.info('scan results %s', scan_results)
 
-            self._emit_services(scan_results, name_domain)
+            self._emit_services(scan_results, domain_name)
             self._emit_network_scan_finding(scan_results, normal_results)
-            self._emit_fingerprints(scan_results, name_domain)
+            self._emit_fingerprints(scan_results, domain_name)
         else:
             raise ValueError('not host or domain name are set')
 
@@ -114,7 +116,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
-    def _scan_domain(self, name_domain: str) -> Tuple[Dict[str, Any], str]:
+    def _scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(dns_resolution=False,
                                            ports=self.args.get('ports'),
                                            fast_mode=self.args.get('fast_mode', False),
@@ -125,14 +127,14 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                            script_default=self.args.get('script_default', False),
                                            version_detection=self.args.get('version_info', False))
         client = nmap_wrapper.NmapWrapper(options)
-        logger.info('scanning domain %s with options %s', name_domain, options)
-        scan_results, normal_results = client.scan_domain(domain_name=name_domain)
+        logger.info('scanning domain %s with options %s', domain_name, options)
+        scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
 
-    def _prepare_domain_name(self, name_domain: Optional[str], url: Optional[str]) -> Optional[str]:
+    def _prepare_domain_name(self, domain_name: Optional[str], url: Optional[str]) -> Optional[str]:
         """Prepare domain name based on type, if a url is provided, return its domain."""
-        if name_domain is not None:
-            return name_domain
+        if domain_name is not None:
+            return domain_name
         elif url is not None:
             return parse.urlparse(url).hostname
         else:
@@ -171,7 +173,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                               risk_rating=vuln_mixin.RiskRating.INFO,
                                               vulnerability_location=vuln_mixin.VulnerabilityLocation(
                                                   metadata=self._prepare_metadata(ports),
-                                                  asset=domain_name.DomainName(name=domain)
+                                                  asset=domain_name_asset.DomainName(name=domain)
                                               ))
             elif address.get('@addrtype', '') == 'ipv4':
                 self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
@@ -179,7 +181,7 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                           risk_rating=vuln_mixin.RiskRating.INFO,
                                           vulnerability_location=vuln_mixin.VulnerabilityLocation(
                                               metadata=self._prepare_metadata(ports),
-                                              asset=ipv4.IPv4(host=address.get('@addr', ''))
+                                              asset=ipv4_asset.IPv4(host=address.get('@addr', ''))
                                           ))
             elif address.get('@addrtype', '') == 'ipv6':
                 self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
@@ -187,11 +189,11 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                                           risk_rating=vuln_mixin.RiskRating.INFO,
                                           vulnerability_location=vuln_mixin.VulnerabilityLocation(
                                               metadata=self._prepare_metadata(ports),
-                                              asset=ipv6.IPv6(host=address.get('@addr', ''))
+                                              asset=ipv6_asset.IPv6(host=address.get('@addr', ''))
                                           ))
 
-    def _emit_services(self, scan_results: Dict[str, Any], name_domain: Optional[str]) -> None:
-        logger.info('sending results to %s', name_domain)
+    def _emit_services(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
+        logger.info('sending results to %s', domain_name)
         if (scan_results is not None and
                 scan_results.get('nmaprun') is not None and
                 scan_results['nmaprun'].get('host') is not None):
@@ -215,14 +217,14 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
                 for data in generators.get_services(scan_results):
                     logger.info('sending results to selector %s', selector)
                     self.emit(selector, data)
-                    if name_domain is not None:
-                        domain_name_service = {'name': name_domain, 'port': data.get('port'),
+                    if domain_name is not None:
+                        domain_name_service = {'name': domain_name, 'port': data.get('port'),
                                                'schema': data.get('service')}
                         logger.info('sending results to selector domain service selector')
                         self.emit('v3.asset.domain_name.service', domain_name_service)
 
-    def _emit_fingerprints(self, scan_results: Dict[str, Any], name_domain: Optional[str]) -> None:
-        logger.info('sending results to %s', name_domain)
+    def _emit_fingerprints(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
+        logger.info('sending results to %s', domain_name)
         if (scan_results is not None and
                 scan_results.get('nmaprun') is not None and
                 scan_results['nmaprun'].get('host') is not None):
