@@ -166,8 +166,18 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
             address = host.get('address', '')
             if domains:
                 domains = domains.get('hostname', {})
-                for domain_dict in domains:
-                    domain = domain_dict.get('@name', '')
+                if isinstance(domains, List):
+                    for domain_dict in domains:
+                        domain = domain_dict.get('@name', '')
+                        self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
+                                                  technical_detail=technical_detail,
+                                                  risk_rating=vuln_mixin.RiskRating.INFO,
+                                                  vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                                      metadata=self._prepare_metadata(ports),
+                                                      asset=domain_name_asset.DomainName(name=domain)
+                                                  ))
+                elif isinstance(domains, dict):
+                    domain = domains.get('@name', '')
                     self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
                                               technical_detail=technical_detail,
                                               risk_rating=vuln_mixin.RiskRating.INFO,
