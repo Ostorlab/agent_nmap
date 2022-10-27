@@ -79,7 +79,6 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
         assert vulne_location['metadata'][0]['type'] == 'PORT'
 
 
-
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(agent_mock: List[message.Message],
                                                                            agent_persist_mock: Dict[Union[str, bytes],
                                                                                                     Union[str, bytes]],
@@ -381,7 +380,6 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
 def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
         agent_mock: List[message.Message],
         mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
-
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_hosts', return_value=(fake_output, HUMAN_OUTPUT))
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
@@ -396,3 +394,24 @@ def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
         assert all(a in options.command_options for a in
                    ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-sU', '-Pn', '--script', 'banner'])
 
+
+def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_reportMultipleVulnerabilities(
+        agent_mock: List[message.Message], agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+        mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    #
+    mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
+    report_mock = mocker.patch('agent.nmap_agent.NmapAgent.report_vulnerability')
+    emit_mock = mocker.patch('agent.nmap_agent.NmapAgent.emit')
+    msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})
+    with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(key='agent/ostorlab/nmap', redis_url='redis://redis')
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        assert emit_mock.call_count == 8
+        assert report_mock.call_count == 2
