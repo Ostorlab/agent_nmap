@@ -398,13 +398,9 @@ def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
 def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
         agent_mock: List[message.Message], agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
         mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
-    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
-    the agents emits back messages of type service with banner.
+    """Unittest for testing the reporting of vulnerabilities in case multiple hostnames from scan result.
     """
-    #
     mocker.patch('agent.nmap_wrapper.NmapWrapper.scan_domain', return_value=(fake_output, HUMAN_OUTPUT))
-    report_mock = mocker.patch('agent.nmap_agent.NmapAgent.report_vulnerability')
-    emit_mock = mocker.patch('agent.nmap_agent.NmapAgent.emit')
     msg = message.Message.from_data(selector='v3.asset.domain_name', data={'name': 'ostorlab.co'})
     with open(OSTORLAB_YAML_PATH, 'r', encoding='utf-8') as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
@@ -413,5 +409,4 @@ def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
 
         test_agent.process(msg)
 
-        assert emit_mock.call_count == 8
-        assert report_mock.call_count == 2
+        assert len([msg for msg in agent_mock if msg.selector == 'v3.report.vulnerability']) == 2
