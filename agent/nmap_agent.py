@@ -147,12 +147,12 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
             for port_dict in ports:
                 port = port_dict.get('@portid', '')
                 ret.append(vuln_mixin.VulnerabilityLocationMetadata(
-                    type=vuln_mixin.MetadataType.PORT,
+                    metadata_type=vuln_mixin.MetadataType.PORT,
                     value=port))
         elif isinstance(ports, Dict):
             port = ports.get('@portid', '')
             ret.append(vuln_mixin.VulnerabilityLocationMetadata(
-                type=vuln_mixin.MetadataType.PORT,
+                metadata_type=vuln_mixin.MetadataType.PORT,
                 value=port))
         return ret
 
