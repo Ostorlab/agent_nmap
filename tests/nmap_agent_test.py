@@ -395,7 +395,7 @@ def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
                    ['-sV', '-n', '-p', '0-65535', '-T5', '-sT', '-sU', '-Pn', '--script', 'banner'])
 
 
-def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_reportMultipleVulnerabilities(
+def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
         agent_mock: List[message.Message], agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
         mocker: plugin.MockerFixture, fake_output: None | Dict[str, str]) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
