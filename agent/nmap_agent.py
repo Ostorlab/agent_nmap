@@ -25,21 +25,26 @@ from agent import nmap_wrapper
 from agent import process_scans
 
 logging.basicConfig(
-    format='%(message)s',
-    datefmt='[%X]',
+    format="%(message)s",
+    datefmt="[%X]",
     handlers=[rich_logging.RichHandler(rich_tracebacks=True)],
-    level='INFO',
-    force=True
+    level="INFO",
+    force=True,
 )
 logger = logging.getLogger(__name__)
 
 
-class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.AgentPersistMixin):
+class NmapAgent(
+    agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.AgentPersistMixin
+):
     """Agent responsible for running scans over IP assets with Nmap Security Scanner.
-       For more visit https://github.com/Ostorlab/ostorlab."""
+    For more visit https://github.com/Ostorlab/ostorlab."""
 
-    def __init__(self, agent_definition: agent_definitions.AgentDefinition,
-                 agent_settings: runtime_definitions.AgentSettings) -> None:
+    def __init__(
+        self,
+        agent_definition: agent_definitions.AgentDefinition,
+        agent_settings: runtime_definitions.AgentSettings,
+    ) -> None:
         agent.Agent.__init__(self, agent_definition, agent_settings)
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
@@ -52,86 +57,101 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         Args:
             message: message containing the IP to scan, the mask & the version.
         """
-        logger.info('processing message of selector : %s', message.selector)
-        host = message.data.get('host', '')
+        logger.info("processing message of selector : %s", message.selector)
+        host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
 
         # Differentiate between a single IP mask in IPv4 and IPv6.
-        if 'v4' in message.selector:
-            mask = int(message.data.get('mask', '32'))
-            max_mask = int(self.args.get('max_network_mask_ipv4', '32'))
+        if "v4" in message.selector:
+            mask = int(message.data.get("mask", "32"))
+            max_mask = int(self.args.get("max_network_mask_ipv4", "32"))
             if mask < max_mask:
-                for subnet in ipaddress.ip_network(f'{host}/{mask}').subnets(new_prefix=max_mask):
+                for subnet in ipaddress.ip_network(f"{host}/{mask}").subnets(
+                    new_prefix=max_mask
+                ):
                     hosts.append((str(subnet.network_address), max_mask))
             else:
                 hosts = [(host, mask)]
-        elif 'v6' in message.selector:
-            mask = int(message.data.get('mask', '64'))
-            max_mask = int(self.args.get('max_network_mask_ipv6', '64'))
+        elif "v6" in message.selector:
+            mask = int(message.data.get("mask", "64"))
+            max_mask = int(self.args.get("max_network_mask_ipv6", "64"))
             if mask < max_mask:
-                for subnet in ipaddress.ip_network(f'{host}/{mask}').subnets(new_prefix=max_mask):
+                for subnet in ipaddress.ip_network(f"{host}/{mask}").subnets(
+                    new_prefix=max_mask
+                ):
                     hosts.append((str(subnet.network_address), max_mask))
             else:
                 hosts = [(host, mask)]
 
-        domain_name = self._prepare_domain_name(message.data.get('name'), message.data.get('url'))
+        domain_name = self._prepare_domain_name(
+            message.data.get("name"), message.data.get("url")
+        )
 
         if len(hosts) > 0:
             for host, mask in hosts:
-                if not self.add_ip_network(b'agent_nmap_asset', ipaddress.ip_network(f'{host}/{mask}', strict=False)):
-                    logger.info('target %s/%s was processed before, exiting', host, mask)
+                if not self.add_ip_network(
+                    b"agent_nmap_asset",
+                    ipaddress.ip_network(f"{host}/{mask}", strict=False),
+                ):
+                    logger.info(
+                        "target %s/%s was processed before, exiting", host, mask
+                    )
                     return
                 scan_results, normal_results = self._scan_host(host, mask)
-                logger.info('scan results %s', scan_results)
+                logger.info("scan results %s", scan_results)
 
                 self._emit_services(scan_results, domain_name)
                 self._emit_network_scan_finding(scan_results, normal_results)
                 self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
-            if not self.set_add(b'agent_nmap_asset', domain_name):
-                logger.info('target %s was processed before, exiting', domain_name)
+            if not self.set_add(b"agent_nmap_asset", domain_name):
+                logger.info("target %s was processed before, exiting", domain_name)
                 return
             scan_results, normal_results = self._scan_domain(domain_name)
-            logger.info('scan results %s', scan_results)
+            logger.info("scan results %s", scan_results)
 
             self._emit_services(scan_results, domain_name)
             self._emit_network_scan_finding(scan_results, normal_results)
             self._emit_fingerprints(scan_results, domain_name)
         else:
-            raise ValueError('not host or domain name are set')
+            raise ValueError("not host or domain name are set")
 
     def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
-        options = nmap_options.NmapOptions(dns_resolution=False,
-                                           ports=self.args.get('ports'),
-                                           fast_mode=self.args.get('fast_mode', False),
-                                           no_ping=self.args.get('no_ping', False),
-                                           timing_template=nmap_options.TimingTemplate[
-                                               self.args['timing_template']],
-                                           scripts=self.args.get('scripts'),
-                                           script_default=self.args.get('script_default', False),
-                                           version_detection=self.args.get('version_info', False))
+        options = nmap_options.NmapOptions(
+            dns_resolution=False,
+            ports=self.args.get("ports"),
+            fast_mode=self.args.get("fast_mode", False),
+            no_ping=self.args.get("no_ping", False),
+            timing_template=nmap_options.TimingTemplate[self.args["timing_template"]],
+            scripts=self.args.get("scripts"),
+            script_default=self.args.get("script_default", False),
+            version_detection=self.args.get("version_info", False),
+        )
         client = nmap_wrapper.NmapWrapper(options)
 
-        logger.info('scanning target %s/%s with options %s', host, mask, options)
+        logger.info("scanning target %s/%s with options %s", host, mask, options)
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
     def _scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
-        options = nmap_options.NmapOptions(dns_resolution=False,
-                                           ports=self.args.get('ports'),
-                                           fast_mode=self.args.get('fast_mode', False),
-                                           no_ping=self.args.get('no_ping', False),
-                                           timing_template=nmap_options.TimingTemplate[
-                                               self.args['timing_template']],
-                                           scripts=self.args.get('scripts'),
-                                           script_default=self.args.get('script_default', False),
-                                           version_detection=self.args.get('version_info', False))
+        options = nmap_options.NmapOptions(
+            dns_resolution=False,
+            ports=self.args.get("ports"),
+            fast_mode=self.args.get("fast_mode", False),
+            no_ping=self.args.get("no_ping", False),
+            timing_template=nmap_options.TimingTemplate[self.args["timing_template"]],
+            scripts=self.args.get("scripts"),
+            script_default=self.args.get("script_default", False),
+            version_detection=self.args.get("version_info", False),
+        )
         client = nmap_wrapper.NmapWrapper(options)
-        logger.info('scanning domain %s with options %s', domain_name, options)
+        logger.info("scanning domain %s with options %s", domain_name, options)
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
 
-    def _prepare_domain_name(self, domain_name: Optional[str], url: Optional[str]) -> Optional[str]:
+    def _prepare_domain_name(
+        self, domain_name: Optional[str], url: Optional[str]
+    ) -> Optional[str]:
         """Prepare domain name based on type, if a url is provided, return its domain."""
         if domain_name is not None:
             return domain_name
@@ -140,140 +160,170 @@ class NmapAgent(agent.Agent, vuln_mixin.AgentReportVulnMixin, persist_mixin.Agen
         else:
             return None
 
-    def _prepare_metadata(self, ports: Dict[str, Any] | List[Dict[str, Any]]) \
-            -> List[vuln_mixin.VulnerabilityLocationMetadata]:
+    def _prepare_metadata(
+        self, ports: Dict[str, Any] | List[Dict[str, Any]]
+    ) -> List[vuln_mixin.VulnerabilityLocationMetadata]:
         ret = []
         if isinstance(ports, List):
             for port_dict in ports:
-                port = port_dict.get('@portid', '')
-                ret.append(vuln_mixin.VulnerabilityLocationMetadata(
-                    metadata_type=vuln_mixin.MetadataType.PORT,
-                    value=port))
+                port = port_dict.get("@portid", "")
+                ret.append(
+                    vuln_mixin.VulnerabilityLocationMetadata(
+                        metadata_type=vuln_mixin.MetadataType.PORT, value=port
+                    )
+                )
         elif isinstance(ports, Dict):
-            port = ports.get('@portid', '')
-            ret.append(vuln_mixin.VulnerabilityLocationMetadata(
-                metadata_type=vuln_mixin.MetadataType.PORT,
-                value=port))
+            port = ports.get("@portid", "")
+            ret.append(
+                vuln_mixin.VulnerabilityLocationMetadata(
+                    metadata_type=vuln_mixin.MetadataType.PORT, value=port
+                )
+            )
         return ret
 
-    def _emit_network_scan_finding(self, scan_results: Dict[str, Any], normal_results: str) -> None:
+    def _emit_network_scan_finding(
+        self, scan_results: Dict[str, Any], normal_results: str
+    ) -> None:
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
-            technical_detail = f'{scan_result_technical_detail}\n```xml\n{normal_results}\n```'
-            host = scan_results.get('nmaprun', {}).get('host', {})
-            domains = host.get('hostnames', {})
-            ports = host.get('ports', {}).get('port', '')
-            address = host.get('address', '')
+            technical_detail = (
+                f"{scan_result_technical_detail}\n```xml\n{normal_results}\n```"
+            )
+            host = scan_results.get("nmaprun", {}).get("host", {})
+            domains = host.get("hostnames", {})
+            ports = host.get("ports", {}).get("port", "")
+            address = host.get("address", "")
             if domains:
-                domains = domains.get('hostname', {})
+                domains = domains.get("hostname", {})
                 if isinstance(domains, List):
                     for domain_dict in domains:
-                        domain = domain_dict.get('@name', '')
-                        self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
-                                                  technical_detail=technical_detail,
-                                                  risk_rating=vuln_mixin.RiskRating.INFO,
-                                                  vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                                      metadata=self._prepare_metadata(ports),
-                                                      asset=domain_name_asset.DomainName(name=domain)
-                                                  ))
+                        domain = domain_dict.get("@name", "")
+                        self.report_vulnerability(
+                            entry=kb.KB.NETWORK_PORT_SCAN,
+                            technical_detail=technical_detail,
+                            risk_rating=vuln_mixin.RiskRating.INFO,
+                            vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                metadata=self._prepare_metadata(ports),
+                                asset=domain_name_asset.DomainName(name=domain),
+                            ),
+                        )
                 elif isinstance(domains, dict):
-                    domain = domains.get('@name', '')
-                    self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
-                                              technical_detail=technical_detail,
-                                              risk_rating=vuln_mixin.RiskRating.INFO,
-                                              vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                                  metadata=self._prepare_metadata(ports),
-                                                  asset=domain_name_asset.DomainName(name=domain)
-                                              ))
-            elif address.get('@addrtype', '') == 'ipv4':
-                self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
-                                          technical_detail=technical_detail,
-                                          risk_rating=vuln_mixin.RiskRating.INFO,
-                                          vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                              metadata=self._prepare_metadata(ports),
-                                              asset=ipv4_asset.IPv4(host=address.get('@addr', ''))
-                                          ))
-            elif address.get('@addrtype', '') == 'ipv6':
-                self.report_vulnerability(entry=kb.KB.NETWORK_PORT_SCAN,
-                                          technical_detail=technical_detail,
-                                          risk_rating=vuln_mixin.RiskRating.INFO,
-                                          vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                              metadata=self._prepare_metadata(ports),
-                                              asset=ipv6_asset.IPv6(host=address.get('@addr', ''))
-                                          ))
+                    domain = domains.get("@name", "")
+                    self.report_vulnerability(
+                        entry=kb.KB.NETWORK_PORT_SCAN,
+                        technical_detail=technical_detail,
+                        risk_rating=vuln_mixin.RiskRating.INFO,
+                        vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                            metadata=self._prepare_metadata(ports),
+                            asset=domain_name_asset.DomainName(name=domain),
+                        ),
+                    )
+            elif address.get("@addrtype", "") == "ipv4":
+                self.report_vulnerability(
+                    entry=kb.KB.NETWORK_PORT_SCAN,
+                    technical_detail=technical_detail,
+                    risk_rating=vuln_mixin.RiskRating.INFO,
+                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                        metadata=self._prepare_metadata(ports),
+                        asset=ipv4_asset.IPv4(host=address.get("@addr", "")),
+                    ),
+                )
+            elif address.get("@addrtype", "") == "ipv6":
+                self.report_vulnerability(
+                    entry=kb.KB.NETWORK_PORT_SCAN,
+                    technical_detail=technical_detail,
+                    risk_rating=vuln_mixin.RiskRating.INFO,
+                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                        metadata=self._prepare_metadata(ports),
+                        asset=ipv6_asset.IPv6(host=address.get("@addr", "")),
+                    ),
+                )
 
-    def _emit_services(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
-        logger.info('sending results to %s', domain_name)
-        if (scan_results is not None and
-                scan_results.get('nmaprun') is not None and
-                scan_results['nmaprun'].get('host') is not None):
+    def _emit_services(
+        self, scan_results: Dict[str, Any], domain_name: Optional[str]
+    ) -> None:
+        logger.info("sending results to %s", domain_name)
+        if (
+            scan_results is not None
+            and scan_results.get("nmaprun") is not None
+            and scan_results["nmaprun"].get("host") is not None
+        ):
 
-            up_hosts = scan_results['nmaprun'].get('host', [])
+            up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]
 
             for host in up_hosts:
-                version = host.get('address', {}).get('@addrtype')
-                address = host.get('address', {}).get('@addr')
-                if version == 'ipv4':
-                    selector = 'v3.asset.ip.v4.port.service'
-                    self.set_add(b'agent_nmap_asset', f'{address}/32')
-                elif version == 'ipv6':
-                    selector = 'v3.asset.ip.v6.port.service'
-                    self.set_add(b'agent_nmap_asset', f'{address}/64')
+                version = host.get("address", {}).get("@addrtype")
+                address = host.get("address", {}).get("@addr")
+                if version == "ipv4":
+                    selector = "v3.asset.ip.v4.port.service"
+                    self.set_add(b"agent_nmap_asset", f"{address}/32")
+                elif version == "ipv6":
+                    selector = "v3.asset.ip.v6.port.service"
+                    self.set_add(b"agent_nmap_asset", f"{address}/64")
                 else:
-                    raise ValueError(f'Incorrect ip version {version}')
+                    raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
-                    logger.info('sending results to selector %s', selector)
+                    logger.info("sending results to selector %s", selector)
                     self.emit(selector, data)
                     if domain_name is not None:
-                        domain_name_service = {'name': domain_name, 'port': data.get('port'),
-                                               'schema': data.get('service')}
-                        logger.info('sending results to selector domain service selector')
-                        self.emit('v3.asset.domain_name.service', domain_name_service)
+                        domain_name_service = {
+                            "name": domain_name,
+                            "port": data.get("port"),
+                            "schema": data.get("service"),
+                        }
+                        logger.info(
+                            "sending results to selector domain service selector"
+                        )
+                        self.emit("v3.asset.domain_name.service", domain_name_service)
 
-    def _emit_fingerprints(self, scan_results: Dict[str, Any], domain_name: Optional[str]) -> None:
-        logger.info('sending results to %s', domain_name)
-        if (scan_results is not None and
-                scan_results.get('nmaprun') is not None and
-                scan_results['nmaprun'].get('host') is not None):
+    def _emit_fingerprints(
+        self, scan_results: Dict[str, Any], domain_name: Optional[str]
+    ) -> None:
+        logger.info("sending results to %s", domain_name)
+        if (
+            scan_results is not None
+            and scan_results.get("nmaprun") is not None
+            and scan_results["nmaprun"].get("host") is not None
+        ):
 
-            up_hosts = scan_results['nmaprun'].get('host', [])
+            up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]
 
             for host in up_hosts:
-                version = host.get('address', {}).get('@addrtype')
-                address = host.get('address', {}).get('@addr')
-                if version == 'ipv4':
-                    selector = 'v3.fingerprint.ip.v4.service.library'
+                version = host.get("address", {}).get("@addrtype")
+                address = host.get("address", {}).get("@addr")
+                if version == "ipv4":
+                    selector = "v3.fingerprint.ip.v4.service.library"
                     default_mask = 32
-                    self.set_add(b'agent_nmap_asset', f'{address}/32')
-                elif version == 'ipv6':
-                    selector = 'v3.fingerprint.ip.v6.service.library'
+                    self.set_add(b"agent_nmap_asset", f"{address}/32")
+                elif version == "ipv6":
+                    selector = "v3.fingerprint.ip.v6.service.library"
                     default_mask = 128
-                    self.set_add(b'agent_nmap_asset', f'{address}/64')
+                    self.set_add(b"agent_nmap_asset", f"{address}/64")
                 else:
-                    raise ValueError(f'Incorrect ip version {version}')
+                    raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
-                    if data.get('banner') is not None:
-                        logger.info('sending results to selector %s', selector)
+                    if data.get("banner") is not None:
+                        logger.info("sending results to selector %s", selector)
                         fingerprint_data = {
-                            'host': data.get('host'),
-                            'mask': data.get('mask', str(default_mask)),
-                            'version': data.get('version'),
-                            'library_type': 'BACKEND_COMPONENT',
-                            'service': data.get('service'),
-                            'port': data.get('port'),
-                            'protocol': data.get('protocol'),
-                            'library_name': data.get('banner'),
-                            'detail': data.get('banner'),
+                            "host": data.get("host"),
+                            "mask": data.get("mask", str(default_mask)),
+                            "version": data.get("version"),
+                            "library_type": "BACKEND_COMPONENT",
+                            "service": data.get("service"),
+                            "port": data.get("port"),
+                            "protocol": data.get("protocol"),
+                            "library_name": data.get("banner"),
+                            "detail": data.get("banner"),
                         }
                         self.emit(selector, fingerprint_data)
 
 
-if __name__ == '__main__':
-    logger.info('starting agent ...')
+if __name__ == "__main__":
+    logger.info("starting agent ...")
     NmapAgent.main()

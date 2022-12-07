@@ -9,8 +9,8 @@ import xmltodict
 
 from agent import nmap_options
 
-XML_OUTPUT_PATH = '/tmp/xmloutput'
-NORMAL_OUTPUT_PATH = '/tmp/normal'
+XML_OUTPUT_PATH = "/tmp/xmloutput"
+NORMAL_OUTPUT_PATH = "/tmp/normal"
 
 logger = logging.getLogger(__name__)
 
@@ -52,17 +52,19 @@ class NmapWrapper:
         """
         ip_version = ipaddress.ip_address(host).version
         if ip_version == 6:
-            hosts_and_mask = f'-6 {host}/{mask}'
+            hosts_and_mask = f"-6 {host}/{mask}"
         else:
-            hosts_and_mask = f'{host}/{mask}'
+            hosts_and_mask = f"{host}/{mask}"
 
-        command = ['nmap',
-                   *self._options.command_options,
-                   '-oX',
-                   XML_OUTPUT_PATH,
-                   '-oN',
-                   NORMAL_OUTPUT_PATH,
-                   hosts_and_mask]
+        command = [
+            "nmap",
+            *self._options.command_options,
+            "-oX",
+            XML_OUTPUT_PATH,
+            "-oN",
+            NORMAL_OUTPUT_PATH,
+            hosts_and_mask,
+        ]
         return command
 
     def _construct_command_domain(self, domain_name: str) -> List[str]:
@@ -75,13 +77,15 @@ class NmapWrapper:
         Returns:
             list of the arguments that will be used to run the scan process.
         """
-        command = ['nmap',
-                   *self._options.command_options,
-                   '-oX',
-                   XML_OUTPUT_PATH,
-                   '-oN',
-                   NORMAL_OUTPUT_PATH,
-                   domain_name]
+        command = [
+            "nmap",
+            *self._options.command_options,
+            "-oX",
+            XML_OUTPUT_PATH,
+            "-oN",
+            NORMAL_OUTPUT_PATH,
+            domain_name,
+        ]
         return command
 
     def scan_hosts(self, hosts: str, mask: int) -> Tuple[Dict[str, Any], str]:
@@ -94,15 +98,15 @@ class NmapWrapper:
         Returns:
             result of the scan.
         """
-        logger.info('running the nmap scan')
+        logger.info("running the nmap scan")
         command = self._construct_command_host(hosts, mask)
 
         subprocess.run(command, check=True)
 
-        with open(XML_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+        with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:
             scan_results = _parse_output(o.read())
 
-        with open(NORMAL_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+        with open(NORMAL_OUTPUT_PATH, "r", encoding="utf-8") as o:
             normal_results = o.read()
 
         return scan_results, normal_results
@@ -116,14 +120,14 @@ class NmapWrapper:
         Returns:
             result of the scan.
         """
-        logger.info('running the nmap scan')
+        logger.info("running the nmap scan")
         command = self._construct_command_domain(domain_name)
         subprocess.run(command, check=True)
 
-        with open(XML_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+        with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:
             scan_results = _parse_output(o.read())
 
-        with open(NORMAL_OUTPUT_PATH, 'r', encoding='utf-8') as o:
+        with open(NORMAL_OUTPUT_PATH, "r", encoding="utf-8") as o:
             normal_results = o.read()
 
         return scan_results, normal_results
