@@ -5,8 +5,9 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 import ipaddress
 import logging
-from typing import Dict, Any, Tuple, Optional, List
 from urllib import parse
+import re
+from typing import Dict, Any, Tuple, Optional, List
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.kb import kb
@@ -48,6 +49,7 @@ class NmapAgent(
         agent.Agent.__init__(self, agent_definition, agent_settings)
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
+        self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -107,6 +109,9 @@ class NmapAgent(
             if not self.set_add(b"agent_nmap_asset", domain_name):
                 logger.info("target %s was processed before, exiting", domain_name)
                 return
+            if self._is_domain_in_scope(self._scope_domain_regex, domain_name) is False:
+                return
+
             scan_results, normal_results = self._scan_domain(domain_name)
             logger.info("scan results %s", scan_results)
 
@@ -148,6 +153,22 @@ class NmapAgent(
         logger.info("scanning domain %s with options %s", domain_name, options)
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
+
+    def _is_domain_in_scope(
+        self, scope_domain_regex: Optional[str], domain: str
+    ) -> bool:
+        if scope_domain_regex is None:
+            return True
+        domain_in_scope = re.match(scope_domain_regex, domain) is not None
+        if not domain_in_scope:
+            logger.warning(
+                "Domain %s is not in scanning scope %s",
+                domain,
+                scope_domain_regex,
+            )
+            return False
+        else:
+            return False
 
     def _prepare_domain_name(
         self, domain_name: Optional[str], url: Optional[str]
