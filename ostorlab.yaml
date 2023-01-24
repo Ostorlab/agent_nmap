@@ -111,3 +111,6 @@ args:
     type: "int"
     description: "When scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
     value: 120
+  - name: "scope_domain_regex"
+    type: "string"
+    description: "Regular expression to define domain scanning scope."

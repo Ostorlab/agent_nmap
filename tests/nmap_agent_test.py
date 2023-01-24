@@ -603,3 +603,52 @@ def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
             )
             == 2
         )
+
+
+def testNmapAgent_withDomainScopeArgAndLinkMessageInScope_reportVulnerabilities(
+    agent_mock: List[message.Message],
+    nmap_agent_with_scope_arg: nmap_agent.NmapAgent,
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+    fake_output: None | Dict[str, str],
+) -> None:
+    """Ensure the domain scope argument is enforced, and urls in the scope should be scanned."""
+    del agent_persist_mock
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.link",
+        data={"url": "https://a.b.c.ostorlab.co", "method": "GET"},
+    )
+
+    nmap_agent_with_scope_arg.process(msg)
+
+    assert (
+        len([msg for msg in agent_mock if msg.selector == "v3.report.vulnerability"])
+        == 2
+    )
+
+
+def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeScanned(
+    agent_mock: List[message.Message],
+    nmap_agent_with_scope_arg: nmap_agent.NmapAgent,
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+    fake_output: None | Dict[str, str],
+) -> None:
+    """Ensure the domain scope argument is enforced, and urls in the scope should be scanned."""
+    del agent_persist_mock
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.link",
+        data={"url": "https://www.google.com", "method": "GET"},
+    )
+
+    nmap_agent_with_scope_arg.process(msg)
+
+    assert len(agent_mock) == 0
