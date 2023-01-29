@@ -287,7 +287,16 @@ class NmapAgent(
 
                 for data in generators.get_services(scan_results):
                     logger.info("sending results to selector %s", selector)
-                    self.emit(selector, data)
+                    ip_service = {
+                        "host": data.get("host"),
+                        "version": data.get("version"),
+                        "port": data.get("port"),
+                        "protocol": data.get("protocol"),
+                        "state": data.get("state"),
+                        "service": data.get("service"),
+                        "banner": data.get("banner"),
+                    }
+                    self.emit(selector, ip_service)
                     if domain_name is not None:
                         domain_name_service = {
                             "name": domain_name,
@@ -328,6 +337,20 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
+                    if data.get("product") is not None:
+                        logger.info("sending results to selector %s", selector)
+                        fingerprint_data = {
+                            "host": data.get("host"),
+                            "mask": data.get("mask", str(default_mask)),
+                            "version": data.get("version"),
+                            "library_type": "BACKEND_COMPONENT",
+                            "service": data.get("service"),
+                            "port": data.get("port"),
+                            "protocol": data.get("protocol"),
+                            "library_name": data.get("product"),
+                            "detail": data.get("product"),
+                        }
+                        self.emit(selector, fingerprint_data)
                     if data.get("banner") is not None:
                         logger.info("sending results to selector %s", selector)
                         fingerprint_data = {
@@ -342,6 +365,35 @@ class NmapAgent(
                             "detail": data.get("banner"),
                         }
                         self.emit(selector, fingerprint_data)
+                    if domain_name is not None:
+                        if data.get("product") is not None:
+                            msg_data = {
+                                "name": domain_name,
+                                "port": data.get("port"),
+                                "schema": "",
+                                "library_name": data.get("product"),
+                                "library_version": "",
+                                "library_type": "BACKEND_COMPONENT",
+                                "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
+                            }
+                            self.emit(
+                                selector="v3.fingerprint.domain_name.service.library",
+                                data=msg_data,
+                            )
+                        if data.get("banner") is not None:
+                            msg_data = {
+                                "name": domain_name,
+                                "port": data.get("port"),
+                                "schema": "",
+                                "library_name": data.get("banner"),
+                                "library_version": "",
+                                "library_type": "BACKEND_COMPONENT",
+                                "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
+                            }
+                            self.emit(
+                                selector="v3.fingerprint.domain_name.service.library",
+                                data=msg_data,
+                            )
 
 
 if __name__ == "__main__":
