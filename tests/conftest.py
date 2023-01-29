@@ -33,6 +33,16 @@ def fake_output_range() -> Any:
         return xmltodict.parse(o.read())
 
 
+@pytest.fixture
+def fake_output_product() -> Any:
+    with open(
+        os.path.join(os.path.dirname(__file__), "nmap_product_output.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
 @pytest.fixture(scope="function")
 def nmap_agent_with_scope_arg(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]]

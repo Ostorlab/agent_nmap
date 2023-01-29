@@ -69,7 +69,7 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 2
+        assert len(agent_mock) == 3
         assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
         assert agent_mock[1].selector == "v3.report.vulnerability"
         assert agent_mock[1].data["risk_rating"] == "INFO"
@@ -107,7 +107,7 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 2
+        assert len(agent_mock) == 3
         assert agent_mock[1].selector == "v3.report.vulnerability"
         assert agent_mock[1].data["risk_rating"] == "INFO"
         assert agent_mock[1].data["title"] == "Network Port Scan"
@@ -139,7 +139,7 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 3
+        assert len(agent_mock) == 5
         assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
 
         assert agent_mock[1].selector == "v3.asset.domain_name.service"
@@ -179,7 +179,7 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 7
+        assert len(agent_mock) == 10
         # check string in banner
         assert "Dummy Banner 1" in agent_mock[0].data["banner"]
         assert "Dummy Banner 2" in agent_mock[1].data["banner"]
@@ -220,7 +220,7 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 10
+        assert len(agent_mock) == 18
         # check string in banner
         assert "Dummy Banner 1" in agent_mock[0].data["banner"]
         assert "Dummy Banner 2" in agent_mock[2].data["banner"]
@@ -251,7 +251,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
 
         test_agent.process(msg)
 
-        assert len(agent_mock) == 10
+        assert len(agent_mock) == 18
         # check string in banner
         assert agent_mock[1].selector == "v3.asset.domain_name.service"
         assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
@@ -488,7 +488,7 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
         test_agent.process(msg)
 
         # 4 is count of IPs in a /30.
-        assert len(agent_mock) == 7 * 4
+        assert len(agent_mock) == 10 * 4
         # check string in banner
         assert "Dummy Banner 1" in agent_mock[0].data["banner"]
         assert "Dummy Banner 2" in agent_mock[1].data["banner"]
@@ -521,7 +521,7 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
         )
         test_agent.process(msg)
         # first scan must pass.
-        assert len(agent_mock) == 8
+        assert len(agent_mock) == 12
 
         # subnet /27 of /24.
         msg = message.Message.from_data(
@@ -530,7 +530,7 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
         )
         test_agent.process(msg)
         # scan subnet must not send any extra messages.
-        assert len(agent_mock) == 8
+        assert len(agent_mock) == 12
 
 
 def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
@@ -652,3 +652,43 @@ def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeSc
     nmap_agent_with_scope_arg.process(msg)
 
     assert len(agent_mock) == 0
+
+
+def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+    fake_output_product: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output_product, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
+    )
+    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(
+            key="agent/ostorlab/nmap",
+            redis_url="redis://redis",
+        )
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+
+        test_agent.process(msg)
+
+        # 4 is count of IPs in a /30.
+        assert len(agent_mock) == 9
+        assert (
+            any(
+                m.selector == "v3.fingerprint.domain_name.service.library"
+                for m in agent_mock
+            )
+            is True
+        )
+        assert (
+            any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
+        )
