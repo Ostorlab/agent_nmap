@@ -384,7 +384,7 @@ class NmapAgent(
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),
-                                "schema": "",
+                                "schema": data.get("service"),
                                 "library_name": data.get("banner"),
                                 "library_version": "",
                                 "library_type": "BACKEND_COMPONENT",
