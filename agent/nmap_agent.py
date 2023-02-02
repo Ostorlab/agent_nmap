@@ -5,18 +5,18 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 import ipaddress
 import logging
-from urllib import parse
 import re
 from typing import Dict, Any, Tuple, Optional, List
+from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
+from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.assets import ipv4 as ipv4_asset
 from ostorlab.assets import ipv6 as ipv6_asset
-from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -42,9 +42,9 @@ class NmapAgent(
     For more visit https://github.com/Ostorlab/ostorlab."""
 
     def __init__(
-        self,
-        agent_definition: agent_definitions.AgentDefinition,
-        agent_settings: runtime_definitions.AgentSettings,
+            self,
+            agent_definition: agent_definitions.AgentDefinition,
+            agent_settings: runtime_definitions.AgentSettings,
     ) -> None:
         agent.Agent.__init__(self, agent_definition, agent_settings)
         vuln_mixin.AgentReportVulnMixin.__init__(self)
@@ -69,7 +69,7 @@ class NmapAgent(
             max_mask = int(self.args.get("max_network_mask_ipv4", "32"))
             if mask < max_mask:
                 for subnet in ipaddress.ip_network(f"{host}/{mask}").subnets(
-                    new_prefix=max_mask
+                        new_prefix=max_mask
                 ):
                     hosts.append((str(subnet.network_address), max_mask))
             else:
@@ -79,7 +79,7 @@ class NmapAgent(
             max_mask = int(self.args.get("max_network_mask_ipv6", "64"))
             if mask < max_mask:
                 for subnet in ipaddress.ip_network(f"{host}/{mask}").subnets(
-                    new_prefix=max_mask
+                        new_prefix=max_mask
                 ):
                     hosts.append((str(subnet.network_address), max_mask))
             else:
@@ -92,8 +92,8 @@ class NmapAgent(
         if len(hosts) > 0:
             for host, mask in hosts:
                 if not self.add_ip_network(
-                    b"agent_nmap_asset",
-                    ipaddress.ip_network(f"{host}/{mask}", strict=False),
+                        b"agent_nmap_asset",
+                        ipaddress.ip_network(f"{host}/{mask}", strict=False),
                 ):
                     logger.info(
                         "target %s/%s was processed before, exiting", host, mask
@@ -170,7 +170,7 @@ class NmapAgent(
             return True
 
     def _prepare_domain_name(
-        self, domain_name: Optional[str], url: Optional[str]
+            self, domain_name: Optional[str], url: Optional[str]
     ) -> Optional[str]:
         """Prepare domain name based on type, if a url is provided, return its domain."""
         if domain_name is not None:
@@ -181,7 +181,7 @@ class NmapAgent(
             return None
 
     def _prepare_metadata(
-        self, ports: Dict[str, Any] | List[Dict[str, Any]]
+            self, ports: Dict[str, Any] | List[Dict[str, Any]]
     ) -> List[vuln_mixin.VulnerabilityLocationMetadata]:
         ret = []
         if isinstance(ports, List):
@@ -202,7 +202,7 @@ class NmapAgent(
         return ret
 
     def _emit_network_scan_finding(
-        self, scan_results: Dict[str, Any], normal_results: str
+            self, scan_results: Dict[str, Any], normal_results: str
     ) -> None:
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
@@ -260,13 +260,13 @@ class NmapAgent(
                 )
 
     def _emit_services(
-        self, scan_results: Dict[str, Any], domain_name: Optional[str]
+            self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
         logger.info("sending results to %s", domain_name)
         if (
-            scan_results is not None
-            and scan_results.get("nmaprun") is not None
-            and scan_results["nmaprun"].get("host") is not None
+                scan_results is not None
+                and scan_results.get("nmaprun") is not None
+                and scan_results["nmaprun"].get("host") is not None
         ):
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
@@ -301,6 +301,7 @@ class NmapAgent(
                             "name": domain_name,
                             "port": data.get("port"),
                             "schema": data.get("service"),
+                            "state": data.get("state")
                         }
                         logger.info(
                             "sending results to selector domain service selector"
@@ -308,13 +309,13 @@ class NmapAgent(
                         self.emit("v3.asset.domain_name.service", domain_name_service)
 
     def _emit_fingerprints(
-        self, scan_results: Dict[str, Any], domain_name: Optional[str]
+            self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
         logger.info("sending results to %s", domain_name)
         if (
-            scan_results is not None
-            and scan_results.get("nmaprun") is not None
-            and scan_results["nmaprun"].get("host") is not None
+                scan_results is not None
+                and scan_results.get("nmaprun") is not None
+                and scan_results["nmaprun"].get("host") is not None
         ):
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
