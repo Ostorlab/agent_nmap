@@ -369,9 +369,9 @@ class NmapAgent(
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),
-                                "schema": "",
+                                "schema": data.get("service"),
                                 "library_name": data.get("product"),
-                                "library_version": "",
+                                "library_version": None,
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
                             }
@@ -385,7 +385,7 @@ class NmapAgent(
                                 "port": data.get("port"),
                                 "schema": data.get("service"),
                                 "library_name": data.get("banner"),
-                                "library_version": "",
+                                "library_version": None,
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
                             }

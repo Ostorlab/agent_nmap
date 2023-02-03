@@ -692,7 +692,7 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
         )
         assert (
             all(
-                m.data.get("schema") is not None
+                m.data.get("schema") is not None and m.data.get("schema") != ''
                 for m in agent_mock
                 if m.selector == "v3.fingerprint.domain_name.service.library"
             )
