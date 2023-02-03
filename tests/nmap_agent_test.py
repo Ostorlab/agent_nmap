@@ -706,14 +706,14 @@ def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
-    fake_output_2: None | Dict[str, str],
+    fake_output_with_down_host: None | Dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
-        return_value=(fake_output_2, HUMAN_OUTPUT),
+        return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
     )
     with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)
@@ -733,14 +733,14 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
-    fake_output_2: None | Dict[str, str],
+    fake_output_with_down_host: None | Dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
-        return_value=(fake_output_2, HUMAN_OUTPUT),
+        return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
     )
     with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
         definition = agent_definitions.AgentDefinition.from_yaml(o)

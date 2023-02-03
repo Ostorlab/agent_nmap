@@ -24,9 +24,9 @@ def fake_output() -> Any:
 
 
 @pytest.fixture
-def fake_output_2() -> Any:
+def fake_output_with_down_host() -> Any:
     with open(
-        os.path.join(os.path.dirname(__file__), "fake_output_2.xml"),
+        os.path.join(os.path.dirname(__file__), "fake_output_with_down_host.xml"),
         "r",
         encoding="utf-8",
     ) as o:
