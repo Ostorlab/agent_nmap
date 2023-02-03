@@ -5,18 +5,18 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 import ipaddress
 import logging
-from urllib import parse
 import re
 from typing import Dict, Any, Tuple, Optional, List
+from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
+from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.assets import ipv4 as ipv4_asset
 from ostorlab.assets import ipv6 as ipv6_asset
-from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -301,6 +301,7 @@ class NmapAgent(
                             "name": domain_name,
                             "port": data.get("port"),
                             "schema": data.get("service"),
+                            "state": data.get("state"),
                         }
                         logger.info(
                             "sending results to selector domain service selector"
@@ -368,9 +369,9 @@ class NmapAgent(
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),
-                                "schema": "",
+                                "schema": data.get("service"),
                                 "library_name": data.get("product"),
-                                "library_version": "",
+                                "library_version": None,
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
                             }
@@ -384,7 +385,7 @@ class NmapAgent(
                                 "port": data.get("port"),
                                 "schema": data.get("service"),
                                 "library_name": data.get("banner"),
-                                "library_version": "",
+                                "library_version": None,
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
                             }

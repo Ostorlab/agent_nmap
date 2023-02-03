@@ -146,6 +146,7 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
         assert agent_mock[1].data["name"] == "test.ostorlab.co"
         assert agent_mock[1].data["port"] == 21
         assert agent_mock[1].data["schema"] == "ssh"
+        assert agent_mock[1].data["state"] == "open"
 
         assert agent_mock[2].selector == "v3.report.vulnerability"
         assert agent_mock[2].data["risk_rating"] == "INFO"
@@ -691,7 +692,7 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
         )
         assert (
             all(
-                m.data.get("schema") is not None
+                m.data.get("schema") is not None and m.data.get("schema") != ""
                 for m in agent_mock
                 if m.selector == "v3.fingerprint.domain_name.service.library"
             )
