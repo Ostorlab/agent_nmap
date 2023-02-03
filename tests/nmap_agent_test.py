@@ -146,6 +146,7 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
         assert agent_mock[1].data["name"] == "test.ostorlab.co"
         assert agent_mock[1].data["port"] == 21
         assert agent_mock[1].data["schema"] == "ssh"
+        assert agent_mock[1].data["state"] == "open"
 
         assert agent_mock[2].selector == "v3.report.vulnerability"
         assert agent_mock[2].data["risk_rating"] == "INFO"
