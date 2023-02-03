@@ -212,7 +212,7 @@ class NmapAgent(
             host = scan_results.get("nmaprun", {}).get("host", {})
             domains = host.get("hostnames", {})
             ports = host.get("ports", {}).get("port", "")
-            address = host.get("address", "")
+            address = host.get("address", {})
             if domains:
                 domains = domains.get("hostname", {})
                 if isinstance(domains, List):
@@ -268,7 +268,6 @@ class NmapAgent(
             and scan_results.get("nmaprun") is not None
             and scan_results["nmaprun"].get("host") is not None
         ):
-
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]
@@ -317,7 +316,6 @@ class NmapAgent(
             and scan_results.get("nmaprun") is not None
             and scan_results["nmaprun"].get("host") is not None
         ):
-
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]

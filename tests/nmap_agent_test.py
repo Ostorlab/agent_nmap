@@ -700,3 +700,30 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
         assert (
             any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
         )
+
+
+def testNmapAgent_whenAdressDoseNotExist_shouldNotRaisAnError(
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+    fake_output_2: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_output_2, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.ip.v4",
+        data={"version": 4, "host": "127.0.0.1", "mask": "32"},
+    )
+    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
+        definition = agent_definitions.AgentDefinition.from_yaml(o)
+        settings = runtime_definitions.AgentSettings(
+            key="agent/ostorlab/nmap", redis_url="redis://redis"
+        )
+        test_agent = nmap_agent.NmapAgent(definition, settings)
+        test_agent.process(msg)
+        assert len(agent_mock) == 0
