@@ -248,7 +248,6 @@ class NmapAgent(
             and scan_results.get("nmaprun") is not None
             and scan_results["nmaprun"].get("host") is not None
         ):
-
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]
@@ -288,7 +287,6 @@ class NmapAgent(
             and scan_results.get("nmaprun") is not None
             and scan_results["nmaprun"].get("host") is not None
         ):
-
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]
