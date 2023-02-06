@@ -13,7 +13,6 @@ from pytest_mock import plugin
 from agent import nmap_agent
 from agent import nmap_options
 
-OSTORLAB_YAML_PATH = (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").absolute()
 
 JSON_OUTPUT = {
     "nmaprun": {
@@ -470,3 +469,106 @@ def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
         len([msg for msg in agent_mock if msg.selector == "v3.report.vulnerability"])
         == 2
     )
+
+
+def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeScanned(
+    agent_mock: List[message.Message],
+    nmap_agent_with_scope_arg: nmap_agent.NmapAgent,
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+    fake_output: None | Dict[str, str],
+) -> None:
+    """Ensure the domain scope argument is enforced, and urls in the scope should be scanned."""
+    del agent_persist_mock
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.link",
+        data={"url": "https://www.google.com", "method": "GET"},
+    )
+
+    nmap_agent_with_scope_arg.process(msg)
+
+    assert len(agent_mock) == 0
+
+
+def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_product: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output_product, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    # 4 is count of IPs in a /30.
+    assert len(agent_mock) == 9
+    assert (
+        any(
+            m.selector == "v3.fingerprint.domain_name.service.library"
+            for m in agent_mock
+        )
+        is True
+    )
+    assert (
+        all(
+            m.data.get("schema") is not None and m.data.get("schema") != ""
+            for m in agent_mock
+            if m.selector == "v3.fingerprint.domain_name.service.library"
+        )
+        is True
+    )
+    assert any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
+
+
+def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_with_down_host: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv4_msg)
+
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_is_down_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_with_down_host: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_is_down_msg)
+
+    assert len(agent_mock) == 0

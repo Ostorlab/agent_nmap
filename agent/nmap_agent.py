@@ -5,6 +5,7 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 """
 import ipaddress
 import logging
+import re
 from typing import Dict, Any, Tuple, Optional, List
 from urllib import parse
 
@@ -13,9 +14,9 @@ from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
 from ostorlab.agent.mixins import agent_report_vulnerability_mixin as vuln_mixin
+from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.assets import ipv4 as ipv4_asset
 from ostorlab.assets import ipv6 as ipv6_asset
-from ostorlab.assets import domain_name as domain_name_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
@@ -48,6 +49,7 @@ class NmapAgent(
         agent.Agent.__init__(self, agent_definition, agent_settings)
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
+        self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -107,6 +109,9 @@ class NmapAgent(
             if not self.set_add(b"agent_nmap_asset", domain_name):
                 logger.info("target %s was processed before, exiting", domain_name)
                 return
+            if self._is_domain_in_scope(domain_name) is False:
+                return
+
             scan_results, normal_results = self._scan_domain(domain_name)
             logger.info("scan results %s", scan_results)
 
@@ -148,6 +153,21 @@ class NmapAgent(
         logger.info("scanning domain %s with options %s", domain_name, options)
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
+
+    def _is_domain_in_scope(self, domain: str) -> bool:
+        """Check if a domain is in the scan scope with a regular expression."""
+        if self._scope_domain_regex is None:
+            return True
+        domain_in_scope = re.match(self._scope_domain_regex, domain)
+        if domain_in_scope is None:
+            logger.warning(
+                "Domain %s is not in scanning scope %s",
+                domain,
+                self._scope_domain_regex,
+            )
+            return False
+        else:
+            return True
 
     def _prepare_domain_name(
         self, domain_name: Optional[str], url: Optional[str]
@@ -192,7 +212,7 @@ class NmapAgent(
             host = scan_results.get("nmaprun", {}).get("host", {})
             domains = host.get("hostnames", {})
             ports = host.get("ports", {}).get("port", "")
-            address = host.get("address", "")
+            address = host.get("address", {})
             if domains:
                 domains = domains.get("hostname", {})
                 if isinstance(domains, List):
@@ -266,12 +286,22 @@ class NmapAgent(
 
                 for data in generators.get_services(scan_results):
                     logger.info("sending results to selector %s", selector)
-                    self.emit(selector, data)
+                    ip_service = {
+                        "host": data.get("host"),
+                        "version": data.get("version"),
+                        "port": data.get("port"),
+                        "protocol": data.get("protocol"),
+                        "state": data.get("state"),
+                        "service": data.get("service"),
+                        "banner": data.get("banner"),
+                    }
+                    self.emit(selector, ip_service)
                     if domain_name is not None:
                         domain_name_service = {
                             "name": domain_name,
                             "port": data.get("port"),
                             "schema": data.get("service"),
+                            "state": data.get("state"),
                         }
                         logger.info(
                             "sending results to selector domain service selector"
@@ -306,6 +336,20 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
+                    if data.get("product") is not None:
+                        logger.info("sending results to selector %s", selector)
+                        fingerprint_data = {
+                            "host": data.get("host"),
+                            "mask": data.get("mask", str(default_mask)),
+                            "version": data.get("version"),
+                            "library_type": "BACKEND_COMPONENT",
+                            "service": data.get("service"),
+                            "port": data.get("port"),
+                            "protocol": data.get("protocol"),
+                            "library_name": data.get("product"),
+                            "detail": data.get("product"),
+                        }
+                        self.emit(selector, fingerprint_data)
                     if data.get("banner") is not None:
                         logger.info("sending results to selector %s", selector)
                         fingerprint_data = {
@@ -320,6 +364,35 @@ class NmapAgent(
                             "detail": data.get("banner"),
                         }
                         self.emit(selector, fingerprint_data)
+                    if domain_name is not None:
+                        if data.get("product") is not None:
+                            msg_data = {
+                                "name": domain_name,
+                                "port": data.get("port"),
+                                "schema": data.get("service"),
+                                "library_name": data.get("product"),
+                                "library_version": None,
+                                "library_type": "BACKEND_COMPONENT",
+                                "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
+                            }
+                            self.emit(
+                                selector="v3.fingerprint.domain_name.service.library",
+                                data=msg_data,
+                            )
+                        if data.get("banner") is not None:
+                            msg_data = {
+                                "name": domain_name,
+                                "port": data.get("port"),
+                                "schema": data.get("service"),
+                                "library_name": data.get("banner"),
+                                "library_version": None,
+                                "library_type": "BACKEND_COMPONENT",
+                                "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
+                            }
+                            self.emit(
+                                selector="v3.fingerprint.domain_name.service.library",
+                                data=msg_data,
+                            )
 
 
 if __name__ == "__main__":

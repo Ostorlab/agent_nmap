@@ -1,6 +1,7 @@
 """Pytest fixture for the nmap agent."""
 import os
 import pathlib
+import json
 from typing import Any, Dict, Union
 
 import pytest
@@ -24,9 +25,28 @@ def fake_output() -> Any:
 
 
 @pytest.fixture
+def fake_output_with_down_host() -> Any:
+    with open(
+        os.path.join(os.path.dirname(__file__), "fake_output_with_down_host.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
+@pytest.fixture
 def fake_output_range() -> Any:
     with open(
         os.path.join(os.path.dirname(__file__), "fake_output_range.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
+def fake_output_product() -> Any:
+    with open(
+        os.path.join(os.path.dirname(__file__), "nmap_product_output.xml"),
         "r",
         encoding="utf-8",
     ) as o:
@@ -71,6 +91,14 @@ def link_msg() -> message.Message:
 
 @pytest.fixture
 def domain_msg() -> message.Message:
+    """Creates a dummy message of type v3.asset.domain_name for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
+    )
+
+
+@pytest.fixture
+def domain_is_down_msg() -> message.Message:
     """Creates a dummy message of type v3.asset.domain_name for testing purposes."""
     return message.Message.from_data(
         selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
@@ -128,3 +156,25 @@ def nmap_test_agent_with_scripts_arg(
 
         agent = nmap_agent.NmapAgent(definition, settings)
         return agent
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_with_scope_arg(
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]]
+) -> nmap_agent.NmapAgent:
+    """Nmap Agent fixture with  domain scope argument for testing purposes."""
+    del agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        agent_definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        agent_settings = runtime_definitions.AgentSettings(
+            key="nmap",
+            redis_url="redis://redis",
+            args=[
+                utils_definitions.Arg(
+                    name="scope_domain_regex",
+                    type="string",
+                    value=json.dumps(".*ostorlab.co").encode(),
+                ),
+            ],
+        )
+        return nmap_agent.NmapAgent(agent_definition, agent_settings)
