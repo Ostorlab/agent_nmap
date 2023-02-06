@@ -2,7 +2,7 @@
 import os
 import pathlib
 import json
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, List
 
 import pytest
 import xmltodict
@@ -44,6 +44,7 @@ def fake_output_range() -> Any:
         return xmltodict.parse(o.read())
 
 
+@pytest.fixture
 def fake_output_product() -> Any:
     with open(
         os.path.join(os.path.dirname(__file__), "nmap_product_output.xml"),
@@ -107,7 +108,8 @@ def domain_is_down_msg() -> message.Message:
 
 @pytest.fixture(scope="function", name="nmap_test_agent")
 def fixture_agent(
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]]
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
@@ -128,7 +130,8 @@ def fixture_agent(
 
 @pytest.fixture(scope="function")
 def nmap_test_agent_with_scripts_arg(
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]]
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
@@ -160,7 +163,8 @@ def nmap_test_agent_with_scripts_arg(
 
 @pytest.fixture(scope="function")
 def nmap_agent_with_scope_arg(
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]]
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
 ) -> nmap_agent.NmapAgent:
     """Nmap Agent fixture with  domain scope argument for testing purposes."""
     del agent_persist_mock

@@ -1,12 +1,9 @@
 """Unittests for Nmap agent."""
 import json
-import pathlib
 from typing import List, Dict, Union
 
 import requests_mock as rq_mock
-from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent.message import message
-from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.utils import defintions as utils_definitions
 from pytest_mock import plugin
 
@@ -60,7 +57,7 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
 
     nmap_test_agent.process(ipv4_msg)
 
-    assert len(agent_mock) == 2
+    assert len(agent_mock) == 3
     assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
     assert agent_mock[1].selector == "v3.report.vulnerability"
     assert agent_mock[1].data["risk_rating"] == "INFO"
@@ -90,7 +87,7 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
 
     nmap_test_agent.process(ipv4_msg)
 
-    assert len(agent_mock) == 2
+    assert len(agent_mock) == 3
     assert agent_mock[1].selector == "v3.report.vulnerability"
     assert agent_mock[1].data["risk_rating"] == "INFO"
     assert agent_mock[1].data["title"] == "Network Port Scan"
@@ -114,7 +111,7 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
 
     nmap_test_agent.process(link_msg)
 
-    assert len(agent_mock) == 3
+    assert len(agent_mock) == 5
     assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
 
     assert agent_mock[1].selector == "v3.asset.domain_name.service"
@@ -146,7 +143,7 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
     nmap_test_agent.process(ipv4_msg)
 
-    assert len(agent_mock) == 7
+    assert len(agent_mock) == 10
     # check string in banner
     assert "Dummy Banner 1" in agent_mock[0].data["banner"]
     assert "Dummy Banner 2" in agent_mock[1].data["banner"]
@@ -180,7 +177,7 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
     nmap_test_agent.process(domain_msg)
 
-    assert len(agent_mock) == 10
+    assert len(agent_mock) == 18
     # check string in banner
     assert "Dummy Banner 1" in agent_mock[0].data["banner"]
     assert "Dummy Banner 2" in agent_mock[2].data["banner"]
@@ -204,7 +201,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
 
     nmap_test_agent.process(domain_msg)
 
-    assert len(agent_mock) == 10
+    assert len(agent_mock) == 18
     # check string in banner
     assert agent_mock[1].selector == "v3.asset.domain_name.service"
     assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
@@ -374,7 +371,7 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
     nmap_test_agent.process(ipv4_msg2)
 
     # 4 is count of IPs in a /30.
-    assert len(agent_mock) == 7 * 4
+    assert len(agent_mock) == 10 * 4
     # check string in banner
     assert "Dummy Banner 1" in agent_mock[0].data["banner"]
     assert "Dummy Banner 2" in agent_mock[1].data["banner"]
@@ -398,7 +395,7 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
 
     nmap_test_agent.process(ipv4_msg_with_mask)
     # first scan must pass.
-    assert len(agent_mock) == 8
+    assert len(agent_mock) == 12
 
     # subnet /27 of /24.
     msg = message.Message.from_data(
@@ -409,7 +406,7 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
     nmap_test_agent.process(msg)
 
     # scan subnet must not send any extra messages.
-    assert len(agent_mock) == 8
+    assert len(agent_mock) == 12
 
 
 def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
