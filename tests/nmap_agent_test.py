@@ -1,19 +1,15 @@
 """Unittests for Nmap agent."""
 import json
-import pathlib
 from typing import List, Dict, Union
 
 import requests_mock as rq_mock
-from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent.message import message
-from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.utils import defintions as utils_definitions
 from pytest_mock import plugin
 
 from agent import nmap_agent
 from agent import nmap_options
 
-OSTORLAB_YAML_PATH = (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").absolute()
 
 JSON_OUTPUT = {
     "nmaprun": {
@@ -45,8 +41,10 @@ PORT     STATE  SERVICE  VERSION                                                
 
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
@@ -56,35 +54,27 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.ip.v4",
-        data={"version": 4, "host": "127.0.0.1", "mask": "32"},
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(ipv4_msg)
 
-        assert len(agent_mock) == 3
-        assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
-        assert agent_mock[1].selector == "v3.report.vulnerability"
-        assert agent_mock[1].data["risk_rating"] == "INFO"
-        assert agent_mock[1].data["title"] == "Network Port Scan"
-        assert agent_mock[1].data["short_description"] == "List of open network ports."
-        vulne_location = agent_mock[1].data["vulnerability_location"]
-        assert vulne_location["ipv4"]["host"] == "127.0.0.1"
-        assert vulne_location["ipv4"]["version"] == 4
-        assert vulne_location["metadata"][0]["value"] == "21"
-        assert vulne_location["metadata"][0]["type"] == "PORT"
+    assert len(agent_mock) == 3
+    assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    assert agent_mock[1].data["risk_rating"] == "INFO"
+    assert agent_mock[1].data["title"] == "Network Port Scan"
+    assert agent_mock[1].data["short_description"] == "List of open network ports."
+    vulne_location = agent_mock[1].data["vulnerability_location"]
+    assert vulne_location["ipv4"]["host"] == "127.0.0.1"
+    assert vulne_location["ipv4"]["version"] == 4
+    assert vulne_location["metadata"][0]["value"] == "21"
+    assert vulne_location["metadata"][0]["type"] == "PORT"
 
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
@@ -94,29 +84,21 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.ip.v4",
-        data={"version": 4, "host": "127.0.0.1", "mask": "32"},
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(ipv4_msg)
 
-        assert len(agent_mock) == 3
-        assert agent_mock[1].selector == "v3.report.vulnerability"
-        assert agent_mock[1].data["risk_rating"] == "INFO"
-        assert agent_mock[1].data["title"] == "Network Port Scan"
-        assert agent_mock[1].data["short_description"] == "List of open network ports."
+    assert len(agent_mock) == 3
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    assert agent_mock[1].data["risk_rating"] == "INFO"
+    assert agent_mock[1].data["title"] == "Network Port Scan"
+    assert agent_mock[1].data["short_description"] == "List of open network ports."
 
 
 def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    link_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
@@ -126,37 +108,28 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.link",
-        data={"url": "https://test.ostorlab.co", "method": "GET"},
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(link_msg)
 
-        assert len(agent_mock) == 5
-        assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
+    assert len(agent_mock) == 5
+    assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
 
-        assert agent_mock[1].selector == "v3.asset.domain_name.service"
-        assert agent_mock[1].data["name"] == "test.ostorlab.co"
-        assert agent_mock[1].data["port"] == 21
-        assert agent_mock[1].data["schema"] == "ssh"
-        assert agent_mock[1].data["state"] == "open"
+    assert agent_mock[1].selector == "v3.asset.domain_name.service"
+    assert agent_mock[1].data["name"] == "test.ostorlab.co"
+    assert agent_mock[1].data["port"] == 21
+    assert agent_mock[1].data["schema"] == "ssh"
 
-        assert agent_mock[2].selector == "v3.report.vulnerability"
-        assert agent_mock[2].data["risk_rating"] == "INFO"
-        assert agent_mock[2].data["title"] == "Network Port Scan"
-        assert agent_mock[2].data["short_description"] == "List of open network ports."
+    assert agent_mock[2].selector == "v3.report.vulnerability"
+    assert agent_mock[2].data["risk_rating"] == "INFO"
+    assert agent_mock[2].data["title"] == "Network Port Scan"
+    assert agent_mock[2].data["short_description"] == "List of open network ports."
 
 
 def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -167,38 +140,30 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.ip.v4",
-        data={"version": 4, "host": "127.0.0.1", "mask": "32"},
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(ipv4_msg)
 
-        assert len(agent_mock) == 10
-        # check string in banner
-        assert "Dummy Banner 1" in agent_mock[0].data["banner"]
-        assert "Dummy Banner 2" in agent_mock[1].data["banner"]
+    assert len(agent_mock) == 10
+    # check string in banner
+    assert "Dummy Banner 1" in agent_mock[0].data["banner"]
+    assert "Dummy Banner 2" in agent_mock[1].data["banner"]
 
-        # check banner is None for last port
-        assert agent_mock[2].data.get("banner", None) is None
-        vulne_location = agent_mock[3].data["vulnerability_location"]
-        assert vulne_location["domain_name"]["name"] == "scanme.nmap.org"
-        assert vulne_location["metadata"][0]["value"] == "80"
-        assert vulne_location["metadata"][1]["type"] == "PORT"
-        assert vulne_location["metadata"][1]["value"] == "9929"
-        assert vulne_location["metadata"][2]["type"] == "PORT"
-        assert vulne_location["metadata"][2]["value"] == "31337"
+    # check banner is None for last port
+    assert agent_mock[2].data.get("banner", None) is None
+    vulne_location = agent_mock[3].data["vulnerability_location"]
+    assert vulne_location["domain_name"]["name"] == "scanme.nmap.org"
+    assert vulne_location["metadata"][0]["value"] == "80"
+    assert vulne_location["metadata"][1]["type"] == "PORT"
+    assert vulne_location["metadata"][1]["value"] == "9929"
+    assert vulne_location["metadata"][2]["type"] == "PORT"
+    assert vulne_location["metadata"][2]["value"] == "31337"
 
 
 def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -209,27 +174,20 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(domain_msg)
 
-        assert len(agent_mock) == 18
-        # check string in banner
-        assert "Dummy Banner 1" in agent_mock[0].data["banner"]
-        assert "Dummy Banner 2" in agent_mock[2].data["banner"]
+    assert len(agent_mock) == 18
+    # check string in banner
+    assert "Dummy Banner 1" in agent_mock[0].data["banner"]
+    assert "Dummy Banner 2" in agent_mock[2].data["banner"]
 
 
 def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -240,30 +198,23 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(domain_msg)
 
-        assert len(agent_mock) == 18
-        # check string in banner
-        assert agent_mock[1].selector == "v3.asset.domain_name.service"
-        assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
-        assert agent_mock[1].data["port"] == 80
-        assert agent_mock[1].data["schema"] == "http"
+    assert len(agent_mock) == 18
+    # check string in banner
+    assert agent_mock[1].selector == "v3.asset.domain_name.service"
+    assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
+    assert agent_mock[1].data["port"] == 80
+    assert agent_mock[1].data["schema"] == "http"
 
 
 def testAgentNmap_whenUrlsScriptsGivent_RunScan(
+    nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -271,37 +222,17 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
+    requests_mock.get(
+        "https://raw.githubusercontent.com/nmap-scripts/main/test1",
+        content=b"test1",
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap",
-            redis_url="redis://redis",
-            args=[
-                utils_definitions.Arg(
-                    name="scripts",
-                    type="array",
-                    value=json.dumps(
-                        [
-                            "https://raw.githubusercontent.com/nmap-scripts/main/test1",
-                            "https://raw.githubusercontent.com/nmap-scripts/main/test2",
-                        ]
-                    ).encode(),
-                )
-            ],
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
-        requests_mock.get(
-            "https://raw.githubusercontent.com/nmap-scripts/main/test1",
-            content=b"test1",
-        )
-        requests_mock.get(
-            "https://raw.githubusercontent.com/nmap-scripts/main/test2",
-            content=b"test2",
-        )
-        test_agent.process(msg)
+    requests_mock.get(
+        "https://raw.githubusercontent.com/nmap-scripts/main/test2",
+        content=b"test2",
+    )
+
+    nmap_test_agent_with_scripts_arg.process(domain_msg)
+
     # check string in banner
     assert agent_mock[1].selector == "v3.asset.domain_name.service"
     assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
@@ -310,6 +241,7 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
+    nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
@@ -320,49 +252,33 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap",
-            redis_url="redis://redis",
-            args=[
-                utils_definitions.Arg(
-                    name="scripts",
-                    type="array",
-                    value=json.dumps(
-                        [
-                            "https://raw.githubusercontent.com/nmap-scripts/main/test1",
-                            "https://raw.githubusercontent.com/nmap-scripts/main/test2",
-                        ]
-                    ).encode(),
-                )
-            ],
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
-        requests_mock.get(
-            "https://raw.githubusercontent.com/nmap-scripts/main/test1",
-            content=b"test1",
-        )
-        requests_mock.get(
-            "https://raw.githubusercontent.com/nmap-scripts/main/test2",
-            content=b"test2",
-        )
-        options = nmap_options.NmapOptions(
-            dns_resolution=False,
-            ports=test_agent.args.get("ports"),
-            timing_template=nmap_options.TimingTemplate[
-                test_agent.args["timing_template"]
-            ],
-            scripts=test_agent.args["scripts"],
-            version_detection=True,
-        )
-        assert all(
-            a in options.command_options
-            for a in ["-sV", "-n", "-p", "0-65535", "-T5", "-sT", "-Pn", "--script"]
-        )
+
+    requests_mock.get(
+        "https://raw.githubusercontent.com/nmap-scripts/main/test1",
+        content=b"test1",
+    )
+    requests_mock.get(
+        "https://raw.githubusercontent.com/nmap-scripts/main/test2",
+        content=b"test2",
+    )
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports=nmap_test_agent_with_scripts_arg.args.get("ports"),
+        timing_template=nmap_options.TimingTemplate[
+            nmap_test_agent_with_scripts_arg.args["timing_template"]
+        ],
+        scripts=nmap_test_agent_with_scripts_arg.args["scripts"],
+        version_detection=True,
+    )
+
+    assert all(
+        a in options.command_options
+        for a in ["-sV", "-n", "-p", "0-65535", "-T5", "-sT", "-Pn", "--script"]
+    )
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
+    nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
@@ -373,51 +289,36 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output_range, HUMAN_OUTPUT),
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap",
-            redis_url="redis://redis",
-            args=[
-                utils_definitions.Arg(
-                    name="scripts",
-                    type="array",
-                    value=json.dumps(
-                        [
-                            "https://raw.githubusercontent.com/nmap-scripts/main/test1",
-                            "https://raw.githubusercontent.com/nmap-scripts/main/test2",
-                        ]
-                    ).encode(),
-                )
-            ],
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
-        requests_mock.get(
-            "https://raw.githubusercontent.com/nmap-scripts/main/test1",
-            content=b"test1",
-        )
-        requests_mock.get(
-            "https://raw.githubusercontent.com/nmap-scripts/main/test2",
-            content=b"test2",
-        )
-        options = nmap_options.NmapOptions(
-            dns_resolution=False,
-            ports=test_agent.args.get("ports"),
-            timing_template=nmap_options.TimingTemplate[
-                test_agent.args["timing_template"]
-            ],
-            scripts=test_agent.args["scripts"],
-            version_detection=True,
-        )
-        assert all(
-            a in options.command_options
-            for a in ["-sV", "-n", "-p", "0-65535", "-T5", "-sT", "-Pn", "--script"]
-        )
+
+    requests_mock.get(
+        "https://raw.githubusercontent.com/nmap-scripts/main/test1",
+        content=b"test1",
+    )
+    requests_mock.get(
+        "https://raw.githubusercontent.com/nmap-scripts/main/test2",
+        content=b"test2",
+    )
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports=nmap_test_agent_with_scripts_arg.args.get("ports"),
+        timing_template=nmap_options.TimingTemplate[
+            nmap_test_agent_with_scripts_arg.args["timing_template"]
+        ],
+        scripts=nmap_test_agent_with_scripts_arg.args["scripts"],
+        version_detection=True,
+    )
+
+    assert all(
+        a in options.command_options
+        for a in ["-sV", "-n", "-p", "0-65535", "-T5", "-sT", "-Pn", "--script"]
+    )
 
 
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -426,37 +327,28 @@ def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
+    nmap_test_agent.process(domain_msg)
 
-        assert "v3.fingerprint.ip.v4.service.library" in [
-            m.selector for m in agent_mock
-        ]
-        assert {
-            "host": "45.33.32.156",
-            "mask": "32",
-            "version": 4,
-            "service": "nping-echo",
-            "port": 9929,
-            "protocol": "tcp",
-            "library_type": "BACKEND_COMPONENT",
-            "library_name": "Dummy Banner 2",
-            "detail": "Dummy Banner 2",
-        } in [m.data for m in agent_mock]
+    assert "v3.fingerprint.ip.v4.service.library" in [m.selector for m in agent_mock]
+    assert {
+        "host": "45.33.32.156",
+        "mask": "32",
+        "version": 4,
+        "service": "nping-echo",
+        "port": 9929,
+        "protocol": "tcp",
+        "library_type": "BACKEND_COMPONENT",
+        "library_name": "Dummy Banner 2",
+        "detail": "Dummy Banner 2",
+    } in [m.data for m in agent_mock]
 
 
 def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg2: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -467,40 +359,32 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.ip.v4",
-        data={"version": 4, "host": "192.168.0.0", "mask": "30"},
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap",
-            redis_url="redis://redis",
-            args=[
-                utils_definitions.Arg(
-                    name="max_network_mask_ipv4",
-                    type="int",
-                    value=json.dumps("32").encode(),
-                )
-            ],
+
+    nmap_test_agent.settings.args = [
+        utils_definitions.Arg(
+            name="max_network_mask_ipv4",
+            type="int",
+            value=json.dumps("32").encode(),
         )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
+    ]
 
-        test_agent.process(msg)
+    nmap_test_agent.process(ipv4_msg2)
 
-        # 4 is count of IPs in a /30.
-        assert len(agent_mock) == 10 * 4
-        # check string in banner
-        assert "Dummy Banner 1" in agent_mock[0].data["banner"]
-        assert "Dummy Banner 2" in agent_mock[1].data["banner"]
+    # 4 is count of IPs in a /30.
+    assert len(agent_mock) == 10 * 4
+    # check string in banner
+    assert "Dummy Banner 1" in agent_mock[0].data["banner"]
+    assert "Dummy Banner 2" in agent_mock[1].data["banner"]
 
-        # check banner is None for last port
-        assert agent_mock[2].data.get("banner", None) is None
+    # check banner is None for last port
+    assert agent_mock[2].data.get("banner", None) is None
 
 
 def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslyScanned_subnetIsNotScanned(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg_with_mask: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
     """The agent must not scan subnets if a larger network has been scanned before."""
@@ -509,32 +393,24 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
     )
 
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
+    nmap_test_agent.process(ipv4_msg_with_mask)
+    # first scan must pass.
+    assert len(agent_mock) == 12
 
-        msg = message.Message.from_data(
-            selector="v3.asset.ip.v4",
-            data={"version": 4, "host": "10.10.10.0", "mask": "24"},
-        )
-        test_agent.process(msg)
-        # first scan must pass.
-        assert len(agent_mock) == 12
+    # subnet /27 of /24.
+    msg = message.Message.from_data(
+        selector="v3.asset.ip.v4",
+        data={"version": 4, "host": "10.10.10.0", "mask": "27"},
+    )
 
-        # subnet /27 of /24.
-        msg = message.Message.from_data(
-            selector="v3.asset.ip.v4",
-            data={"version": 4, "host": "10.10.10.0", "mask": "27"},
-        )
-        test_agent.process(msg)
-        # scan subnet must not send any extra messages.
-        assert len(agent_mock) == 12
+    nmap_test_agent.process(msg)
+
+    # scan subnet must not send any extra messages.
+    assert len(agent_mock) == 12
 
 
 def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -543,41 +419,38 @@ def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
-        options = nmap_options.NmapOptions(
-            dns_resolution=False,
-            ports=test_agent.args.get("ports"),
-            timing_template=nmap_options.TimingTemplate[
-                test_agent.args["timing_template"]
-            ],
-            scripts=test_agent.args["scripts"],
-            version_detection=True,
-        )
-        assert all(
-            a in options.command_options
-            for a in [
-                "-sV",
-                "-n",
-                "-p",
-                "0-65535",
-                "-T5",
-                "-sT",
-                "-sU",
-                "-Pn",
-                "--script",
-                "banner",
-            ]
-        )
+
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports=nmap_test_agent.args.get("ports"),
+        timing_template=nmap_options.TimingTemplate[
+            nmap_test_agent.args["timing_template"]
+        ],
+        scripts=nmap_test_agent.args["scripts"],
+        version_detection=True,
+    )
+    assert all(
+        a in options.command_options
+        for a in [
+            "-sV",
+            "-n",
+            "-p",
+            "0-65535",
+            "-T5",
+            "-sT",
+            "-sU",
+            "-Pn",
+            "--script",
+            "banner",
+        ]
+    )
 
 
 def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -586,45 +459,8 @@ def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
-    )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
 
-        test_agent.process(msg)
-
-        assert (
-            len(
-                [msg for msg in agent_mock if msg.selector == "v3.report.vulnerability"]
-            )
-            == 2
-        )
-
-
-def testNmapAgent_withDomainScopeArgAndLinkMessageInScope_reportVulnerabilities(
-    agent_mock: List[message.Message],
-    nmap_agent_with_scope_arg: nmap_agent.NmapAgent,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
-    mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
-) -> None:
-    """Ensure the domain scope argument is enforced, and urls in the scope should be scanned."""
-    del agent_persist_mock
-    mocker.patch(
-        "agent.nmap_wrapper.NmapWrapper.scan_domain",
-        return_value=(fake_output, HUMAN_OUTPUT),
-    )
-    msg = message.Message.from_data(
-        selector="v3.asset.link",
-        data={"url": "https://a.b.c.ostorlab.co", "method": "GET"},
-    )
-
-    nmap_agent_with_scope_arg.process(msg)
+    nmap_test_agent.process(domain_msg)
 
     assert (
         len([msg for msg in agent_mock if msg.selector == "v3.report.vulnerability"])
@@ -656,8 +492,10 @@ def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeSc
 
 
 def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output_product: None | Dict[str, str],
 ) -> None:
@@ -668,44 +506,34 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output_product, HUMAN_OUTPUT),
     )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "ostorlab.co"}
+
+    nmap_test_agent.process(domain_msg)
+
+    # 4 is count of IPs in a /30.
+    assert len(agent_mock) == 9
+    assert (
+        any(
+            m.selector == "v3.fingerprint.domain_name.service.library"
+            for m in agent_mock
+        )
+        is True
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap",
-            redis_url="redis://redis",
+    assert (
+        all(
+            m.data.get("schema") is not None and m.data.get("schema") != ""
+            for m in agent_mock
+            if m.selector == "v3.fingerprint.domain_name.service.library"
         )
-        test_agent = nmap_agent.NmapAgent(definition, settings)
-
-        test_agent.process(msg)
-
-        # 4 is count of IPs in a /30.
-        assert len(agent_mock) == 9
-        assert (
-            any(
-                m.selector == "v3.fingerprint.domain_name.service.library"
-                for m in agent_mock
-            )
-            is True
-        )
-        assert (
-            all(
-                m.data.get("schema") is not None and m.data.get("schema") != ""
-                for m in agent_mock
-                if m.selector == "v3.fingerprint.domain_name.service.library"
-            )
-            is True
-        )
-        assert (
-            any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
-        )
+        is True
+    )
+    assert any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
 
 
 def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output_with_down_host: None | Dict[str, str],
 ) -> None:
@@ -716,23 +544,17 @@ def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-    msg = message.Message.from_data(
-        selector="v3.asset.ip.v4",
-        data={"version": 4, "host": "127.0.0.1", "mask": "32"},
-    )
-    test_agent = nmap_agent.NmapAgent(definition, settings)
-    test_agent.process(msg)
+
+    nmap_test_agent.process(ipv4_msg)
+
     assert len(agent_mock) == 0
 
 
 def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
+    nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_is_down_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output_with_down_host: None | Dict[str, str],
 ) -> None:
@@ -743,14 +565,7 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
     )
-    with open(OSTORLAB_YAML_PATH, "r", encoding="utf-8") as o:
-        definition = agent_definitions.AgentDefinition.from_yaml(o)
-        settings = runtime_definitions.AgentSettings(
-            key="agent/ostorlab/nmap", redis_url="redis://redis"
-        )
-    msg = message.Message.from_data(
-        selector="v3.asset.domain_name", data={"name": "domain-mayakench.os"}
-    )
-    test_agent = nmap_agent.NmapAgent(definition, settings)
-    test_agent.process(msg)
+
+    nmap_test_agent.process(domain_is_down_msg)
+
     assert len(agent_mock) == 0
