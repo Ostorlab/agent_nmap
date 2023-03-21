@@ -49,10 +49,6 @@ class Error(Exception):
     """Base Custom Error Class."""
 
 
-class ScanAssetWithVpnError(Error):
-    """Scan network with a VPN Error."""
-
-
 class RunCommandError(Error):
     """Error when running a command using a subprocess."""
 
