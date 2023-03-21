@@ -4,10 +4,13 @@ The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back message
 `v3.asset.ip.v[4,6].port.service`, and `v3.report.vulnerability` with a technical report of the scan.
 """
 import ipaddress
+import datetime
 import logging
 import re
 from typing import Dict, Any, Tuple, Optional, List
 from urllib import parse
+import subprocess
+import pathlib
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.kb import kb
@@ -29,10 +32,50 @@ logging.basicConfig(
     format="%(message)s",
     datefmt="[%X]",
     handlers=[rich_logging.RichHandler(rich_tracebacks=True)],
-    level="INFO",
+    level="DEBUG",
     force=True,
 )
 logger = logging.getLogger(__name__)
+
+COMMAND_TIMEOUT = datetime.timedelta(minutes=5)
+
+
+# add wireguard config file here
+CONFIG_FILES_PATH = pathlib.Path("/app/agent/tools/wireguard/configs/")
+RESOLV_CONFIG_PATH = pathlib.Path("/app/agent/tools/wireguard/resolv/resolv.conf")
+
+# WANTED_COUNTRIES = ['CN', 'SA']
+# this the list of countries we would like to cover in the future.
+
+AVAILABLE_COUNTRIES = {
+    "US": "wg0_us.conf",
+    "BR": "wg0_br.conf",
+    "CA": "wg0_ca.conf",
+    "FR": "wg0_fr.conf",
+    "GB": "wg0_uk.conf",
+    "FI": "wg0_fi.conf",
+    "DE": "wg0_de.conf",
+    "IT": "wg0_it.conf",
+    "JP": "wg0_jp.conf",
+    "KR": "wg0_kr.conf",
+    "MX": "wg0_mx.conf",
+    "NL": "wg0_nl.conf",
+    "NO": "wg0_no.conf",
+    "CH": "wg0_ch.conf",
+    "AE": "wg0_ae.conf",
+}
+
+
+class Error(Exception):
+    """Base Custom Error Class."""
+
+
+class ScanAssetWithVpnError(Error):
+    """Scan network with a VPN Error."""
+
+
+class RunCommandError(Error):
+    """Error when running a command using a subprocess."""
 
 
 class NmapAgent(
@@ -50,6 +93,7 @@ class NmapAgent(
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
+        self._country_code: Optional[str] = self.args.get("country")
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -62,6 +106,10 @@ class NmapAgent(
         logger.info("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
+
+        # Connect to VPN
+        if self._country_code is not None:
+            self._connect_to_vpn()
 
         # Differentiate between a single IP mask in IPv4 and IPv6.
         if "v4" in message.selector:
@@ -393,6 +441,45 @@ class NmapAgent(
                                 selector="v3.fingerprint.domain_name.service.library",
                                 data=msg_data,
                             )
+
+    def _connect_to_vpn(self) -> None:
+        """Connect to VPN."""
+
+        logger.info("Trying to scan the asset with VPN")
+        try:
+            config_file = AVAILABLE_COUNTRIES.get(self._country_code)
+            if config_file is None:
+                raise ScanAssetWithVpnError("No country available to scan.")
+            config_path = CONFIG_FILES_PATH / config_file
+
+            self._exec_command(["cp", str(config_path), "/etc/wireguard/wg0.conf"])
+            self._exec_command(["wg-quick", "up", "wg0"])
+            self._exec_command(["cp", str(RESOLV_CONFIG_PATH), "/etc/resolv.conf"])
+            logger.info("connected with %s", config_path)
+
+        except RunCommandError as e:
+            logger.warning("%s", e)
+
+    def _exec_command(self, command: List[str]) -> None:
+        """Execute a command."""
+        try:
+            logger.info("%s", " ".join(command))
+            output = subprocess.run(
+                command,
+                capture_output=True,
+                timeout=COMMAND_TIMEOUT.seconds,
+                check=True,
+            )
+            logger.debug("process returned: %s", output.returncode)
+            logger.debug("output: %s", output.stdout)
+            logger.debug("err: %s", output.stderr)
+
+        except subprocess.CalledProcessError as e:
+            raise RunCommandError(
+                f'An error occurred while running the command {" ".join(command)}'
+            ) from e
+        except subprocess.TimeoutExpired:
+            logger.warning("Command timed out for command %s", " ".join(command))
 
 
 if __name__ == "__main__":

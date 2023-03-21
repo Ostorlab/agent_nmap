@@ -115,3 +115,6 @@ args:
   - name: "scope_domain_regex"
     type: "string"
     description: "Regular expression to define domain scanning scope."
+  - name: "country"
+    type: "string"
+    description: "Country code."
