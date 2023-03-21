@@ -115,3 +115,6 @@ args:
   - name: "scope_domain_regex"
     type: "string"
     description: "Regular expression to define domain scanning scope."
+  - name: "vpn_config"
+    type: "string"
+    description: "Vpn configuration."

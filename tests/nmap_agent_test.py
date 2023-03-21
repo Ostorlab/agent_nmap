@@ -10,7 +10,6 @@ from pytest_mock import plugin
 from agent import nmap_agent
 from agent import nmap_options
 
-
 JSON_OUTPUT = {
     "nmaprun": {
         "host": {
@@ -569,3 +568,41 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
     nmap_test_agent.process(domain_is_down_msg)
 
     assert len(agent_mock) == 0
+
+
+def testAgentLifecycle_whenScanRunsWithVpn_emitsBackMessagesAndVulnerability(
+    nmap_agent_with_vpn_config_arg: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agent scan with vpn, the agents emits back messages of type service, and of type vulnerability.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
+    )
+    exec_cmd_mock = mocker.patch("subprocess.run")
+    nmap_agent_with_vpn_config_arg.process(ipv4_msg)
+    # Test VPN
+    assert exec_cmd_mock.call_args_list[0][0] == (
+        ["cp", "./wg0.conf", "/etc/wireguard/wg0.conf"],
+    )
+    assert exec_cmd_mock.call_args_list[1][0] == (["wg-quick", "up", "wg0"],)
+    assert exec_cmd_mock.call_args_list[2][0] == (
+        ["cp", "/app/agent/resolv/resolv.conf", "/etc/resolv.conf"],
+    )
+    # Test Agent
+    assert len(agent_mock) == 3
+    assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    assert agent_mock[1].data["risk_rating"] == "INFO"
+    assert agent_mock[1].data["title"] == "Network Port Scan"
+    assert agent_mock[1].data["short_description"] == "List of open network ports."
+    vulne_location = agent_mock[1].data["vulnerability_location"]
+    assert vulne_location["ipv4"]["host"] == "127.0.0.1"
+    assert vulne_location["ipv4"]["version"] == 4
+    assert vulne_location["metadata"][0]["value"] == "21"
+    assert vulne_location["metadata"][0]["type"] == "PORT"
