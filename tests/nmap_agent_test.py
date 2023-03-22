@@ -585,8 +585,9 @@ def testAgentLifecycle_whenScanRunsWithVpn_emitsBackMessagesAndVulnerability(
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
     )
     exec_cmd_mock = mocker.patch("subprocess.run")
+
     nmap_agent_with_vpn_config_arg.process(ipv4_msg)
-    # Test VPN
+
     assert exec_cmd_mock.call_args_list[0][0] == (
         ["cp", "./wg0.conf", "/etc/wireguard/wg0.conf"],
     )
