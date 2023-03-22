@@ -32,16 +32,14 @@ logging.basicConfig(
     format="%(message)s",
     datefmt="[%X]",
     handlers=[rich_logging.RichHandler(rich_tracebacks=True)],
-    level="DEBUG",
+    level="INFO",
     force=True,
 )
 logger = logging.getLogger(__name__)
 
-COMMAND_TIMEOUT = datetime.timedelta(minutes=5)
+COMMAND_TIMEOUT = datetime.timedelta(minutes=1)
 
-
-# add wireguard config file here
-CONFIG_FILES_PATH = "./wg0.conf"
+WIREGUARD_CONFIG_FILE_PATH = "./wireguard.conf"
 RESOLV_CONFIG_PATH = pathlib.Path("/app/agent/resolv/resolv.conf")
 
 
@@ -69,6 +67,8 @@ class NmapAgent(
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
         self._vpn_config: Optional[str] = self.args.get("vpn_config")
+        if self._vpn_config is not None:
+            self._connect_to_vpn()
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -81,10 +81,6 @@ class NmapAgent(
         logger.info("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
-
-        # Connect to VPN
-        if self._vpn_config is not None:
-            self._connect_to_vpn()
 
         # Differentiate between a single IP mask in IPv4 and IPv6.
         if "v4" in message.selector:
