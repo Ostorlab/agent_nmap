@@ -577,8 +577,8 @@ def testAgentLifecycle_whenScanRunsWithVpn_emitsBackMessagesAndVulnerability(
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
-    the agent scan with vpn, the agents emits back messages of type service, and of type vulnerability.
+    """Unit test for the full life cycle of the agent: case where the  nmap scan runs without errors,
+    the agent scans with the vpn, the agent emits back messages of type service, and of type vulnerability.
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
