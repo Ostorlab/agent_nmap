@@ -118,3 +118,6 @@ args:
   - name: "vpn_config"
     type: "string"
     description: "Vpn configuration."
+  - name: "dns_config"
+    type: "string"
+    description: "DNS configuration."

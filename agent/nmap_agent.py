@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 COMMAND_TIMEOUT = datetime.timedelta(minutes=1)
 
 WIREGUARD_CONFIG_FILE_PATH = "./wireguard.conf"
-RESOLV_CONFIG_PATH = pathlib.Path("/app/agent/resolv/resolv.conf")
+DNS_RESOLV_CONFIG_PATH = "./resolv.conf"
 
 
 class Error(Exception):
@@ -67,7 +67,10 @@ class NmapAgent(
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
         self._vpn_config: Optional[str] = self.args.get("vpn_config")
-        if self._vpn_config is not None:
+        self._dns_config: Optional[str] = self.args.get("dns_config")
+
+    def start(self) -> None:
+        if self._vpn_config is not None and self._dns_config is not None:
             self._connect_to_vpn()
 
     def process(self, message: msg.Message) -> None:
@@ -417,13 +420,21 @@ class NmapAgent(
         """Connect to VPN."""
         logger.info("Trying to scan the asset with VPN")
         try:
-            with open(CONFIG_FILES_PATH, "w", encoding="UTF-8") as conf_file:
+            with open(WIREGUARD_CONFIG_FILE_PATH, "w", encoding="UTF-8") as conf_file:
+                conf_file.write(cast(str, self._vpn_config))
+            with open(DNS_RESOLV_CONFIG_PATH, "w", encoding="UTF-8") as conf_file:
                 conf_file.write(cast(str, self._vpn_config))
 
-            self._exec_command(["cp", CONFIG_FILES_PATH, "/etc/wireguard/wg0.conf"])
+            self._exec_command(
+                [
+                    "cp",
+                    WIREGUARD_CONFIG_FILE_PATH,
+                    "/etc/wireguard/wg0.conf",
+                ]
+            )
             self._exec_command(["wg-quick", "up", "wg0"])
-            self._exec_command(["cp", str(RESOLV_CONFIG_PATH), "/etc/resolv.conf"])
-            logger.info("connected with %s", CONFIG_FILES_PATH)
+            self._exec_command(["cp", DNS_RESOLV_CONFIG_PATH, "/etc/resolv.conf"])
+            logger.info("connected with %s", WIREGUARD_CONFIG_FILE_PATH)
 
         except RunCommandError as e:
             logger.warning("%s", e)

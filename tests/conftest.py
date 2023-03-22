@@ -29,6 +29,13 @@ AllowedIPs =
 Endpoint = 
 """
 
+DNS_CONFIG = """
+nameserver 127.0.0.11
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+"""
+
 
 @pytest.fixture
 def fake_output() -> Any:
@@ -217,6 +224,11 @@ def nmap_agent_with_vpn_config_arg(
                     name="vpn_config",
                     type="string",
                     value=json.dumps(VPN_CONFIG).encode(),
+                ),
+                utils_definitions.Arg(
+                    name="dns_config",
+                    type="string",
+                    value=json.dumps(DNS_CONFIG).encode(),
                 ),
             ],
         )
