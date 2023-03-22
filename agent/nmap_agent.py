@@ -419,10 +419,10 @@ class NmapAgent(
         """Connect to VPN."""
         logger.info("Trying to scan the asset with VPN")
         try:
-            with open(WIREGUARD_CONFIG_FILE_PATH, "w", encoding="UTF-8") as conf_file:
+            with open(WIREGUARD_CONFIG_FILE_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._vpn_config))
-            with open(DNS_RESOLV_CONFIG_PATH, "w", encoding="UTF-8") as conf_file:
-                conf_file.write(cast(str, self._vpn_config))
+            with open(DNS_RESOLV_CONFIG_PATH, "w", encoding="utf-8") as conf_file:
+                conf_file.write(cast(str, self._dns_config))
 
             self._exec_command(
                 [
@@ -449,8 +449,8 @@ class NmapAgent(
                 check=True,
             )
             logger.debug("process returned: %s", output.returncode)
-            logger.debug("output: %s", output.stdout)
-            logger.debug("err: %s", output.stderr)
+            logger.debug("output: %s", output.stdout.decode())
+            logger.debug("err: %s", output.stderr.decode())
 
         except subprocess.CalledProcessError as e:
             raise RunCommandError(
