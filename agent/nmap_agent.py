@@ -38,8 +38,8 @@ logger = logging.getLogger(__name__)
 
 COMMAND_TIMEOUT = datetime.timedelta(minutes=1)
 
-WIREGUARD_CONFIG_FILE_PATH = "./wireguard.conf"
-DNS_RESOLV_CONFIG_PATH = "./resolv.conf"
+WIREGUARD_CONFIG_FILE_PATH = "/etc/wireguard/wg0.conf"
+DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 
 
 class Error(Exception):
@@ -421,18 +421,12 @@ class NmapAgent(
         try:
             with open(WIREGUARD_CONFIG_FILE_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._vpn_config))
+
+            self._exec_command(["wg-quick", "up", "wg0"])
+
             with open(DNS_RESOLV_CONFIG_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._dns_config))
 
-            self._exec_command(
-                [
-                    "cp",
-                    WIREGUARD_CONFIG_FILE_PATH,
-                    "/etc/wireguard/wg0.conf",
-                ]
-            )
-            self._exec_command(["wg-quick", "up", "wg0"])
-            self._exec_command(["cp", DNS_RESOLV_CONFIG_PATH, "/etc/resolv.conf"])
             logger.info("connected with %s", WIREGUARD_CONFIG_FILE_PATH)
 
         except RunCommandError as e:

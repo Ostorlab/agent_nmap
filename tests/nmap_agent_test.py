@@ -581,6 +581,7 @@ def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
     the agent scans with the vpn, the agent emits back messages of type service, and of type vulnerability.
     """
     exec_cmd_mock = mocker.patch("agent.nmap_agent.NmapAgent._exec_command")
+    mocker.patch("builtins.open")
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
@@ -588,12 +589,4 @@ def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
 
     nmap_agent_with_vpn_config_arg.start()
 
-    assert (
-        " ".join(exec_cmd_mock.call_args_list[0][0][0])
-        == "cp ./wireguard.conf /etc/wireguard/wg0.conf"
-    )
-    assert " ".join(exec_cmd_mock.call_args_list[1][0][0]) == "wg-quick up wg0"
-    assert (
-        " ".join(exec_cmd_mock.call_args_list[2][0][0])
-        == "cp ./resolv.conf /etc/resolv.conf"
-    )
+    assert " ".join(exec_cmd_mock.call_args_list[0][0][0]) == "wg-quick up wg0"
