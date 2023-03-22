@@ -577,16 +577,17 @@ def testAgentLifecycle_whenScanRunsWithVpn_emitsBackMessagesAndVulnerability(
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
-    the agent scan with vpn, the agents emits back messages of type service, and of type vulnerability.
+    """Unit test for the full life cycle of the agent: case where the  nmap scan runs without errors,
+    the agent scans with the vpn, the agent emits back messages of type service, and of type vulnerability.
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_hosts",
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
     )
     exec_cmd_mock = mocker.patch("subprocess.run")
+
     nmap_agent_with_vpn_config_arg.process(ipv4_msg)
-    # Test VPN
+
     assert exec_cmd_mock.call_args_list[0][0] == (
         ["cp", "./wg0.conf", "/etc/wireguard/wg0.conf"],
     )
@@ -594,7 +595,6 @@ def testAgentLifecycle_whenScanRunsWithVpn_emitsBackMessagesAndVulnerability(
     assert exec_cmd_mock.call_args_list[2][0] == (
         ["cp", "/app/agent/resolv/resolv.conf", "/etc/resolv.conf"],
     )
-    # Test Agent
     assert len(agent_mock) == 3
     assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
     assert agent_mock[1].selector == "v3.report.vulnerability"
