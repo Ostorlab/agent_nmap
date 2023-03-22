@@ -595,7 +595,6 @@ def testAgentLifecycle_whenScanRunsWithVpn_emitsBackMessagesAndVulnerability(
     assert exec_cmd_mock.call_args_list[2][0] == (
         ["cp", "/app/agent/resolv/resolv.conf", "/etc/resolv.conf"],
     )
-    # Test Agent
     assert len(agent_mock) == 3
     assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
     assert agent_mock[1].selector == "v3.report.vulnerability"
