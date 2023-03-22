@@ -10,7 +10,6 @@ import re
 from typing import Dict, Any, Tuple, Optional, List, cast
 from urllib import parse
 import subprocess
-import pathlib
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.kb import kb
