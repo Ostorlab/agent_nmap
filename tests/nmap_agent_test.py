@@ -10,7 +10,6 @@ from pytest_mock import plugin
 from agent import nmap_agent
 from agent import nmap_options
 
-
 JSON_OUTPUT = {
     "nmaprun": {
         "host": {
@@ -569,3 +568,25 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
     nmap_test_agent.process(domain_is_down_msg)
 
     assert len(agent_mock) == 0
+
+
+def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
+    nmap_agent_with_vpn_config_arg: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unit test for the full life cycle of the agent: case where the  nmap scan runs without errors,
+    the agent scans with the vpn, the agent emits back messages of type service, and of type vulnerability.
+    """
+    exec_cmd_mock = mocker.patch("agent.nmap_agent.NmapAgent._exec_command")
+    mocker.patch("builtins.open")
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_vpn_config_arg.start()
+
+    assert " ".join(exec_cmd_mock.call_args_list[0][0][0]) == "wg-quick up wg0"

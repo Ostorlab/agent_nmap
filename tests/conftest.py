@@ -13,6 +13,29 @@ from ostorlab.utils import defintions as utils_definitions
 
 from agent import nmap_agent
 
+VPN_CONFIG = """[Interface]
+# Bouncing = 
+# NetShield = 
+# NAT modéré = 
+# NAT-PMP (transfert de port) =
+# VPN Accelerator = 
+PrivateKey = 
+Address = 
+DNS = \n
+[Peer]
+
+PublicKey =
+AllowedIPs = 
+Endpoint = 
+"""
+
+DNS_CONFIG = """
+nameserver 127.0.0.11
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+"""
+
 
 @pytest.fixture
 def fake_output() -> Any:
@@ -178,6 +201,34 @@ def nmap_agent_with_scope_arg(
                     name="scope_domain_regex",
                     type="string",
                     value=json.dumps(".*ostorlab.co").encode(),
+                ),
+            ],
+        )
+        return nmap_agent.NmapAgent(agent_definition, agent_settings)
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_with_vpn_config_arg(
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+) -> nmap_agent.NmapAgent:
+    """Nmap Agent fixture with  domain scope argument for testing purposes."""
+    del agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        agent_definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        agent_settings = runtime_definitions.AgentSettings(
+            key="nmap",
+            redis_url="redis://redis",
+            args=[
+                utils_definitions.Arg(
+                    name="vpn_config",
+                    type="string",
+                    value=json.dumps(VPN_CONFIG).encode(),
+                ),
+                utils_definitions.Arg(
+                    name="dns_config",
+                    type="string",
+                    value=json.dumps(DNS_CONFIG).encode(),
                 ),
             ],
         )
