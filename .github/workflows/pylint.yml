@@ -31,7 +31,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirement.txt
         python -m pip install -r tests/test-requirement.txt        
-        python -m pip install mypy types-click types-protobuf types-redis types-requests types-urllib3 typing_extensions
     - name: Running Black.
       uses: psf/black@stable
       with:

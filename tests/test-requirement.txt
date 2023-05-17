@@ -5,3 +5,12 @@ pytest-cov
 pytest-mock
 xmltodict
 requests-mock
+
+# Typing requirements. 
+mypy
+types-click
+types-protobuf
+types-redis
+types-requests
+types-urllib3
+typing-extensions
