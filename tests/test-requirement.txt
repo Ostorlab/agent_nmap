@@ -1,7 +1,6 @@
 pylint
 pylint-quotes
 pytest
-pytest-cov
 pytest-mock
 xmltodict
 requests-mock
