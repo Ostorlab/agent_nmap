@@ -233,3 +233,12 @@ def nmap_agent_with_vpn_config_arg(
             ],
         )
         return nmap_agent.NmapAgent(agent_definition, agent_settings)
+
+
+@pytest.fixture
+def junk_msg() -> message.Message:
+    """Creates a dummy message of type v3.asset.ip.v4 for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.ip",
+        data={"version": 4, "host": "0.0.0.0"},
+    )
