@@ -603,11 +603,6 @@ def testAgentNmap_whenNoHost_agentShouldNotCrash(
 
     parse_mock = mocker.patch("urllib.parse.urlparse")
 
-    mocker.patch(
-        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
-        return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
-    )
-
     nmap_test_agent.process(junk_msg)
 
     assert parse_mock.call_count == 0
