@@ -590,3 +590,19 @@ def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
     nmap_agent_with_vpn_config_arg.start()
 
     assert " ".join(exec_cmd_mock.call_args_list[0][0][0]) == "wg-quick up wg0"
+
+
+def testAgentNmap_whenNoHost_agentShouldNotCrash(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    junk_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unittest for making sure that the agent not crashing when no host provided."""
+
+    parse_mock = mocker.patch("urllib.parse.urlparse")
+
+    nmap_test_agent.process(junk_msg)
+
+    assert parse_mock.call_count == 0

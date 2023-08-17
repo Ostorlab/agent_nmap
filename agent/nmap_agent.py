@@ -140,7 +140,7 @@ class NmapAgent(
             self._emit_network_scan_finding(scan_results, normal_results)
             self._emit_fingerprints(scan_results, domain_name)
         else:
-            raise ValueError("not host or domain name are set")
+            logger.error("Neither host or domain are set.")
 
     def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(
