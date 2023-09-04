@@ -178,8 +178,8 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
     assert len(agent_mock) == 18
     # check string in banner
-    assert "Dummy Banner 1" in agent_mock[0].data["banner"]
-    assert "Dummy Banner 2" in agent_mock[2].data["banner"]
+    assert any("Dummy Banner 1" in m.data.get('banner', '') for m in agent_mock) is True
+    assert any("Dummy Banner 2" in m.data.get('banner', '') for m in agent_mock) is True
 
 
 def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(

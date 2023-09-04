@@ -95,7 +95,7 @@ args:
   - name: "timing_template"
     type: "string"
     description: "Template of timing settings (T0, T1, ... T5)."
-    value: "T5"
+    value: "T3"
   - name: "script_default"
     type: "bool"
     description: "Script scan, equivalent to --script=default"

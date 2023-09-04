@@ -283,12 +283,24 @@ class NmapAgent(
     def _emit_services(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.info("sending results to %s", domain_name)
+        logger.info("Services targeting domain `%s`.", domain_name)
         if (
             scan_results is not None
             and scan_results.get("nmaprun") is not None
-            and scan_results["nmaprun"].get("host") is not None
         ):
+            if domain_name is not None:
+                for data in generators.get_services(scan_results):
+                    domain_name_service = {
+                        "name": domain_name,
+                        "port": data.get("port"),
+                        "schema": data.get("service"),
+                        "state": data.get("state"),
+                    }
+                    logger.info(
+                        "Domain Service Identified %s.", domain_name_service
+                    )
+                    self.emit("v3.asset.domain_name.service", domain_name_service)
+
             up_hosts = scan_results["nmaprun"].get("host", [])
             if isinstance(up_hosts, dict):
                 up_hosts = [up_hosts]
@@ -306,7 +318,7 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
-                    logger.info("sending results to selector %s", selector)
+                    logger.info("Sending results to `%s`", selector)
                     ip_service = {
                         "host": data.get("host"),
                         "version": data.get("version"),
@@ -317,22 +329,11 @@ class NmapAgent(
                         "banner": data.get("banner"),
                     }
                     self.emit(selector, ip_service)
-                    if domain_name is not None:
-                        domain_name_service = {
-                            "name": domain_name,
-                            "port": data.get("port"),
-                            "schema": data.get("service"),
-                            "state": data.get("state"),
-                        }
-                        logger.info(
-                            "sending results to selector domain service selector"
-                        )
-                        self.emit("v3.asset.domain_name.service", domain_name_service)
 
     def _emit_fingerprints(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.info("sending results to %s", domain_name)
+        logger.info("Fingerprints targeting domain `%s`.", domain_name)
         if (
             scan_results is not None
             and scan_results.get("nmaprun") is not None
