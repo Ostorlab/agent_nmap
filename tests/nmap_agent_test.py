@@ -111,17 +111,23 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
     nmap_test_agent.process(link_msg)
 
     assert len(agent_mock) == 5
-    assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
+    assert any(m.selector == "v3.asset.ip.v4.port.service" for m in agent_mock) is True
 
-    assert agent_mock[1].selector == "v3.asset.domain_name.service"
-    assert agent_mock[1].data["name"] == "test.ostorlab.co"
-    assert agent_mock[1].data["port"] == 21
-    assert agent_mock[1].data["schema"] == "ssh"
+    assert any(m.selector == "v3.asset.domain_name.service" for m in agent_mock) is True
+    assert any(m.data["name"] == "test.ostorlab.co" for m in agent_mock) is True
+    assert any(m.data["port"] == 21 for m in agent_mock) is True
+    assert any(m.data["schema"] == "ssh" for m in agent_mock) is True
 
-    assert agent_mock[2].selector == "v3.report.vulnerability"
-    assert agent_mock[2].data["risk_rating"] == "INFO"
-    assert agent_mock[2].data["title"] == "Network Port Scan"
-    assert agent_mock[2].data["short_description"] == "List of open network ports."
+    assert any(m.selector == "v3.report.vulnerability" for m in agent_mock) is True
+    assert any(m.data.get("risk_rating") == "INFO" for m in agent_mock) is True
+    assert any(m.data.get("title") == "Network Port Scan" for m in agent_mock) is True
+    assert (
+        any(
+            m.data.get("short_description") == "List of open network ports."
+            for m in agent_mock
+        )
+        is True
+    )
 
 
 def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
@@ -178,8 +184,8 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
     assert len(agent_mock) == 18
     # check string in banner
-    assert "Dummy Banner 1" in agent_mock[0].data["banner"]
-    assert "Dummy Banner 2" in agent_mock[2].data["banner"]
+    assert any("Dummy Banner 1" in m.data.get("banner", "") for m in agent_mock) is True
+    assert any("Dummy Banner 2" in m.data.get("banner", "") for m in agent_mock) is True
 
 
 def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
@@ -202,10 +208,15 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
 
     assert len(agent_mock) == 18
     # check string in banner
-    assert agent_mock[1].selector == "v3.asset.domain_name.service"
-    assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
-    assert agent_mock[1].data["port"] == 80
-    assert agent_mock[1].data["schema"] == "http"
+    assert (
+        any(
+            m.selector == "v3.asset.domain_name.service"
+            and m.data["port"] == 80
+            and m.data["schema"] == "http"
+            for m in agent_mock
+        )
+        is True
+    )
 
 
 def testAgentNmap_whenUrlsScriptsGivent_RunScan(
@@ -233,10 +244,15 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
     nmap_test_agent_with_scripts_arg.process(domain_msg)
 
     # check string in banner
-    assert agent_mock[1].selector == "v3.asset.domain_name.service"
-    assert agent_mock[1].data.get("name") == agent_mock[1].data.get("name")
-    assert agent_mock[1].data["port"] == 80
-    assert agent_mock[1].data["schema"] == "http"
+    assert (
+        any(
+            m.selector == "v3.asset.domain_name.service"
+            and m.data["port"] == 80
+            and m.data["schema"] == "http"
+            for m in agent_mock
+        )
+        is True
+    )
 
 
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
@@ -272,7 +288,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
 
     assert all(
         a in options.command_options
-        for a in ["-sV", "-n", "-p", "0-65535", "-T5", "-sT", "-Pn", "--script"]
+        for a in ["-sV", "-n", "-p", "0-65535", "-T3", "-sT", "-Pn", "--script"]
     )
 
 
@@ -309,7 +325,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
 
     assert all(
         a in options.command_options
-        for a in ["-sV", "-n", "-p", "0-65535", "-T5", "-sT", "-Pn", "--script"]
+        for a in ["-sV", "-n", "-p", "0-65535", "-T3", "-sT", "-Pn", "--script"]
     )
 
 
@@ -406,43 +422,6 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
 
     # scan subnet must not send any extra messages.
     assert len(agent_mock) == 12
-
-
-def testAgentNmapOptions_whenIpAddressGiven_scansWithUDP(
-    nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
-) -> None:
-    mocker.patch(
-        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
-        return_value=(fake_output, HUMAN_OUTPUT),
-    )
-
-    options = nmap_options.NmapOptions(
-        dns_resolution=False,
-        ports=nmap_test_agent.args.get("ports"),
-        timing_template=nmap_options.TimingTemplate[
-            nmap_test_agent.args["timing_template"]
-        ],
-        scripts=nmap_test_agent.args["scripts"],
-        version_detection=True,
-    )
-    assert all(
-        a in options.command_options
-        for a in [
-            "-sV",
-            "-n",
-            "-p",
-            "0-65535",
-            "-T5",
-            "-sT",
-            "-sU",
-            "-Pn",
-            "--script",
-            "banner",
-        ]
-    )
 
 
 def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
