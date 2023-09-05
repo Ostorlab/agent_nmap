@@ -284,10 +284,7 @@ class NmapAgent(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
         logger.info("Services targeting domain `%s`.", domain_name)
-        if (
-            scan_results is not None
-            and scan_results.get("nmaprun") is not None
-        ):
+        if scan_results is not None and scan_results.get("nmaprun") is not None:
             if domain_name is not None:
                 for data in generators.get_services(scan_results):
                     domain_name_service = {
@@ -296,9 +293,7 @@ class NmapAgent(
                         "schema": data.get("service"),
                         "state": data.get("state"),
                     }
-                    logger.info(
-                        "Domain Service Identified %s.", domain_name_service
-                    )
+                    logger.info("Domain Service Identified %s.", domain_name_service)
                     self.emit("v3.asset.domain_name.service", domain_name_service)
 
             up_hosts = scan_results["nmaprun"].get("host", [])
