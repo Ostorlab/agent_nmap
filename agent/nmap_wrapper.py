@@ -52,9 +52,9 @@ class NmapWrapper:
         """
         ip_version = ipaddress.ip_address(host).version
         if ip_version == 6:
-            hosts_and_mask = f"-6 {host}/{mask}"
+            hosts_and_mask = ["-6", f"{host}/{mask}"]
         else:
-            hosts_and_mask = f"{host}/{mask}"
+            hosts_and_mask = [f"{host}/{mask}"]
 
         command = [
             "nmap",
@@ -63,7 +63,7 @@ class NmapWrapper:
             XML_OUTPUT_PATH,
             "-oN",
             NORMAL_OUTPUT_PATH,
-            hosts_and_mask,
+            *hosts_and_mask,
         ]
         return command
 
