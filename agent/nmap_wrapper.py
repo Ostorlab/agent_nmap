@@ -51,11 +51,6 @@ class NmapWrapper:
             list of the arguments that will be used to run the scan process.
         """
         ip_version = ipaddress.ip_address(host).version
-        if ip_version == 6:
-            hosts_and_mask = f"-6 {host}/{mask}"
-        else:
-            hosts_and_mask = f"{host}/{mask}"
-
         command = [
             "nmap",
             *self._options.command_options,
@@ -63,8 +58,10 @@ class NmapWrapper:
             XML_OUTPUT_PATH,
             "-oN",
             NORMAL_OUTPUT_PATH,
-            hosts_and_mask,
         ]
+        if ip_version == 6:
+            command.append("-6")
+        command.append(f"{host}/{mask}")
         return command
 
     def _construct_command_domain(self, domain_name: str) -> List[str]:
