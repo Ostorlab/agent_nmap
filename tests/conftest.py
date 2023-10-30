@@ -242,3 +242,16 @@ def junk_msg() -> message.Message:
         selector="v3.asset.ip",
         data={"version": 4, "host": "0.0.0.0"},
     )
+
+
+@pytest.fixture
+def ipv6_msg() -> message.Message:
+    """Creates a dummy message of type v3.asset.ip.v6 for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f",
+            "mask": "64",
+        },
+    )
