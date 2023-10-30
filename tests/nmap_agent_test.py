@@ -38,6 +38,37 @@ PORT     STATE  SERVICE  VERSION                                                
 80/tcp   open   http     awselb/2.0   
 """
 
+IPV6_JSON_OUTPUT = {
+    "nmaprun": {
+        "host": {
+            "address": {
+                "@addr": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f",
+                "@addrtype": "ipv6",
+            },
+            "ports": {
+                "port": {
+                    "@portid": "21",
+                    "@protocol": "tcp",
+                    "state": {"@state": "open"},
+                    "service": {"@name": "ssh"},
+                }
+            },
+        }
+    }
+}
+
+IPV6_HUMAN_OUTPUT = """
+# Nmap 7.92 scan initiated Mon Mar 28 15:05:11 2022 as: nmap -sV --script=banner -n "-p 0-65535" -T5 -oX /tmp/xmloutput -oN /tmp/normal 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f                                                                 │ │
+Warning: 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f giving up on port because retransmission cap hit (2).                                                                                                                                                   │ │
+Nmap scan report for 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f (2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f)                                                                                                                                                                     │ │
+Host is up (0.0061s latency).                                                                                                                                                                                                 │ │
+Other addresses for 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f (not scanned): 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f                                                                                                                                                       │ │
+Not shown: 65532 filtered tcp ports (no-response)                                                                                                                                                                             │ │
+PORT     STATE  SERVICE  VERSION                                                                                                                                                                                              │ │
+22/tcp   closed ssh                                                                                                                                                                                                           │ │
+80/tcp   open   http     awselb/2.0
+"""
+
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
     nmap_test_agent: nmap_agent.NmapAgent,
@@ -585,3 +616,29 @@ def testAgentNmap_whenNoHost_agentShouldNotCrash(
     nmap_test_agent.process(junk_msg)
 
     assert parse_mock.call_count == 0
+
+
+def testNmapAgentLifecycle_whenIpv6WithHostBits_agentShouldNotCrash(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv6_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unit test of nmap agent when ipv6 with host bits is provided, the agent should not crash."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(IPV6_JSON_OUTPUT, IPV6_HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv6_msg)
+
+    assert len(agent_mock) == 3
+    assert agent_mock[0].selector == "v3.asset.ip.v6.port.service"
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    assert agent_mock[1].data["risk_rating"] == "INFO"
+    assert agent_mock[1].data["title"] == "Network Port Scan"
+    assert (
+        "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f"
+        in agent_mock[1].data["technical_detail"]
+    )

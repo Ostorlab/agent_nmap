@@ -99,9 +99,9 @@ class NmapAgent(
             mask = int(message.data.get("mask", "64"))
             max_mask = int(self.args.get("max_network_mask_ipv6", "64"))
             if mask < max_mask:
-                for subnet in ipaddress.ip_network(f"{host}/{mask}").subnets(
-                    new_prefix=max_mask
-                ):
+                for subnet in ipaddress.ip_network(
+                    f"{host}/{mask}", strict=False
+                ).subnets(new_prefix=max_mask):
                     hosts.append((str(subnet.network_address), max_mask))
             else:
                 hosts = [(host, mask)]
