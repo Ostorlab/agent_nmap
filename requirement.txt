@@ -2,4 +2,3 @@ ostorlab[agent]
 xmltodict
 pytablewriter
 rich
-async_timeout
