@@ -1,14 +1,19 @@
 FROM ubuntu:22.04
-RUN apt-get update && apt-get install -y build-essential \
-                                        python3.11 \
-                                        python3.11-dev \
-                                        python3-pip \
-                                        wireguard \
-                                        iproute2 \
-                                        openresolv \
-                                        nmap \
-                                        && \
-                                        python3.11 -m pip install --upgrade pip
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get remove -y python*
+RUN apt-get install -y build-essential \
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    wireguard \
+    iproute2 \
+    openresolv \
+    nmap
+
+RUN python3.11 -m pip install --upgrade pip
 COPY requirement.txt /requirement.txt
 RUN python3.11 -m pip install -r /requirement.txt
 RUN mkdir -p /app/agent
