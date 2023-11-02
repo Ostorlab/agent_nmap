@@ -1,9 +1,10 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y software-properties-common
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt-get remove -y python*
+RUN apt-get update && apt-get install -y software-properties-common  \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get remove -y python*
+
 RUN apt-get install -y build-essential \
     python3.11 \
     python3.11-dev \
