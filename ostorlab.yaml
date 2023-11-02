@@ -1,6 +1,6 @@
 kind: Agent
 name: nmap
-version: 0.9.3
+version: 0.10.0
 image: images/logo.png
 description: |
   This repository is an implementation of [Ostorlab Agent](https://pypi.org/project/ostorlab/) for the [Nmap Scanner](https://github.com/projectdiscovery/nmap) by Project Discovery.
