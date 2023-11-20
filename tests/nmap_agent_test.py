@@ -663,7 +663,7 @@ def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv6_msg_above_limit: message.Message,
 ) -> None:
-    """Unit test of nmap agent when ipv6 without mask is provided, the agent should not get stuck."""
+    """Unit test of nmap agent when ipv6 above limit is provided, the agent should raise an error."""
     with pytest.raises(ValueError) as error_message:
         nmap_test_agent.process(ipv6_msg_above_limit)
 
