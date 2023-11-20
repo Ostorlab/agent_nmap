@@ -255,3 +255,15 @@ def ipv6_msg() -> message.Message:
             "mask": "64",
         },
     )
+
+
+@pytest.fixture
+def ipv6_msg_without_mask() -> message.Message:
+    """Creates a dummy message of type v3.asset.ip.v6 for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2001:470:1:18:1000::46",
+        },
+    )
