@@ -9,6 +9,7 @@ from pytest_mock import plugin
 
 from agent import nmap_agent
 from agent import nmap_options
+import pytest
 
 JSON_OUTPUT = {
     "nmaprun": {
@@ -642,3 +643,29 @@ def testNmapAgentLifecycle_whenIpv6WithHostBits_agentShouldNotCrash(
         "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f"
         in agent_mock[1].data["technical_detail"]
     )
+
+
+def testNmapAgent_whenIpv6WithoutMask_agentShouldNotGetStuck(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv6_msg_without_mask: message.Message,
+) -> None:
+    """Unit test of nmap agent when ipv6 without mask is provided, the agent should not get stuck."""
+    nmap_test_agent.process(ipv6_msg_without_mask)
+
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv6_msg_above_limit: message.Message,
+) -> None:
+    """Unit test of nmap agent when ipv6 above limit is provided, the agent should raise an error."""
+    with pytest.raises(ValueError) as error_message:
+        nmap_test_agent.process(ipv6_msg_above_limit)
+
+    assert len(agent_mock) == 0
+    assert error_message.value.args[0] == "Subnet mask below 112 is not supported"

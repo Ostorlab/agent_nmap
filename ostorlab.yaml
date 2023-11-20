@@ -1,6 +1,6 @@
 kind: Agent
 name: nmap
-version: 0.10.0
+version: 0.10.1
 image: images/logo.png
 description: |
   This repository is an implementation of [Ostorlab Agent](https://pypi.org/project/ostorlab/) for the [Nmap Scanner](https://github.com/projectdiscovery/nmap) by Project Discovery.
@@ -111,7 +111,7 @@ args:
   - name: "max_network_mask_ipv6"
     type: "int"
     description: "When scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
-    value: 64
+    value: 112
   - name: "scope_domain_regex"
     type: "string"
     description: "Regular expression to define domain scanning scope."
