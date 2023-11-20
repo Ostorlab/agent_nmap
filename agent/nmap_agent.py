@@ -3,13 +3,13 @@
 The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back messages of type
 `v3.asset.ip.v[4,6].port.service`, and `v3.report.vulnerability` with a technical report of the scan.
 """
-import ipaddress
 import datetime
+import ipaddress
 import logging
 import re
+import subprocess
 from typing import Dict, Any, Tuple, Optional, List, cast
 from urllib import parse
-import subprocess
 
 from ostorlab.agent import agent, definitions as agent_definitions
 from ostorlab.agent.kb import kb
@@ -40,6 +40,10 @@ COMMAND_TIMEOUT = datetime.timedelta(minutes=1)
 
 WIREGUARD_CONFIG_FILE_PATH = "/etc/wireguard/wg0.conf"
 DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
+
+DEFAULT_MASK_IPV6 = 128
+# scan up to 65536 host
+IPV6_CIDR_LIMIT = 112
 
 
 class Error(Exception):
@@ -96,8 +100,13 @@ class NmapAgent(
             else:
                 hosts = [(host, mask)]
         elif "v6" in message.selector:
-            mask = int(message.data.get("mask", "128"))
-            max_mask = int(self.args.get("max_network_mask_ipv6", "64"))
+            mask = int(message.data.get("mask", DEFAULT_MASK_IPV6))
+            if mask < IPV6_CIDR_LIMIT:
+                raise ValueError(
+                    f"Subnet mask below {IPV6_CIDR_LIMIT} is not supported"
+                )
+
+            max_mask = int(self.args.get("max_network_mask_ipv6", "128"))
             if mask < max_mask:
                 for subnet in ipaddress.ip_network(
                     f"{host}/{mask}", strict=False
