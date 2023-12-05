@@ -34,7 +34,7 @@ def table_markdown(data: List[List[Optional[str]]]) -> str:
     Returns:
         table: Complete markdown table
     """
-    headers = ["Host", "Port", "Version", "Protocol", "State", "Service"]
+    headers = ["Host", "Version", "Port", "Protocol", "State", "Service"]
     markdown_writer = pytablewriter.MarkdownTableWriter(
         headers=headers, value_matrix=data
     )
