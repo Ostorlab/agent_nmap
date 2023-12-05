@@ -31,6 +31,8 @@ def testNmapWrapper_whenFastMode_returnCommand(
     command = client.construct_command_host("127.0.0.1", 24)
 
     assert "-F" in command
+    assert "--top-ports" not in command
+    assert "-p" not in command
 
 
 @pytest.mark.parametrize(
@@ -59,6 +61,8 @@ def testNmapWrapper_whenTopPortsUsed_returnCommand(
 
     assert "--top-ports" in command
     assert "420" in command
+    assert "-F" not in command
+    assert "-p" not in command
 
 
 @pytest.mark.parametrize(
@@ -87,3 +91,5 @@ def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
 
     assert "-p" in command
     assert "0-65535" in command
+    assert "-F" not in command
+    assert "--top-ports" not in command
