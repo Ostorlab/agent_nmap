@@ -6,15 +6,10 @@ from agent import nmap_options
 from agent import nmap_wrapper
 
 
-@pytest.mark.parametrize(
-    "nmap_parametrized_agent",
-    [["fast_mode.yaml"]],
-    indirect=True,
-)
 def testNmapWrapper_whenFastMode_returnCommand(
-    nmap_parametrized_agent: agent.nmap_agent.NmapAgent,
+    nmap_agent_fast_mode: agent.nmap_agent.NmapAgent,
 ) -> None:
-    args = nmap_parametrized_agent.args
+    args = nmap_agent_fast_mode.args
     options = nmap_options.NmapOptions(
         dns_resolution=False,
         ports=args.get("ports"),
@@ -35,15 +30,10 @@ def testNmapWrapper_whenFastMode_returnCommand(
     assert "-p" not in command
 
 
-@pytest.mark.parametrize(
-    "nmap_parametrized_agent",
-    [["top_ports.yaml"]],
-    indirect=True,
-)
 def testNmapWrapper_whenTopPortsUsed_returnCommand(
-    nmap_parametrized_agent: agent.nmap_agent.NmapAgent,
+    nmap_agent_top_ports: agent.nmap_agent.NmapAgent,
 ) -> None:
-    args = nmap_parametrized_agent.args
+    args = nmap_agent_top_ports.args
     options = nmap_options.NmapOptions(
         dns_resolution=False,
         ports=args.get("ports"),
@@ -65,15 +55,10 @@ def testNmapWrapper_whenTopPortsUsed_returnCommand(
     assert "-p" not in command
 
 
-@pytest.mark.parametrize(
-    "nmap_parametrized_agent",
-    [["all_ports.yaml"]],
-    indirect=True,
-)
 def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
-    nmap_parametrized_agent: agent.nmap_agent.NmapAgent,
+    nmap_agent_all_ports: agent.nmap_agent.NmapAgent,
 ) -> None:
-    args = nmap_parametrized_agent.args
+    args = nmap_agent_all_ports.args
     options = nmap_options.NmapOptions(
         dns_resolution=False,
         ports=args.get("ports"),
