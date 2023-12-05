@@ -39,7 +39,7 @@ class NmapWrapper:
         """
         self._options = options
 
-    def _construct_command_host(self, host: str, mask: int) -> List[str]:
+    def construct_command_host(self, host: str, mask: int) -> List[str]:
         """
         Construct the Nmap command to be run.
 
@@ -96,7 +96,7 @@ class NmapWrapper:
             result of the scan.
         """
         logger.info("running the nmap scan")
-        command = self._construct_command_host(hosts, mask)
+        command = self.construct_command_host(hosts, mask)
 
         subprocess.run(command, check=True)
 

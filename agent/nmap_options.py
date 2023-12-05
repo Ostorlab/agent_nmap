@@ -45,6 +45,7 @@ class NmapOptions:
     dns_resolution: bool = True
     dns_servers: List[str] | None = None
     ports: Optional[str] | None = None
+    top_ports: Optional[int] | None = None
     fast_mode: bool = False
     timing_template: TimingTemplate = TimingTemplate.T3
     script_default: bool = False
@@ -97,6 +98,8 @@ class NmapOptions:
         """Appends the ports option to the list of nmap options."""
         if self.fast_mode is True:
             return ["-F"]
+        elif self.top_ports is not None:
+            return ["--top-ports", str(self.top_ports)]
         elif self.ports is not None:
             return ["-p", self.ports]
         else:

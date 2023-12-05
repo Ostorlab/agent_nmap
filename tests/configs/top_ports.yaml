@@ -80,13 +80,14 @@ args:
   - name: "fast_mode"
     description: "Fast mode scans fewer ports than the default mode."
     type: "boolean"
-    value: true
+    value: false
   - name: "ports"
     type: "string"
     description: "List of ports to scan."
     value: "0-65535"
   - name: "top_ports"
     type: "int"
+    value: 420
     description: "Top ports to scan."
   - name: "no_ping"
     description: "Treat all hosts as online, skip host discovery."
