@@ -1,5 +1,4 @@
 """Nmap wrapper unit tests"""
-import pytest
 
 import agent.nmap_agent
 from agent import nmap_options
