@@ -155,6 +155,7 @@ class NmapAgent(
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
+            top_ports=self.args.get("top_ports"),
             fast_mode=self.args.get("fast_mode", False),
             no_ping=self.args.get("no_ping", False),
             timing_template=nmap_options.TimingTemplate[self.args["timing_template"]],
@@ -172,6 +173,7 @@ class NmapAgent(
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
+            top_ports=self.args.get("top_ports"),
             fast_mode=self.args.get("fast_mode", False),
             no_ping=self.args.get("no_ping", False),
             timing_template=nmap_options.TimingTemplate[self.args["timing_template"]],

@@ -280,3 +280,94 @@ def ipv6_msg_above_limit() -> message.Message:
             "mask": "64",
         },
     )
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_fast_mode(
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+) -> nmap_agent.NmapAgent:
+    """Fixture of the Nmap Agent to be used for testing purposes."""
+    del agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        settings = runtime_definitions.AgentSettings(
+            key="agent/ostorlab/nmap_agent",
+            bus_url="NA",
+            bus_exchange_topic="NA",
+            args=[
+                utils_definitions.Arg(
+                    name="fast_mode",
+                    type="boolean",
+                    value=json.dumps(True).encode(),
+                )
+            ],
+            healthcheck_port=5301,
+            redis_url="redis://guest:guest@localhost:6379",
+        )
+
+        agent = nmap_agent.NmapAgent(definition, settings)
+        return agent
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_top_ports(
+    request: Any,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+) -> nmap_agent.NmapAgent:
+    """Fixture of the Nmap Agent to be used for testing purposes."""
+    del agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        settings = runtime_definitions.AgentSettings(
+            key="agent/ostorlab/nmap_agent",
+            bus_url="NA",
+            bus_exchange_topic="NA",
+            args=[
+                utils_definitions.Arg(
+                    name="fast_mode",
+                    type="boolean",
+                    value=json.dumps(False).encode(),
+                ),
+                utils_definitions.Arg(
+                    name="top_ports",
+                    type="int",
+                    value=json.dumps("420").encode(),
+                ),
+            ],
+            healthcheck_port=5301,
+            redis_url="redis://guest:guest@localhost:6379",
+        )
+
+        agent = nmap_agent.NmapAgent(definition, settings)
+        return agent
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_all_ports(
+    request: Any,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+) -> nmap_agent.NmapAgent:
+    """Fixture of the Nmap Agent to be used for testing purposes."""
+    del agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        settings = runtime_definitions.AgentSettings(
+            key="agent/ostorlab/nmap_agent",
+            bus_url="NA",
+            bus_exchange_topic="NA",
+            args=[
+                utils_definitions.Arg(
+                    name="fast_mode",
+                    type="boolean",
+                    value=json.dumps(False).encode(),
+                )
+            ],
+            healthcheck_port=5301,
+            redis_url="redis://guest:guest@localhost:6379",
+        )
+
+        agent = nmap_agent.NmapAgent(definition, settings)
+        return agent

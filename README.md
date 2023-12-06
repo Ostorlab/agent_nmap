@@ -35,6 +35,7 @@ Supported agent flags:
 
 * `fast_mode` (`-F`): Fast mode scans fewer ports than the default mode.
 * `ports` (`-p`): List of ports to scan.
+* `top_ports` (`--top-ports`): Top ports to scan.
 * `no_ping` (`-Pn`): Treat all hosts as online, skip host discovery.
 * `version_info` (`-sV`): Probe open ports to determine service/version info.
 * `timing_template` (`-Tx`): Template of timing settings (T0, T1, ... T5)..
