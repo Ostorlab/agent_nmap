@@ -295,7 +295,13 @@ def nmap_agent_fast_mode(
             key="agent/ostorlab/nmap_agent",
             bus_url="NA",
             bus_exchange_topic="NA",
-            args=[],
+            args=[
+                utils_definitions.Arg(
+                    name="fast_mode",
+                    type="boolean",
+                    value=json.dumps(True).encode(),
+                )
+            ],
             healthcheck_port=5301,
             redis_url="redis://guest:guest@localhost:6379",
         )
@@ -322,7 +328,7 @@ def nmap_agent_top_ports(
                 utils_definitions.Arg(
                     name="fast_mode",
                     type="boolean",
-                    value=json.dumps("false").encode(),
+                    value=json.dumps(False).encode(),
                 ),
                 utils_definitions.Arg(
                     name="top_ports",
@@ -356,7 +362,7 @@ def nmap_agent_all_ports(
                 utils_definitions.Arg(
                     name="fast_mode",
                     type="boolean",
-                    value=json.dumps("false").encode(),
+                    value=json.dumps(False).encode(),
                 )
             ],
             healthcheck_port=5301,

@@ -24,9 +24,22 @@ def testNmapWrapper_whenFastMode_returnCommand(
 
     command = client.construct_command_host("127.0.0.1", 24)
 
-    assert "-F" in command
-    assert "--top-ports" not in command
-    assert "-p" not in command
+    assert command == [
+        "nmap",
+        "-sV",
+        "-n",
+        "-F",
+        "-T3",
+        "-sT",
+        "--script",
+        "banner",
+        "-sC",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "127.0.0.1/24",
+    ]
 
 
 def testNmapWrapper_whenTopPortsUsed_returnCommand(
@@ -48,10 +61,23 @@ def testNmapWrapper_whenTopPortsUsed_returnCommand(
 
     command = client.construct_command_host("127.0.0.1", 24)
 
-    assert "--top-ports" in command
-    assert "420" in command
-    assert "-F" not in command
-    assert "-p" not in command
+    assert command == [
+        "nmap",
+        "-sV",
+        "-n",
+        "--top-ports",
+        "420",
+        "-T3",
+        "-sT",
+        "--script",
+        "banner",
+        "-sC",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "127.0.0.1/24",
+    ]
 
 
 def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
@@ -73,7 +99,20 @@ def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
 
     command = client.construct_command_host("127.0.0.1", 24)
 
-    assert "-p" in command
-    assert "0-65535" in command
-    assert "-F" not in command
-    assert "--top-ports" not in command
+    assert command == [
+        "nmap",
+        "-sV",
+        "-n",
+        "-p",
+        "0-65535",
+        "-T3",
+        "-sT",
+        "--script",
+        "banner",
+        "-sC",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "127.0.0.1/24",
+    ]
