@@ -1,6 +1,7 @@
 """Unittests for Nmap agent."""
 import json
 from typing import List, Dict, Union
+import subprocess
 
 import requests_mock as rq_mock
 from ostorlab.agent.message import message
@@ -669,3 +670,20 @@ def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
 
     assert len(agent_mock) == 0
     assert error_message.value.args[0] == "Subnet mask below 112 is not supported"
+
+
+def testAgentNmap_whenInvalidDomainName_doesNotCrash(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    invalid_domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unit test for testing agent handling of an invalid domain name."""
+    mocker.patch(
+        "subprocess.run",
+        side_effect=subprocess.CalledProcessError(255, ""),
+    )
+
+    nmap_test_agent.process(invalid_domain_msg)
+
+    assert len(agent_mock) == 0
