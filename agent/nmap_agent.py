@@ -129,7 +129,11 @@ class NmapAgent(
                         "target %s/%s was processed before, exiting", host, mask
                     )
                     return
-                scan_results, normal_results = self._scan_host(host, mask)
+                try:
+                    scan_results, normal_results = self._scan_host(host, mask)
+                except subprocess.CalledProcessError:
+                    logger.error("Nmap command failed to scan host %s", host)
+                    continue
                 logger.info("scan results %s", scan_results)
 
                 self._emit_services(scan_results, domain_name)
@@ -141,8 +145,11 @@ class NmapAgent(
                 return
             if self._is_domain_in_scope(domain_name) is False:
                 return
-
-            scan_results, normal_results = self._scan_domain(domain_name)
+            try:
+                scan_results, normal_results = self._scan_domain(domain_name)
+            except subprocess.CalledProcessError:
+                logger.error("Nmap command failed to scan domain name %s", domain_name)
+                return
             logger.info("scan results %s", scan_results)
 
             self._emit_services(scan_results, domain_name)

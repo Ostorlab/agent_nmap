@@ -371,3 +371,11 @@ def nmap_agent_all_ports(
 
         agent = nmap_agent.NmapAgent(definition, settings)
         return agent
+
+
+@pytest.fixture
+def invalid_domain_msg() -> message.Message:
+    """Creates a dummy message of type v3.asset.domain_name for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.domain_name", data={"name": "-ostorlab.co"}
+    )
