@@ -132,11 +132,11 @@ def testNmapWrapperParseOutput_whenXmlIsInvalid_catchesAndReraisesError() -> Non
 
 
 def testNmapWrapperParseOutput_whenXmlIsValid_returnsParsedXml() -> None:
-    invalid_xml = (
+    valid_xml = (
         pathlib.Path(__file__).parent / "fake_output_with_down_host.xml"
     ).read_text()
 
-    parsed_output = nmap_wrapper.parse_output(invalid_xml)
+    parsed_output = nmap_wrapper.parse_output(valid_xml)
 
     assert {
         "nmaprun": {

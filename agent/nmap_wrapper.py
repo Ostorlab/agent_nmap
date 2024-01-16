@@ -29,7 +29,11 @@ def parse_output(xml_output: str) -> Any:
         parsed_xml = xmltodict.parse(xml_output)
         return parsed_xml
     except xml.parsers.expat.ExpatError as parsing_error:
-        logger.error("Error parsing XML output: %s - Original Error: %s", xml_output, parsing_error)
+        logger.error(
+            "Error parsing XML output: %s - Original Error: %s",
+            xml_output,
+            parsing_error,
+        )
         raise
 
 
