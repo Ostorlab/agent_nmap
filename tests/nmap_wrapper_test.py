@@ -123,15 +123,17 @@ def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
 
 
 def testNmapWrapperParseOutput_whenXmlIsInvalid_catchesAndReraisesError() -> None:
+    """Tests parsing invalid XML output scan results. Should catch the error and re-raise it."""
     invalid_xml = (pathlib.Path(__file__).parent / "malformed_output.xml").read_text()
 
     with pytest.raises(xml.parsers.expat.ExpatError):
         parsed_output = nmap_wrapper.parse_output(invalid_xml)
 
-        assert parsed_output is None
+    assert parsed_output is None
 
 
 def testNmapWrapperParseOutput_whenXmlIsValid_returnsParsedXml() -> None:
+    """Checks that XML output scan results are correctly parsed to a dict."""
     valid_xml = (
         pathlib.Path(__file__).parent / "fake_output_with_down_host.xml"
     ).read_text()
