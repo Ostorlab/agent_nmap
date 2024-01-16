@@ -16,7 +16,7 @@ NORMAL_OUTPUT_PATH = "/tmp/normal"
 logger = logging.getLogger(__name__)
 
 
-def parse_output(xml_output: str) -> Any:
+def parse_output(xml_output: str) -> dict[str, Any]:
     """Parse the xml_output of the nmap scan command.
 
     Args:
