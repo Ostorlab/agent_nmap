@@ -26,7 +26,7 @@ def parse_output(xml_output: str) -> dict[str, Any]:
         dict of the scan's result.
     """
     try:
-        parsed_xml: dict[str, Any] = xmltodict.parse(xml_output)
+        parsed_xml: dict[str, Any] = xmltodict.parse(xml_output, disable_entities=True)
         return parsed_xml
     except xml.parsers.expat.ExpatError as parsing_error:
         logger.error(
