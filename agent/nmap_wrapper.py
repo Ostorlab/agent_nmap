@@ -3,6 +3,7 @@
 import ipaddress
 import logging
 import subprocess
+import xml
 from typing import Any, Dict, List, Tuple
 
 import xmltodict
@@ -15,7 +16,7 @@ NORMAL_OUTPUT_PATH = "/tmp/normal"
 logger = logging.getLogger(__name__)
 
 
-def _parse_output(xml_output: str) -> Any:
+def parse_output(xml_output: str) -> dict[str, Any]:
     """Parse the xml_output of the nmap scan command.
 
     Args:
@@ -24,8 +25,14 @@ def _parse_output(xml_output: str) -> Any:
     Returns:
         dict of the scan's result.
     """
-    parsed_xml = xmltodict.parse(xml_output)
-    return parsed_xml
+    try:
+        parsed_xml: dict[str, Any] = xmltodict.parse(xml_output, disable_entities=True)
+        return parsed_xml
+    except xml.parsers.expat.ExpatError as parsing_error:
+        logger.error(
+            "Error parsing XML output: %s - XML output: %s", parsing_error, xml_output
+        )
+        raise
 
 
 class NmapWrapper:
@@ -101,7 +108,7 @@ class NmapWrapper:
         subprocess.run(command, check=True)
 
         with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:
-            scan_results = _parse_output(o.read())
+            scan_results = parse_output(o.read())
 
         with open(NORMAL_OUTPUT_PATH, "r", encoding="utf-8") as o:
             normal_results = o.read()
@@ -122,7 +129,7 @@ class NmapWrapper:
         subprocess.run(command, check=True)
 
         with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:
-            scan_results = _parse_output(o.read())
+            scan_results = parse_output(o.read())
 
         with open(NORMAL_OUTPUT_PATH, "r", encoding="utf-8") as o:
             normal_results = o.read()

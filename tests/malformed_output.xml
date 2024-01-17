@@ -1,0 +1,14 @@
+<root>
+  <element1>
+    <subelement>Value1</subelement>
+  </element1>
+  <element2>
+    <subelement>Value2</subelement>
+  </element2>
+  <element3>
+    <subelement>Value3</subelement>
+    <subelement>Value4</subelement>
+    <subelement>Value5</subelement>
+  </element3>
+</root>
+<additionalElement>Extra content</additionalElement>
