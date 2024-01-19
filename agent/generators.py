@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_services(
-    scan_result: Dict[str, Dict[str, List[Dict[str, Any]] | Dict[str, Dict[str, Any]]]]
+    scan_result: Dict[str, Dict[str, List[Dict[str, Any]] | Dict[str, Dict[str, Any]]]],
 ) -> Iterator[Dict[str, Optional[str]]]:
     """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
 

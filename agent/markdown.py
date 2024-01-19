@@ -10,7 +10,7 @@ from agent import generators
 def prepare_data_for_markdown_formatting(
     scans: Dict[
         str, Dict[str, List[Dict[str, Dict[str, str]]] | Dict[str, Dict[str, str]]]
-    ]
+    ],
 ) -> List[List[Optional[str]]]:
     """Method responsible for formatting the data into the correct form for the MarkdownTableWriter.
     Args:
