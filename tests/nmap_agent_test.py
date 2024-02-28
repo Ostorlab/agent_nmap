@@ -687,3 +687,57 @@ def testAgentNmap_whenInvalidDomainName_doesNotCrash(
     nmap_test_agent.process(invalid_domain_msg)
 
     assert len(agent_mock) == 0
+
+
+def testAgent_whenServiceWithProductAndVersion_fingerprintMessageShouldHaveLibraryNameAndVersion(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    ipv4_msg: message.Message,
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Ensure the agents emits the detected library name with its version."""
+    del agent_persist_mock
+    product_fake_output = {
+        "nmaprun": {
+            "host": {
+                "address": {"@addr": "127.0.0.1", "@addrtype": "ipv4"},
+                "ports": {
+                    "port": {
+                        "@portid": "22",
+                        "@protocol": "tcp",
+                        "state": {
+                            "@state": "open",
+                            "@reason": "syn-ack",
+                            "@reason_ttl": "0",
+                        },
+                        "service": {
+                            "@name": "ssh",
+                            "@product": "OpenSSH",
+                            "@version": "7.4",
+                            "cpe": "cpe:/a:openbsd:openssh:7.4",
+                        },
+                    }
+                },
+            }
+        }
+    }
+
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(product_fake_output, ""),
+    )
+
+    nmap_test_agent.process(ipv4_msg)
+
+    assert len(agent_mock) == 3
+    assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    fingerprint_msg = agent_mock[2]
+    assert fingerprint_msg.selector == "v3.fingerprint.ip.v4.service.library"
+    assert fingerprint_msg.data["host"] == "127.0.0.1"
+    assert fingerprint_msg.data["mask"] == "32"
+    assert fingerprint_msg.data["service"] == "ssh"
+    assert fingerprint_msg.data["port"] == 22
+    assert fingerprint_msg.data["library_name"] == "OpenSSH"
+    assert fingerprint_msg.data["library_version"] == "7.4"
