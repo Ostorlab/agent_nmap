@@ -382,6 +382,7 @@ class NmapAgent(
                             "port": data.get("port"),
                             "protocol": data.get("protocol"),
                             "library_name": data.get("product"),
+                            "library_version": data.get("product_version"),
                             "detail": data.get("product"),
                         }
                         self.emit(selector, fingerprint_data)
@@ -406,7 +407,7 @@ class NmapAgent(
                                 "port": data.get("port"),
                                 "schema": data.get("service"),
                                 "library_name": data.get("product"),
-                                "library_version": None,
+                                "library_version": data.get("product_version"),
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
                             }

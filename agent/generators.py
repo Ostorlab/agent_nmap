@@ -47,6 +47,7 @@ def get_services(
                 data["state"] = port.get("state", {}).get("@state", "closed")
                 data["service"] = port.get("service", {}).get("@name", "")
                 data["product"] = port.get("service", {}).get("@product", "")
+                data["product_version"] = port.get("service", {}).get("@version", "")
                 data["banner"] = get_script_by_name(name="banner", port=port)
                 yield data
     except KeyError as e:
