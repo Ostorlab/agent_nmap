@@ -1,4 +1,5 @@
 """Pytest fixture for the nmap agent."""
+
 import os
 import pathlib
 import json

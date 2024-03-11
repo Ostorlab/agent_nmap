@@ -1,4 +1,5 @@
 """Unittests for Nmap agent."""
+
 import json
 from typing import List, Dict, Union
 import subprocess

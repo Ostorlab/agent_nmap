@@ -1,4 +1,5 @@
 """Module responsible for markdown formatting."""
+
 from typing import Dict, List, Optional
 import io
 

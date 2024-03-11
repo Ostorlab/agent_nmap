@@ -1,4 +1,5 @@
 """Processing scans returned by the nmap agent."""
+
 from typing import Dict, List
 
 from agent import markdown
