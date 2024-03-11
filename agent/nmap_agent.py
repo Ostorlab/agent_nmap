@@ -89,7 +89,6 @@ class NmapAgent(
         host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
 
-        # Differentiate between a single IP mask in IPv4 and IPv6.
         if "v4" in message.selector:
             mask = int(message.data.get("mask", "32"))
             max_mask = int(self.args.get("max_network_mask_ipv4", "32"))
@@ -121,6 +120,7 @@ class NmapAgent(
         )
 
         if len(hosts) > 0:
+            logger.info("Scanning hosts `%s`.", hosts)
             for host, mask in hosts:
                 if not self.add_ip_network(
                     b"agent_nmap_asset",
@@ -141,6 +141,7 @@ class NmapAgent(
                 self._emit_network_scan_finding(scan_results, normal_results)
                 self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
+            logger.info("Scanning domain `%s`.", domain_name)
             if not self.set_add(b"agent_nmap_asset", domain_name):
                 logger.debug("target %s was processed before, exiting", domain_name)
                 return
