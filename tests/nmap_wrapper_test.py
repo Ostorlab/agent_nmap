@@ -1,4 +1,5 @@
 """Nmap wrapper unit tests"""
+
 import xml
 import pathlib
 

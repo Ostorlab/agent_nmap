@@ -3,6 +3,7 @@
 The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back messages of type
 `v3.asset.ip.v[4,6].port.service`, and `v3.report.vulnerability` with a technical report of the scan.
 """
+
 import datetime
 import ipaddress
 import logging
@@ -84,11 +85,10 @@ class NmapAgent(
         Args:
             message: message containing the IP to scan, the mask & the version.
         """
-        logger.info("processing message of selector : %s", message.selector)
+        logger.debug("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
 
-        # Differentiate between a single IP mask in IPv4 and IPv6.
         if "v4" in message.selector:
             mask = int(message.data.get("mask", "32"))
             max_mask = int(self.args.get("max_network_mask_ipv4", "32"))
@@ -120,12 +120,13 @@ class NmapAgent(
         )
 
         if len(hosts) > 0:
+            logger.info("Scanning hosts `%s`.", hosts)
             for host, mask in hosts:
                 if not self.add_ip_network(
                     b"agent_nmap_asset",
                     ipaddress.ip_network(f"{host}/{mask}", strict=False),
                 ):
-                    logger.info(
+                    logger.debug(
                         "target %s/%s was processed before, exiting", host, mask
                     )
                     return
@@ -140,8 +141,9 @@ class NmapAgent(
                 self._emit_network_scan_finding(scan_results, normal_results)
                 self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
+            logger.info("Scanning domain `%s`.", domain_name)
             if not self.set_add(b"agent_nmap_asset", domain_name):
-                logger.info("target %s was processed before, exiting", domain_name)
+                logger.debug("target %s was processed before, exiting", domain_name)
                 return
             if self._is_domain_in_scope(domain_name) is False:
                 return
@@ -331,7 +333,7 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
-                    logger.info("Sending results to `%s`", selector)
+                    logger.debug("Sending results to `%s`", selector)
                     ip_service = {
                         "host": data.get("host"),
                         "version": data.get("version"),
@@ -372,7 +374,7 @@ class NmapAgent(
 
                 for data in generators.get_services(scan_results):
                     if data.get("product") is not None:
-                        logger.info("sending results to selector %s", selector)
+                        logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
                             "host": data.get("host"),
                             "mask": data.get("mask", str(default_mask)),
@@ -387,7 +389,7 @@ class NmapAgent(
                         }
                         self.emit(selector, fingerprint_data)
                     if data.get("banner") is not None:
-                        logger.info("sending results to selector %s", selector)
+                        logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
                             "host": data.get("host"),
                             "mask": data.get("mask", str(default_mask)),
