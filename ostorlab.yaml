@@ -89,7 +89,7 @@ args:
     description: "List of ports to scan."
     value: "0-65535"
   - name: "top_ports"
-    type: "int"
+    type: "number"
     description: "Top ports to scan."
   - name: "no_ping"
     description: "Treat all hosts as online, skip host discovery."
@@ -112,11 +112,11 @@ args:
     description: "List of scripts to run using Nmap"
     value: ['banner']
   - name: "max_network_mask_ipv4"
-    type: "int"
+    type: "number"
     description: "When scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
     value: 26
   - name: "max_network_mask_ipv6"
-    type: "int"
+    type: "number"
     description: "When scanning an IP range, maximum network size, if the network is above max, network in divided into subnetworks."
     value: 112
   - name: "scope_domain_regex"
