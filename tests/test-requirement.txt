@@ -1,6 +1,7 @@
 ruff
 pytest
 pytest-mock
+pytest-cov
 xmltodict
 requests-mock
 
