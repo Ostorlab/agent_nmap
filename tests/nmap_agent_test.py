@@ -412,7 +412,7 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
     nmap_test_agent.settings.args = [
         utils_definitions.Arg(
             name="max_network_mask_ipv4",
-            type="int",
+            type="number",
             value=json.dumps("32").encode(),
         )
     ]
