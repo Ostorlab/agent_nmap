@@ -333,7 +333,7 @@ def nmap_agent_top_ports(
                 ),
                 utils_definitions.Arg(
                     name="top_ports",
-                    type="int",
+                    type="number",
                     value=json.dumps("420").encode(),
                 ),
             ],

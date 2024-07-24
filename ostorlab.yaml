@@ -104,7 +104,7 @@ args:
     description: "Template of timing settings (T0, T1, ... T5)."
     value: "T3"
   - name: "script_default"
-    type: "bool"
+    type: "boolean"
     description: "Script scan, equivalent to --script=default"
     value: true
   - name: "scripts"
