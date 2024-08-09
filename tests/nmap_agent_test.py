@@ -322,7 +322,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
 
     assert all(
         a in options.command_options
-        for a in ["-sV", "-n", "-p", "0-65535", "-T3", "-sT", "-Pn", "--script"]
+        for a in ["-sV", "-n", "-p", "0-65535", "-T3", "-sS", "-Pn", "--script"]
     )
 
 
@@ -359,7 +359,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
 
     assert all(
         a in options.command_options
-        for a in ["-sV", "-n", "-p", "0-65535", "-T3", "-sT", "-Pn", "--script"]
+        for a in ["-sV", "-n", "-p", "0-65535", "-T3", "-sS", "-Pn", "--script"]
     )
 
 
