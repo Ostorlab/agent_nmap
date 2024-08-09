@@ -55,7 +55,7 @@ class NmapOptions:
     version_detection: bool = True
     port_scanning_techniques: List[PortScanningTechnique] = dataclasses.field(
         default_factory=lambda: [
-            PortScanningTechnique.TCP_CONNECT,
+            PortScanningTechnique.TCP_SYN,
         ]
     )
     no_ping: bool = True
