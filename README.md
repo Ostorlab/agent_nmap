@@ -41,6 +41,7 @@ Supported agent flags:
 * `timing_template` (`-Tx`): Template of timing settings (T0, T1, ... T5)..
 * `script_default` (`-sC`): Script scan, equivalent to --script=default.
 * `scripts` (`--script`): List of scripts to run using Nmap.
+* `os` (`--os`): Enable OS detection
 
 
  ### Install directly from OXO agent store

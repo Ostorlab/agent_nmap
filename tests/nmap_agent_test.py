@@ -801,6 +801,7 @@ def testAgent_whenHostHaveOs_fingerprintMessageShouldHaveOs(
     )
 
     nmap_test_agent.process(ipv4_msg)
+
     assert len(agent_mock) == 4
     assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
     assert agent_mock[1].selector == "v3.report.vulnerability"
