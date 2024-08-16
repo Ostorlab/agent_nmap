@@ -53,6 +53,7 @@ class NmapOptions:
         default_factory=lambda: ["default", "banner"]
     )
     version_detection: bool = True
+    os_detection: bool = True
     port_scanning_techniques: List[PortScanningTechnique] = dataclasses.field(
         default_factory=lambda: [
             PortScanningTechnique.TCP_SYN,
@@ -61,8 +62,15 @@ class NmapOptions:
     no_ping: bool = True
     privileged: Optional[bool] = None
 
+    def _set_os_detection_option(self) -> List[str]:
+        """Appends the os detection option to the list of nmap options."""
+        command_options = []
+        if self.os_detection is True:
+            command_options.append("-O")
+        return command_options
+
     def _set_version_detection_option(self) -> List[str]:
-        """Appends the  option to the list of nmap options."""
+        """Appends the version detection option to the list of nmap options."""
         command_options = []
         if self.version_detection is True:
             command_options.append("-sV")
@@ -144,6 +152,7 @@ class NmapOptions:
     def command_options(self) -> List[str]:
         """Computes the list of nmap options."""
         command_options = []
+        command_options.extend(self._set_os_detection_option())
         command_options.extend(self._set_version_detection_option())
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())

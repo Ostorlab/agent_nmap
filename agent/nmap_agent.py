@@ -189,6 +189,7 @@ class NmapAgent(
             scripts=self.args.get("scripts"),
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
+            os_detection=self.args.get("os", False),
         )
         client = nmap_wrapper.NmapWrapper(options)
         logger.info("scanning domain %s with options %s", domain_name, options)
@@ -371,6 +372,21 @@ class NmapAgent(
                     self.set_add(b"agent_nmap_asset", f"{address}/64")
                 else:
                     raise ValueError(f"Incorrect ip version {version}")
+
+                if host.get("os", {}).get("osmatch") is not None:
+                    os_match_highest = host.get("os").get("osmatch", {})[0]
+                    fingerprint_data = {
+                        "host": host.get("address", {}).get("@addr"),
+                        "library_type": "OS",
+                        "library_name": os_match_highest.get("osclass", {}).get(
+                            "@osfamily"
+                        ),
+                        "library_version": os_match_highest.get("osclass").get(
+                            "@osgen"
+                        ),
+                        "detail": os_match_highest.get("@name"),
+                    }
+                    self.emit(selector, fingerprint_data)
 
                 for data in generators.get_services(scan_results):
                     if data.get("product") is not None:

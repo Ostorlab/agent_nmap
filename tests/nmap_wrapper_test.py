@@ -31,6 +31,7 @@ def testNmapWrapper_whenFastMode_returnCommand(
 
     assert command == [
         "nmap",
+        "-O",
         "-sV",
         "-n",
         "-F",
@@ -68,6 +69,7 @@ def testNmapWrapper_whenTopPortsUsed_returnCommand(
 
     assert command == [
         "nmap",
+        "-O",
         "-sV",
         "-n",
         "--top-ports",
@@ -106,6 +108,7 @@ def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
 
     assert command == [
         "nmap",
+        "-O",
         "-sV",
         "-n",
         "-p",
