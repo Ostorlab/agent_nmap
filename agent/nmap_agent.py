@@ -372,6 +372,19 @@ class NmapAgent(
                 else:
                     raise ValueError(f"Incorrect ip version {version}")
 
+                if host.get("os") is not None:
+                    if host.get("os").get("osmatch", {}) is not None:
+                        logger.debug("sending results to selector %s", selector)
+
+                        os = host.get("os").get("osmatch", {})[0]
+                        fingerprint_data = {
+                            "host": host.get("address", {}).get("@addr"),
+                            "library_type": "OS",
+                            "library_name": os.get("osclass").get("@osfamily"),
+                            "library_version": os.get("osclass").get("@osgen"),
+                        }
+                        self.emit(selector, fingerprint_data)
+
                 for data in generators.get_services(scan_results):
                     if data.get("product") is not None:
                         logger.debug("sending results to selector %s", selector)
