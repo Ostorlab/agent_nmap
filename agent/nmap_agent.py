@@ -380,11 +380,11 @@ class NmapAgent(
                     else:
                         continue
 
-                    if type(os_match_highest) is list and len(os_match_highest) > 0:
+                    if isinstance(os_match_highest, list) and len(os_match_highest) > 0:
                         os_match_highest = os_match_highest[0]
                     os_class = os_match_highest.get("osclass", {})
 
-                    if type(os_class) is list and len(os_class) > 0:
+                    if isinstance(os_class, list) and len(os_class) > 0:
                         os_class = os_class[0]
                     elif os_class == []:
                         continue
