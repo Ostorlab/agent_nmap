@@ -374,13 +374,25 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 if host.get("os", {}).get("osmatch") is not None:
-                    os_match_highest = host.get("os").get("osmatch", {})[0]
+                    os_match = host.get("os").get("osmatch", [])
+                    if type(os_match) is list and len(os_match) > 0:
+                        os_match_highest = os_match[0]
+                    elif type(os_match) is not list:
+                        os_match_highest = os_match
+
+                    if type(os_match_highest) is list and len(os_match_highest) > 0:
+                        os_match_highest = os_match_highest[0]
+                    os_class = os_match_highest.get("osclass", {})
+
+                    if type(os_class) is list and len(os_class) > 0:
+                        os_class = os_class[0]
+                    elif os_class == []:
+                        continue
+
                     fingerprint_data = {
                         "host": host.get("address", {}).get("@addr"),
                         "library_type": "OS",
-                        "library_name": os_match_highest.get("osclass", {}).get(
-                            "@osfamily"
-                        ),
+                        "library_name": os_class.get("@osfamily"),
                         "library_version": os_match_highest.get("osclass").get(
                             "@osgen"
                         ),
