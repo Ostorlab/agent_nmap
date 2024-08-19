@@ -375,10 +375,10 @@ class NmapAgent(
 
                 if host.get("os", {}).get("osmatch") is not None:
                     os_match = host.get("os").get("osmatch", [])
-                    if type(os_match) is list and len(os_match) > 0:
+                    if len(os_match) > 0:
                         os_match_highest = os_match[0]
-                    elif type(os_match) is not list:
-                        os_match_highest = os_match
+                    else:
+                        continue
 
                     if type(os_match_highest) is list and len(os_match_highest) > 0:
                         os_match_highest = os_match_highest[0]
@@ -393,9 +393,7 @@ class NmapAgent(
                         "host": host.get("address", {}).get("@addr"),
                         "library_type": "OS",
                         "library_name": os_class.get("@osfamily"),
-                        "library_version": os_match_highest.get("osclass").get(
-                            "@osgen"
-                        ),
+                        "library_version": os_class.get("@osgen"),
                         "detail": os_match_highest.get("@name"),
                     }
                     self.emit(selector, fingerprint_data)
