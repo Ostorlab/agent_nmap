@@ -844,21 +844,23 @@ def testAgent_whenOsClassIsList_fingerprintMessageShouldHaveOs(
                 },
                 "os": {
                     "osmatch": [
-                        {
-                            "@name": "Microsoft Windows 10 1511",
-                            "@accuracy": "88",
-                            "@line": "69505",
-                            "osclass": [
-                                {
-                                    "@type": "specialized",
-                                    "@vendor": "Microsoft",
-                                    "@osfamily": "Windows",
-                                    "@osgen": "10",
-                                    "@accuracy": "88",
-                                    "cpe": "cpe:/o:microsoft:windows_10:1511",
-                                }
-                            ],
-                        }
+                        [
+                            {
+                                "@name": "Microsoft Windows 10 1511",
+                                "@accuracy": "88",
+                                "@line": "69505",
+                                "osclass": [
+                                    {
+                                        "@type": "specialized",
+                                        "@vendor": "Microsoft",
+                                        "@osfamily": "Windows",
+                                        "@osgen": "10",
+                                        "@accuracy": "88",
+                                        "cpe": "cpe:/o:microsoft:windows_10:1511",
+                                    }
+                                ],
+                            }
+                        ]
                     ]
                 },
             }

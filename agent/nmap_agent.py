@@ -386,7 +386,7 @@ class NmapAgent(
 
                     if type(os_class) is list and len(os_class) > 0:
                         os_class = os_class[0]
-                    elif os_class == []:
+                    else:
                         continue
 
                     fingerprint_data = {
