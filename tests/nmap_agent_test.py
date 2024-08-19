@@ -751,7 +751,7 @@ def testAgent_whenHostHaveOs_fingerprintMessageShouldHaveOs(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agents emits the detected library name with its version."""
+    """Ensure the agent fingerprint OS."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
@@ -819,7 +819,7 @@ def testAgent_whenOsClassIsList_fingerprintMessageShouldHaveOs(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agents emits the detected library name with its version."""
+    """Ensure the agent handel osclass when it's a list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
@@ -891,7 +891,7 @@ def testAgent_whenOsMatchIsEmptyList_fingerprintMessageShouldHaveOs(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agents emits the detected library name with its version."""
+    """Ensure the agent handel osmatch when it's an empty list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
@@ -929,14 +929,14 @@ def testAgent_whenOsMatchIsEmptyList_fingerprintMessageShouldHaveOs(
     assert len(agent_mock) == 2
 
 
-def testAgent_whenOsClassIsEmptyList_fingerprintMessageShouldHaveOs(
+def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     ipv4_msg: message.Message,
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agents emits the detected library name with its version."""
+    """Ensure the agent handel osmatch when it's a list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {

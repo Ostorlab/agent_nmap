@@ -374,7 +374,7 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 if host.get("os", {}).get("osmatch") is not None:
-                    os_match = host.get("os").get("osmatch", [])
+                    os_match = host.get("os").get("osmatch")
                     if len(os_match) > 0:
                         os_match_highest = os_match[0]
                     else:
