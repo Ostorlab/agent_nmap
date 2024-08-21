@@ -304,9 +304,9 @@ class NmapAgent(
     def _emit_services(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.info("Services targeting domain `%s`.", domain_name)
         if scan_results is not None and scan_results.get("nmaprun") is not None:
             if domain_name is not None:
+                logger.info("Services targeting domain `%s`.", domain_name)
                 for data in generators.get_services(scan_results):
                     domain_name_service = {
                         "name": domain_name,
@@ -373,10 +373,15 @@ class NmapAgent(
                 else:
                     raise ValueError(f"Incorrect ip version {version}")
 
-                if host.get("os", {}).get("osmatch") is not None:
+                if (
+                    host.get("os", {}) is not None
+                    and host.get("os", {}).get("osmatch") is not None
+                ):
                     os_match = host.get("os").get("osmatch")
-                    if len(os_match) > 0:
+                    if isinstance(os_match, list) and len(os_match) > 0:
                         os_match_highest = os_match[0]
+                    elif os_match is not None:
+                        os_match_highest = os_match
                     else:
                         continue
 
