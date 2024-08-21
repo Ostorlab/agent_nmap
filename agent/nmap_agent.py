@@ -381,6 +381,13 @@ class NmapAgent(
                     if isinstance(os_match, list):
                         if len(os_match) > 0:
                             os_match_highest = os_match[0]
+                            if (
+                                isinstance(os_match_highest, list)
+                                and len(os_match_highest) > 0
+                            ):
+                                os_match_highest = os_match_highest[0]
+                            else:
+                                continue
                         else:
                             continue
                     elif isinstance(os_match, dict):
