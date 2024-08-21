@@ -49,6 +49,26 @@ def fake_output() -> Any:
 
 
 @pytest.fixture
+def fake_crash_1_output() -> Any:
+    with open(
+        os.path.join(os.path.dirname(__file__), "fake_output_crash_1.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
+@pytest.fixture
+def fake_crash_2_output() -> Any:
+    with open(
+        os.path.join(os.path.dirname(__file__), "fake_output_crash_2.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
+@pytest.fixture
 def fake_output_with_down_host() -> Any:
     with open(
         os.path.join(os.path.dirname(__file__), "fake_output_with_down_host.xml"),

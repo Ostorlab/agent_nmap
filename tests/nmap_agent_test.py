@@ -983,3 +983,61 @@ def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
     nmap_test_agent.process(ipv4_msg)
 
     assert len(agent_mock) == 2
+
+
+def testAgentNmap_withOSFingerprintCrash1_noException(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg2: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_crash_1_output: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_crash_1_output, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.settings.args = [
+        utils_definitions.Arg(
+            name="max_network_mask_ipv4",
+            type="number",
+            value=json.dumps("32").encode(),
+        )
+    ]
+
+    nmap_test_agent.process(ipv4_msg2)
+
+    assert len(agent_mock) > 0
+
+
+def testAgentNmap_withOSFingerprintCrash2_noException(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg2: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_crash_2_output: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_crash_2_output, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.settings.args = [
+        utils_definitions.Arg(
+            name="max_network_mask_ipv4",
+            type="number",
+            value=json.dumps("32").encode(),
+        )
+    ]
+
+    nmap_test_agent.process(ipv4_msg2)
+
+    assert len(agent_mock) > 0

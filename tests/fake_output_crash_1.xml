@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.80 scan initiated Wed Aug 21 09:19:28 2024 as: nmap -O -sV -n -p 0-65535 -T3 -sS -&#45;script banner -sC -oX /tmp/xmloutput -oN /tmp/normal 52.28.101.76/32 -->
+<nmaprun scanner="nmap" args="nmap -O -sV -n -p 0-65535 -T3 -sS -&#45;script banner -sC -oX /tmp/xmloutput -oN /tmp/normal 52.28.101.76/32" start="1724231968" startstr="Wed Aug 21 09:19:28 2024" version="7.80" xmloutputversion="1.04">
+<scaninfo type="syn" protocol="tcp" numservices="65536" services="0-65535"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1724231968" endtime="1724232081"><status state="up" reason="reset" reason_ttl="63"/>
+<address addr="52.28.101.76" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="filtered" count="65536">
+<extrareasons reason="no-responses" count="65536"/>
+</extraports>
+</ports>
+<os></os>
+<times srtt="894" rttvar="813" to="100000"/>
+</host>
+<runstats><finished time="1724232081" timestr="Wed Aug 21 09:21:21 2024" elapsed="112.50" summary="Nmap done at Wed Aug 21 09:21:21 2024; 1 IP address (1 host up) scanned in 112.50 seconds" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

@@ -304,9 +304,9 @@ class NmapAgent(
     def _emit_services(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.info("Services targeting domain `%s`.", domain_name)
         if scan_results is not None and scan_results.get("nmaprun") is not None:
             if domain_name is not None:
+                logger.info("Services targeting domain `%s`.", domain_name)
                 for data in generators.get_services(scan_results):
                     domain_name_service = {
                         "name": domain_name,
@@ -373,15 +373,30 @@ class NmapAgent(
                 else:
                     raise ValueError(f"Incorrect ip version {version}")
 
-                if host.get("os", {}).get("osmatch") is not None:
+                if (
+                    host.get("os", {}) is not None
+                    and host.get("os", {}).get("osmatch") is not None
+                ):
                     os_match = host.get("os").get("osmatch")
-                    if len(os_match) > 0:
-                        os_match_highest = os_match[0]
+                    if isinstance(os_match, list):
+                        if len(os_match) > 0:
+                            os_match_highest = os_match[0]
+                            if isinstance(os_match_highest, dict):
+                                pass
+                            elif (
+                                isinstance(os_match_highest, list)
+                                and len(os_match_highest) > 0
+                            ):
+                                os_match_highest = os_match_highest[0]
+                            else:
+                                continue
+                        else:
+                            continue
+                    elif isinstance(os_match, dict):
+                        os_match_highest = os_match
                     else:
                         continue
 
-                    if isinstance(os_match_highest, list) and len(os_match_highest) > 0:
-                        os_match_highest = os_match_highest[0]
                     os_class = os_match_highest.get("osclass", {})
 
                     if isinstance(os_class, list) and len(os_class) > 0:

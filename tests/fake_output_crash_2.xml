@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.94SVN scan initiated Wed Aug 21 10:19:48 2024 as: nmap -O -sV -n -p 0-65535 -T3 -sS -&#45;script banner -sC -oX /tmp/xmloutput -oN /tmp/normal 52.28.101.76/32 -->
+<nmaprun scanner="nmap" args="nmap -O -sV -n -p 0-65535 -T3 -sS -&#45;script banner -sC -oX /tmp/xmloutput -oN /tmp/normal 52.28.101.76/32" start="1724231988" startstr="Wed Aug 21 10:19:48 2024" version="7.94SVN" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="65536" services="0-65535"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="unknown-response" reason_ttl="0"/>
+<address addr="52.28.101.76" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<taskprogress task="SYN Stealth Scan" time="1724232077" percent="81.76" remaining="20" etc="1724232097"/>
+<host starttime="1724231988" endtime="1724232092"><status state="up" reason="reset" reason_ttl="64"/>
+<address addr="52.28.101.76" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="filtered" count="65536">
+<extrareasons reason="no-response" count="65536" proto="tcp" ports="0-65535"/>
+</extraports>
+</ports>
+<os><osmatch name="Linux 2.6.18" accuracy="100" line="48991">
+<osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6.18</cpe></osclass>
+</osmatch>
+</os>
+<times srtt="550" rttvar="218" to="100000"/>
+</host>
+<runstats><finished time="1724232092" timestr="Wed Aug 21 10:21:32 2024" summary="Nmap done at Wed Aug 21 10:21:32 2024; 1 IP address (1 host up) scanned in 104.21 seconds" elapsed="104.21" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>
