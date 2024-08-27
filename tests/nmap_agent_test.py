@@ -1128,5 +1128,4 @@ def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
 
     nmap_test_agent.process(domain_msg)
 
-    assert len(agent_mock) > 0
-    assert "tcpwrapped" not in [m.data.get("service") for m in agent_mock]
+    assert len(agent_mock) == 0
