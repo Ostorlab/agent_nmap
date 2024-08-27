@@ -1060,7 +1060,7 @@ def testAgentLifecycle_whenTCPWrappedService_emitsNoService(
                         "@portid": "222",
                         "@protocol": "tcp",
                         "state": {"@state": "open"},
-                        "service": {"@name": "ssh"},
+                        "service": {"@name": "tcpwrapped"},
                     }
                 },
             }
@@ -1073,6 +1073,60 @@ def testAgentLifecycle_whenTCPWrappedService_emitsNoService(
     )
 
     nmap_test_agent.process(ipv4_msg)
+
+    assert len(agent_mock) > 0
+    assert "tcpwrapped" not in [m.data.get("service") for m in agent_mock]
+
+
+def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    domain_msg: message.Message,
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Ensure the agent handel osmatch when it's a list."""
+    del agent_persist_mock
+    product_fake_output = {
+        "nmaprun": {
+            "host": {
+                "address": {"@addr": "127.0.0.1", "@addrtype": "ipv4"},
+                "ports": {
+                    "port": {
+                        "@portid": "22",
+                        "@protocol": "tcp",
+                        "state": {
+                            "@state": "open",
+                            "@reason": "syn-ack",
+                            "@reason_ttl": "0",
+                        },
+                        "service": {
+                            "@name": "tcpwrapped",
+                        },
+                    }
+                },
+                "os": {
+                    "osmatch": [
+                        [
+                            {
+                                "@name": "Microsoft Windows 10 1511",
+                                "@accuracy": "88",
+                                "@line": "69505",
+                                "osclass": [],
+                            }
+                        ]
+                    ]
+                },
+            }
+        }
+    }
+
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(product_fake_output, ""),
+    )
+
+    nmap_test_agent.process(domain_msg)
 
     assert len(agent_mock) > 0
     assert "tcpwrapped" not in [m.data.get("service") for m in agent_mock]
