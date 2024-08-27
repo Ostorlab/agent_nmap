@@ -1041,3 +1041,38 @@ def testAgentNmap_withOSFingerprintCrash2_noException(
     nmap_test_agent.process(ipv4_msg2)
 
     assert len(agent_mock) > 0
+
+
+def testAgentLifecycle_whenTCPWrappedService_emitsNoService(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Check `tcpwrapped` services are not emitted."""
+    json_output = {
+        "nmaprun": {
+            "host": {
+                "address": {"@addr": "127.0.0.1", "@addrtype": "ipv4"},
+                "ports": {
+                    "port": {
+                        "@portid": "222",
+                        "@protocol": "tcp",
+                        "state": {"@state": "open"},
+                        "service": {"@name": "ssh"},
+                    }
+                },
+            }
+        }
+    }
+
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(json_output, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv4_msg)
+
+    assert len(agent_mock) > 0
+    assert "tcpwrapped" not in [m.data.get("service") for m in agent_mock]
