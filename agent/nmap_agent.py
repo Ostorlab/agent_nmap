@@ -460,7 +460,7 @@ class NmapAgent(
                                 "library_name": data.get("product"),
                                 "library_version": data.get("product_version"),
                                 "library_type": "BACKEND_COMPONENT",
-                                "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
+                                "detail": f"Nmap Detected {data.get('service')} on {domain_name}",
                             }
                             self.emit(
                                 selector="v3.fingerprint.domain_name.service.library",
@@ -474,7 +474,7 @@ class NmapAgent(
                                 "library_name": data.get("banner"),
                                 "library_version": None,
                                 "library_type": "BACKEND_COMPONENT",
-                                "detail": f"Nmap Detected {data.get('name')} on {domain_name}",
+                                "detail": f"Nmap Detected {data.get('service')} on {domain_name}",
                             }
                             self.emit(
                                 selector="v3.fingerprint.domain_name.service.library",
