@@ -46,6 +46,8 @@ DEFAULT_MASK_IPV6 = 128
 # scan up to 65536 host
 IPV6_CIDR_LIMIT = 112
 
+BLACKLISTED_SERVICES = ["tcpwrapped"]
+
 
 class Error(Exception):
     """Base Custom Error Class."""
@@ -308,6 +310,8 @@ class NmapAgent(
             if domain_name is not None:
                 logger.info("Services targeting domain `%s`.", domain_name)
                 for data in generators.get_services(scan_results):
+                    if data.get("service") in BLACKLISTED_SERVICES:
+                        continue
                     domain_name_service = {
                         "name": domain_name,
                         "port": data.get("port"),
@@ -334,6 +338,8 @@ class NmapAgent(
                     raise ValueError(f"Incorrect ip version {version}")
 
                 for data in generators.get_services(scan_results):
+                    if data.get("service") in BLACKLISTED_SERVICES:
+                        continue
                     logger.debug("Sending results to `%s`", selector)
                     ip_service = {
                         "host": data.get("host"),
@@ -414,6 +420,8 @@ class NmapAgent(
                     self.emit(selector, fingerprint_data)
 
                 for data in generators.get_services(scan_results):
+                    if data.get("service") in BLACKLISTED_SERVICES:
+                        continue
                     if data.get("product") is not None:
                         logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
