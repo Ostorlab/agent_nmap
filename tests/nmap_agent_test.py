@@ -539,6 +539,20 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
         is True
     )
     assert any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
+    assert (
+        any(
+            m.data.get("detail") == "Nmap Detected http-proxy on ostorlab.co"
+            for m in agent_mock
+        )
+        is True
+    )
+    assert (
+        any(
+            m.data.get("detail") == "Nmap Detected http on ostorlab.co"
+            for m in agent_mock
+        )
+        is True
+    )
 
 
 def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
