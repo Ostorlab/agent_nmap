@@ -13,6 +13,56 @@ from agent import nmap_agent
 from agent import nmap_options
 import pytest
 
+SCAN_RESULT_NO_PRODUCT = {
+    "nmaprun": {
+        "@scanner": "nmap",
+        "@args": "nmap -sV -n -p 0-65535 -T3 -sS --script banner -sC -oX /tmp/xmloutput -oN /tmp/normal video-cf.twimg.com",
+        "@start": "1724597787",
+        "@startstr": "Sun Aug 25 14:56:27 2024",
+        "@version": "7.80",
+        "@xmloutputversion": "1.04",
+        "scaninfo": {
+            "@type": "syn",
+            "@protocol": "tcp",
+            "@numservices": "65536",
+            "@services": "0-65535",
+        },
+        "verbose": {"@level": "0"},
+        "debugging": {"@level": "0"},
+        "host": {
+            "@starttime": "1724597787",
+            "@endtime": "1724597946",
+            "status": {"@state": "up", "@reason": "syn-ack", "@reason_ttl": "59"},
+            "address": {"@addr": "104.18.21.22", "@addrtype": "ipv4"},
+            "hostnames": {"hostname": {"@name": "video-cf.twimg.com", "@type": "user"}},
+            "ports": {
+                "extraports": {
+                    "@state": "filtered",
+                    "@count": "65523",
+                    "extrareasons": {"@reason": "no-responses", "@count": "65523"},
+                },
+                "port": [
+                    {
+                        "@protocol": "tcp",
+                        "@portid": "80",
+                        "state": {
+                            "@state": "open",
+                            "@reason": "syn-ack",
+                            "@reason_ttl": "59",
+                        },
+                        "service": {
+                            "@name": "http",
+                            "@servicefp": 'SF-Port80-TCP:V=7.80%I=7%D=8/25%Time=66CB468A%P=x86_64-pc-linux-gnu%r(GetRequest,14F,"HTTP/1\\.1\\x20400\\x20Bad\\x20Request\\r\\nDate:\\x20Sun,\\x2025\\x20Aug\\x202024\\x2014:58:18\\x20GMT\\r\\nContent-Type:\\x20text/html\\r\\nContent-Length:\\x20155\\r\\nConnection:\\x20close\\r\\nServer:\\x20cloudflare\\r\\nCF-RAY:\\x208b8c70817c5ac7b7-DUS\\r\\n\\r\\n<html>\\r\\n<head><title>400\\x20Bad\\x20Request</title></head>\\r\\n<body>\\r\\n<center><h1>400\\x20Bad\\x20Request</h1></center>\\r\\n<hr><center>cloudflare</center>\\r\\n</body>\\r\\n</html>\\r\\n")%r(HTTPOptions,14F,"HTTP/1\\.1\\x20400\\x20Bad\\x20Request\\r\\nDate:\\x20Sun,\\x2025\\x20Aug\\x202024\\x2014:58:18\\x20GMT\\r\\nContent-Type:\\x20text/html\\r\\nContent-Length:\\x20155\\r\\nConnection:\\x20close\\r\\nServer:\\x20cloudflare\\r\\nCF-RAY:\\x208b8c70818b877a48-DUS\\r\\n\\r\\n<html>\\r\\n<head><title>400\\x20Bad\\x20Request</title></head>\\r\\n<body>\\r\\n<center><h1>400\\x20Bad\\x20Request</h1></center>\\r\\n<hr><center>cloudflare</center>\\r\\n</body>\\r\\n</html>\\r\\n")%r(RTSPRequest,9B,"<html>\\r\\n<head><title>400\\x20Bad\\x20Request</title></head>\\r\\n<body>\\r\\n<center><h1>400\\x20Bad\\x20Request</h1></center>\\r\\n<hr><center>cloudflare</center>\\r\\n</body>\\r\\n</html>\\r\\n")%r(X11Probe,13C,"HTTP/1\\.1\\x20400\\x20Bad\\x20Request\\r\\nServer:\\x20cloudflare\\r\\nDate:\\x20Sun,\\x2025\\x20Aug\\x202024\\x2014:58:18\\x20GMT\\r\\nContent-Type:\\x20text/html\\r\\nContent-Length:\\x20155\\r\\nConnection:\\x20close\\r\\nCF-RAY:\\x20-\\r\\n\\r\\n<html>\\r\\n<head><title>400\\x20Bad\\x20Request</title></head>\\r\\n<body>\\r\\n<center><h1>400\\x20Bad\\x20Request</h1></center>\\r\\n<hr><center>cloudflare</center>\\r\\n</body>\\r\\n</html>\\r\\n")%r(FourOhFourRequest,14F,"HTTP/1\\.1\\x20400\\x20Bad\\x20Request\\r\\nDate:\\x20Sun,\\x2025\\x20Aug\\x202024\\x2014:58:18\\x20GMT\\r\\nContent-Type:\\x20text/html\\r\\nContent-Length:\\x20155\\r\\nConnection:\\x20close\\r\\nServer:\\x20cloudflare\\r\\nCF-RAY:\\x208b8c7081bba77a3a-DUS\\r\\n\\r\\n<html>\\r\\n<head><title>400\\x20Bad\\x20Request</title></head>\\r\\n<body>\\r\\n<center><h1>400\\x20Bad\\x20Request</h1></center>\\r\\n<hr><center>cloudflare</center>\\r\\n</body>\\r\\n</html>\\r\\n")%r(RPCCheck,13C,"HTTP/1\\.1\\x20400\\x20Bad\\x20Request\\r\\nServer:\\x20cloudflare\\r\\nDate:\\x20Sun,\\x2025\\x20Aug\\x202024\\x2014:58:23\\x20GMT\\r\\nContent-Type:\\x20text/html\\r\\nContent-Length:\\x20155\\r\\nConnection:\\x20close\\r\\nCF-RAY:\\x20-\\r\\n\\r\\n<html>\\r\\n<head><title>400\\x20Bad\\x20Request</title></head>\\r\\n<body>\\r\\n<center><h1>400\\x20Bad\\x20Request</h1></center>\\r\\n<hr><center>cloudflare</center>\\r\\n</body>\\r\\n</html>\\r\\n");',
+                            "@method": "probed",
+                            "@conf": "10",
+                        },
+                    }
+                ],
+            },
+        },
+    }
+}
+
 JSON_OUTPUT = {
     "nmaprun": {
         "host": {
@@ -1143,3 +1193,24 @@ def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
     nmap_test_agent.process(domain_msg)
 
     assert len(agent_mock) == 0
+
+
+def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_product: None | Dict[str, str],
+) -> None:
+    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
+    the agents emits back messages of type service with banner.
+    """
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(SCAN_RESULT_NO_PRODUCT, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    assert any("fingerprint" in msg.selector for msg in agent_mock) is False
