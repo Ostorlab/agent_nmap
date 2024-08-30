@@ -16,30 +16,30 @@ import pytest
 SCAN_RESULT_NO_PRODUCT = {
     "nmaprun": {
         "@scanner": "nmap",
-        "@args": "nmap -sV -n -p 0-65535 -T3 -sS --script banner -sC -oX /tmp/xmloutput -oN /tmp/normal video-cf.twimg.com",
-        "@start": "1724597787",
-        "@startstr": "Sun Aug 25 14:56:27 2024",
-        "@version": "7.80",
-        "@xmloutputversion": "1.04",
+        "@args": "nmap -sV -n -p 0-6111515135 -T3 -sS --script banner -sC -oX /tmp/xm -oN /tmp/normal photo-rw.som.cm",
+        "@start": "11423487",
+        "@startstr": "Sun Aug 32 24:56:27 2424",
+        "@version": "5.50",
+        "@xmloutputversion": "1.01",
         "scaninfo": {
             "@type": "syn",
             "@protocol": "tcp",
-            "@numservices": "65536",
-            "@services": "0-65535",
+            "@numservices": "3223",
+            "@services": "0-62341",
         },
         "verbose": {"@level": "0"},
         "debugging": {"@level": "0"},
         "host": {
-            "@starttime": "1724597787",
-            "@endtime": "1724597946",
-            "status": {"@state": "up", "@reason": "syn-ack", "@reason_ttl": "59"},
-            "address": {"@addr": "104.18.21.22", "@addrtype": "ipv4"},
+            "@starttime": "1724553457",
+            "@endtime": "17243453456",
+            "status": {"@state": "up", "@reason": "syn-ack", "@reason_ttl": "19"},
+            "address": {"@addr": "184.11.11.13", "@addrtype": "ipv4"},
             "hostnames": {"hostname": {"@name": "video-cf.twimg.com", "@type": "user"}},
             "ports": {
                 "extraports": {
                     "@state": "filtered",
-                    "@count": "65523",
-                    "extrareasons": {"@reason": "no-responses", "@count": "65523"},
+                    "@count": "62343",
+                    "extrareasons": {"@reason": "no-responses", "@count": "62343"},
                 },
                 "port": [
                     {
@@ -48,13 +48,13 @@ SCAN_RESULT_NO_PRODUCT = {
                         "state": {
                             "@state": "open",
                             "@reason": "syn-ack",
-                            "@reason_ttl": "59",
+                            "@reason_ttl": "52",
                         },
                         "service": {
                             "@name": "http",
                             "@servicefp": 'SF-Port80-TCPdy>\\r\\n</html>\\r\\nRequest\\r\\nServer:\\x20cloudflare\\r\\nDate:\\x20Sun,\\x2025\\x20Aug\\x202024\\x2014:58:18\\x20GMT\\r\\nContent-Type:\\x20text/html\\r\\nContent-Length:\\x20")%dm\x20r>\\r\\n</body>\\r\\n</html>\\r\\n");',
                             "@method": "probed",
-                            "@conf": "10",
+                            "@conf": "12",
                         },
                     }
                 ],
