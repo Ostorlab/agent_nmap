@@ -1,0 +1,10 @@
+{
+  "risk_rating": "info",
+  "short_description": "Application signing certificate details",
+  "references": {
+    "Signing Your Applications": "http://developer.android.com/tools/publishing/app-signing.html"
+  },
+  "title": "Application certificate information",
+  "privacy_issue": false,
+  "security_issue": false
+}

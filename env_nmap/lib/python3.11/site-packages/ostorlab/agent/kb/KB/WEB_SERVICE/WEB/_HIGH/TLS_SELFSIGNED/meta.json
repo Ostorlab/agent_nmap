@@ -1,0 +1,25 @@
+{
+  "risk_rating": "high",
+  "short_description": "The application accepts self-signed certificates making it vulnerable to man-in-the-middle (MITM) attacks.",
+  "references": {
+    "Improper Certificate Validation - CWE": "https://cwe.mitre.org/data/definitions/295.html"
+  },
+  "title": "Insecure TLS certificate validation (accept self-signed certificate)",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_4_2",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

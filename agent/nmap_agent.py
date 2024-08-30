@@ -422,7 +422,7 @@ class NmapAgent(
                 for data in generators.get_services(scan_results):
                     if data.get("service") in BLACKLISTED_SERVICES:
                         continue
-                    if data.get("product") is not None:
+                    if data.get("product") is not None and data.get("product") != "":
                         logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
                             "host": data.get("host"),
@@ -437,7 +437,7 @@ class NmapAgent(
                             "detail": data.get("product"),
                         }
                         self.emit(selector, fingerprint_data)
-                    if data.get("banner") is not None:
+                    if data.get("banner") is not None and data.get("banner") != "":
                         logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
                             "host": data.get("host"),
@@ -452,7 +452,10 @@ class NmapAgent(
                         }
                         self.emit(selector, fingerprint_data)
                     if domain_name is not None:
-                        if data.get("product") is not None:
+                        if (
+                            data.get("product") is not None
+                            and data.get("product") != ""
+                        ):
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),
@@ -466,7 +469,7 @@ class NmapAgent(
                                 selector="v3.fingerprint.domain_name.service.library",
                                 data=msg_data,
                             )
-                        if data.get("banner") is not None:
+                        if data.get("banner") is not None and data.get("banner") != "":
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),

@@ -1,0 +1,21 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Insecure HTTP Header Setting: Content Security Policy (CSP).",
+  "references": {
+    "Content Security Policy (CSP)": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP"
+  },
+  "title": "Insecure HTTP Header Setting: Content Security Policy (CSP)",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L3": [
+      "V2_2_5"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ]
+  }
+}

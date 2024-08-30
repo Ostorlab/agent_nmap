@@ -1,0 +1,6 @@
+[console_scripts]
+ostorlab = ostorlab:main
+oxo = ostorlab:main
+
+[pytest11]
+pytest_ostorlab = ostorlab.testing.agent

@@ -1,0 +1,29 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "List of unused permissions based on API calls.",
+  "references": {
+    "Android InSecurity: Understanding Permissions": "https://www.infsec.cs.uni-saarland.de/wp-content/uploads/sites/2/2014/10/04_AndroidInsecurity.pdf",
+    "Underestimated Privacy Implications of the ACCESS_WIFI_STATE": "https://hal.inria.fr/hal-00994926v2/document"
+  },
+  "title": "Unused permissions (overprivileged)",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_1"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_1"
+    ],
+    "CWE_TOP_25": [
+      "CWE_276"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_7_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PRIVACY_1"
+    ]
+  }
+}

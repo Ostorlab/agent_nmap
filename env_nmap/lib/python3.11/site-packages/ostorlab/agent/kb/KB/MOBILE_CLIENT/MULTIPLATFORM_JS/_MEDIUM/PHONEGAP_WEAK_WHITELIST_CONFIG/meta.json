@@ -1,0 +1,39 @@
+{
+  "title": "Insecure whitelist",
+  "risk_rating": "medium",
+  "short_description": "Insecure permissive whitelist configuration.",
+  "references": {
+    "Cordova Security Whitelist and Content Security Policy Guide": "https://taco.visualstudio.com/en-us/docs/cordova-security-whitlists/",
+    "Whitelist Guide": "https://cordova.apache.org/docs/en/latest/guide/appdev/whitelist/",
+    "Apache Cordova CVE-2015-5256": "https://cordova.apache.org/announcements/2015/11/20/security.html",
+    "Apache Cordova CVE-2015-1835": "http://cordova.apache.org/announcements/2015/05/26/android-402.html"
+  },
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_2"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_4"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

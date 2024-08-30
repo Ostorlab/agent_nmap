@@ -1,0 +1,11 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Application is disabling backup mode.",
+  "references": {
+    "Random Musings on the M Developer Preview: the Ugly (Part Two)": "https://commonsware.com/blog/2015/06/04/random-musings-m-developer-preview-bad-part-two.html",
+    "DRD22. Do not cache sensitive information": "https://www.securecoding.cert.org/confluence/display/android/DRD22.+Do+not+cache+sensitive+information"
+  },
+  "title": "Backup mode disabled",
+  "privacy_issue": true,
+  "security_issue": false
+}

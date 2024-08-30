@@ -1,0 +1,26 @@
+{
+  "risk_rating": "medium",
+  "short_description": "A publicly accessible ASW S3 bucket with potentially sensitive information has file listing enabled.",
+  "references": {
+    "AWS S3 bucket - another layer of protection": "https://aws.amazon.com/blogs/aws/amazon-s3-block-public-access-another-layer-of-protection-for-your-accounts-and-buckets/"
+  },
+  "title": "Public AWS S3 bucket with file listing enabled",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_7_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",  
+      "CC_7_4",
+      "CC_7_5",
+      "CC_8_1"
+    ]
+  }
+}

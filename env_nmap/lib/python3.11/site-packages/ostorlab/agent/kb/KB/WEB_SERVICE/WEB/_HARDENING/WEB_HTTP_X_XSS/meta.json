@@ -1,0 +1,19 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Insecure HTTP Header Setting: X-XSS-Protection Header.",
+  "references": {
+    "X-XSS-Protection": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection"
+  },
+  "title": "Insecure HTTP Header Setting: X-XSS-Protection Header",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ]
+  }
+}

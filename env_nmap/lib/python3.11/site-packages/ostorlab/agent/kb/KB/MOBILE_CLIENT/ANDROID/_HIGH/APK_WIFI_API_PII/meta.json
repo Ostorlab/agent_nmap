@@ -1,0 +1,61 @@
+{
+    "risk_rating": "high",
+    "short_description": "Android WiFi API exposes Personal Identifiable Information (PII), potentially allowing apps with appropriate permissions to access sensitive information through WiFi-related APIs on Android devices.",
+    "references": {
+        "Android Docs": "https://source.android.com/docs/security/bulletin/2015-12-01#information_disclosure_vulnerability_in_wi-fi",
+        "NVD": "https://nvd.nist.gov/vuln/detail/CVE-2015-6629",
+        "Vuldb": "https://vuldb.com/?id.221977"
+    },
+    "title": "Android APK WiFi API Personal Identifiable Information concerns",
+    "privacy_issue": true,
+    "security_issue": true,
+    "categories": {
+        "CCPA": [
+            "CCPA_1798_100",
+            "CCPA_1798_110",
+            "CCPA_1798_115",
+            "CCPA_1798_135",
+            "CCPA_1798_150"
+        ],
+        "CWE_TOP_25": [
+            "CWE_276"
+        ],
+        "GDPR": [
+            "ART_1",
+            "ART_2",
+            "ART_3",
+            "ART_4",
+            "ART_5",
+            "ART_6",
+            "ART_9",
+            "ART_13",
+            "ART_14",
+            "ART_21",
+            "ART_32"
+        ],
+        "OWASP_ASVS_L1": [
+                "V8_3_3"
+        ],
+        "OWASP_MASVS_L1": [
+            "MSTG_ARCH_1",
+            "MSTG_ARCH_4",
+            "MSTG_ARCH_12",
+            "MSTG_STORAGE_1",
+            "MSTG_STORAGE_4",
+            "MSTG_STORAGE_12",
+            "MSTG_CODE_5"
+            ],
+        "OWASP_MASVS_L2": [
+            "MSTG_ARCH_12",
+            "MSTG_STORAGE_12",
+            "MSTG_STORAGE_4"
+            ],
+        "OWASP_MASVS_v2_1": [
+            "MASVS_PRIVACY_1",
+            "MASVS_PRIVACY_3",
+            "MASVS_STORAGE_2",
+            "MASVS_CODE_1",
+            "MASVS_CODE_3"
+            ]
+    }
+}

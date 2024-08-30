@@ -1,0 +1,28 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Application is compiled with Facebook Sdk debug mode enabled.",
+  "references": {
+    "Facebook Sdk Debug Logs": "https://developers.facebook.com/docs/app-events/getting-started-app-events-android/"
+  },
+  "title": "Facebook SDK debug mode enabled",
+  "cvss_v3_vector": "CVSS:3.0/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_2",
+      "MSTG_CODE_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_2",
+      "MSTG_CODE_4"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_3"
+    ]
+  }
+}

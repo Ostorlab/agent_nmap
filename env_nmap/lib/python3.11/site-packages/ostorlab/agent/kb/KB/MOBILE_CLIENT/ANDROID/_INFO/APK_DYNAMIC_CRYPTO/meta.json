@@ -1,0 +1,33 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of crypto API calls",
+  "references": {
+    "SER03-J. Do not serialize unencrypted sensitive data (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/java/SER03-J.+Do+not+serialize+unencrypted+sensitive+data",
+    "DRD18. Do not use the default behavior in a cryptographic library if it does not use recommended practices (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/android/DRD18.+Do+not+use+the+default+behavior+in+a+cryptographic+library+if+it+does+not+use+recommended+practices"
+  },
+  "title": "Recorded calls to Crypto API",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+  "OWASP_MASVS_L1": [
+    "MSTG_CRYPTO_1",
+    "MSTG_CRYPTO_2",
+    "MSTG_CRYPTO_3",
+    "MSTG_CRYPTO_4",
+    "MSTG_CRYPTO_5",
+    "MSTG_CRYPTO_6"
+    ],
+  "OWASP_MASVS_L2": [
+    "MSTG_CRYPTO_1",
+    "MSTG_CRYPTO_2",
+    "MSTG_CRYPTO_3",
+    "MSTG_CRYPTO_4",
+    "MSTG_CRYPTO_5",
+    "MSTG_CRYPTO_6"
+    ],
+    "OWASP_MASVS_v2_1": [
+    "MASVS_CRYPTO_1",
+    "MASVS_CRYPTO_2"
+    ]
+  }
+}

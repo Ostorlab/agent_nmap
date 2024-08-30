@@ -1,0 +1,21 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of calls to dangerous low-level C functions prone to memory corruption vulnerabilities.",
+  "references": {
+    "C++ Core Guidelines R.10 - Avoid malloc() and free()": "https://github.com/isocpp/CppCoreGuidelines/blob/036324/CppCoreGuidelines.md#r10-avoid-malloc-and-free"
+  },
+  "title": "List of calls to dangerous low-level C functions",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_787",
+      "CWE_125",
+      "CWE_416",
+      "CWE_476",
+      "CWE_190",
+      "CWE_190",
+      "CWE_400"
+    ]
+  }
+}

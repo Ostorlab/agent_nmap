@@ -1,0 +1,12 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Application checks for the use of rooted or jail-broken device.",
+  "references": {
+    "Root detection & evasion": "http://resources.infosecinstitute.com/android-hacking-security-part-8-root-detection-evasion/#gref",
+    "OWASP Mobile Security Testing Guide - Reverse Engineering": "https://github.com/OWASP/owasp-mstg/blob/master/Document/0x06j-Testing-Resiliency-Against-Reverse-Engineering.md"
+  },
+  "title": "Application checks rooted device",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {}
+}

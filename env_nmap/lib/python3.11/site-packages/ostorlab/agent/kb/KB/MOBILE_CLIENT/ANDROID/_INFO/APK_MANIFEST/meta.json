@@ -1,0 +1,10 @@
+{
+  "risk_rating": "info",
+  "short_description": "APK Manifest in XML",
+  "references": {
+    "Manifest Introduction (Android developer)": "http://developer.android.com/guide/topics/manifest/manifest-intro.html"
+  },
+  "title": "Android Manifest",
+  "privacy_issue": false,
+  "security_issue": false
+}

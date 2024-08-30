@@ -1,0 +1,37 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The client supports combinations of cipher suites that suffer from known cryptographic weaknesses.",
+  "references": {
+    "Transport Layer Protection Cheat Sheet (OWASP)": "https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet",
+    "SSL/TLS Deployment Best Practices (SSLabs)": "https://www.ssllabs.com/projects/best-practices/",
+    "Mozilla Secure TLS/SSL Configuration": "https://wiki.mozilla.org/Security/Server_Side_TLS"
+  },
+  "title": "Insecure TLS Ciphers supported",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L2": [
+      "V6_2_3"
+    ],
+    "OWASP_ASVS_L3": [
+      "V6_2_3"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_4_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_7",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

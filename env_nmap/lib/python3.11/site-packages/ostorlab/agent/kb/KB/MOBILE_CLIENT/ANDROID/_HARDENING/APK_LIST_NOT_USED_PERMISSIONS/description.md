@@ -1,0 +1,1 @@
+The application requests permissions, but never uses the resource granted.

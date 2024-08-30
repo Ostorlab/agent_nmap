@@ -1,0 +1,1 @@
+The types of personally identifiable information (PII) collected and used in the privacy policy is safe from legal and regulatory issues, or can erode trust with users who may feel their privacy is not being adequately protected.

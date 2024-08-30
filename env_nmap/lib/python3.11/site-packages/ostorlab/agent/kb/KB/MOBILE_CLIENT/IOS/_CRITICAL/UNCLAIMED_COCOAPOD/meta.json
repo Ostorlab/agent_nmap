@@ -1,0 +1,32 @@
+{
+    "risk_rating": "critical",
+    "short_description": "Unclaimed Cocoapods can expose applications to potential dependency injection.",
+    "references": {
+        "E.V.A Sec article": "https://evasec.webflow.io/blog/eva-discovered-supply-chain-vulnerabities-in-cocoapods"
+    },
+    "title": "Unclaimed Cocoapods Vulnerability",
+    "privacy_issue": false,
+    "security_issue": true,
+    "categories": {
+        "OWASP_MASVS_L1": [
+            "MSTG_CODE_5"
+        ],
+        "OWASP_MASVS_L2": [
+            "MSTG_CODE_5"
+        ],
+        "OWASP_MASVS_v2_1": [
+            "MASVS_CODE_3"
+        ],
+        "PCI_STANDARDS": [
+            "REQ_12_8"
+        ],
+        "SOC2_CONTROLS": [
+            "CC_9_2",
+            "CC_4_2",
+            "CC_7_1",
+            "CC_7_2",
+            "CC_7_4",
+            "CC_7_5"
+        ]
+    }
+}

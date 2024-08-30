@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of Swift frameworks included in the application.",
+  "references": {},
+  "title": "IPA Frameworks list",
+  "privacy_issue": false,
+  "security_issue": false
+}

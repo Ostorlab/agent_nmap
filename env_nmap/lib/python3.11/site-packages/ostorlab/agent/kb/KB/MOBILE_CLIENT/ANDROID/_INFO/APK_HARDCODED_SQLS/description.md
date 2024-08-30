@@ -1,0 +1,1 @@
+List of all hardcoded SQL queries constant strings in the application.

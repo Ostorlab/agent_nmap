@@ -1,0 +1,19 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Implement policies and procedures to protect electronic protected information from improper alteration or destruction.",
+  "references": {
+    "HIPAA Security Rules": "http://www.access.gpo.gov/nara/cfr/waisidx_07/45cfr160_07.html",
+    "Security Standards: Technical Safeguards": "https://www.hhs.gov/sites/default/files/ocr/privacy/hipaa/administrative/securityrule/techsafeguards.pdf"
+  },
+  "title": "Enforcer proper authentication",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_ARCH_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_ARCH_2"
+    ]
+  }
+}

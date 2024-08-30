@@ -1,0 +1,32 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Application is not explicitly setting the attribute hasFragileUserData.",
+  "references": {
+    "Android Developer - Fragile User Data": "https://developer.android.com/guide/topics/manifest/application-element#fragileuserdata"
+  },
+  "title": "Attribute hasFragileUserData not set",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N",
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_ARCH_12"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_ARCH_12"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_3_2",
+      "REQ_3_5",
+      "REQ_6_2"
+    ],
+    "GDPR": [
+        "ART_5",
+        "ART_12",
+        "ART_25"
+      ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PRIVACY_4"
+    ]
+  }
+}

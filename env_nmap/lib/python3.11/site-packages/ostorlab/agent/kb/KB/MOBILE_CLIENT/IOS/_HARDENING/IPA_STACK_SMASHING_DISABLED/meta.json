@@ -1,0 +1,29 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "The application does not enforce Stack Smashing Protection (SSP).",
+  "references": {
+    "Stack Smashing Protection (OSdev)": "http://wiki.osdev.org/Stack_Smashing_Protector",
+    "Xcode 3 supports Stack Canaries": "http://lists.apple.com/archives/xcode-users/2007/Dec/msg00055.html"
+  },
+  "title": "Stack smashing protection not enforced",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_9"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_9"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_4"
+    ]
+  }
+}

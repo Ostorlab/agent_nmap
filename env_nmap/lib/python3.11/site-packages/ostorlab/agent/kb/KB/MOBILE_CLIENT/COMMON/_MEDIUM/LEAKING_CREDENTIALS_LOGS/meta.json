@@ -1,0 +1,41 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Inclusion of Sensitive Information in Log Files.",
+  "references": {
+    "Practices for Protecting Electronic Restricted Data: A Quick Reference": "http://its.ucsc.edu/policies/rd.html",
+    "CWE-200: Information Exposure": "http://cwe.mitre.org/data/definitions/200.html",
+    "CWE-359: Exposure of Private Information (\"Privacy Violation\")": "http://cwe.mitre.org/data/definitions/359.html",
+    "DRD04-J. Do not log sensitive information": "https://www.securecoding.cert.org/confluence/display/android/DRD04-J.+Do+not+log+sensitive+information",
+    "ERR02-J. Prevent exceptions while logging data": "https://www.securecoding.cert.org/confluence/display/java/ERR02-J.+Prevent+exceptions+while+logging+data",
+    "Logging methods ( Log sparingly )": "https://source.android.com/setup/contribute/code-style#log-sparingly"
+  },
+  "title": "Credentials exposed in logs",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_3"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_3"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_3_2",
+      "REQ_3_3",
+      "REQ_6_2",
+      "REQ_10_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_STORAGE_2"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+The vulnerability exists in the application's failure to accurately reflect the collection of users' web browsing history in the privacy policy, potentially leading to a breach of user privacy and trust.

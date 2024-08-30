@@ -1,0 +1,11 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of native methods calls",
+  "references": {
+    "JNI Tips (Android developer)": "http://developer.android.com/training/articles/perf-jni.html",
+    "JNI04-J. Do not assume that Java strings are null-terminated (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/java/JNI04-J.+Do+not+assume+that+Java+strings+are+null-terminated"
+  },
+  "title": "Call to native methods",
+  "privacy_issue": false,
+  "security_issue": true
+}

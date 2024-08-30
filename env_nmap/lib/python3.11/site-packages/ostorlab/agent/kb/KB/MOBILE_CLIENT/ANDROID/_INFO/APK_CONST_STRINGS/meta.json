@@ -1,0 +1,18 @@
+{
+  "risk_rating": "info",
+  "short_description": "Hardcoded strings",
+  "references": {
+    "MSC03-J. Never hard code sensitive information": "https://www.securecoding.cert.org/confluence/display/java/MSC03-J.+Never+hard+code+sensitive+information?focusedCommentId=142409764#comment-142409764"
+  },
+  "title": "Hardcoded strings list",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_9"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_9"
+    ]
+  }
+}

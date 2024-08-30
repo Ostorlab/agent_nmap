@@ -1,0 +1,1 @@
+The vulnerability exists in the privacy policy as it fails to mention users' right to know about information sharing, potentially leaving users unaware of how their data is being shared with third parties.

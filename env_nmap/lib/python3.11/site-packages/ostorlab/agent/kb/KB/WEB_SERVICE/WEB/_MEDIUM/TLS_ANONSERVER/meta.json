@@ -1,0 +1,31 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Server accepts anonymous authentication.",
+  "references": {
+  },
+  "title": "Anonymous unauthenticated server accepted",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_287"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_1_2",
+      "REQ_2_2",
+      "REQ_4_2",
+      "REQ_6_4",
+      "REQ_8_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

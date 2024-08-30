@@ -1,0 +1,47 @@
+{
+  "risk_rating": "high",
+  "short_description": "The application uses an insecure object deserialization format that attackers can exploit to cause remote code execution.",
+  "references": {
+    "Java unmarsheller security": "https://github.com/mbechler/marshalsec/raw/master/marshalsec.pdf",
+    "Deserialization of untrusted data (OWASP)": "https://www.owasp.org/index.php/Deserialization_of_untrusted_data",
+    "Java deserialization cheat sheet": "https://github.com/GrrrDog/Java-Deserialization-Cheat-Sheet",
+    "CWE-502: Deserialization of Untrusted Data": "https://cwe.mitre.org/data/definitions/502.html"
+  },
+  "title": "Insecure Object Serialization",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_502"
+    ],
+    "OWASP_ASVS_L1": [
+      "V5_5_1",
+      "V5_5_3"
+    ],
+    "OWASP_ASVS_L2": [
+      "V1_5_2",
+      "V5_5_1",
+      "V5_5_3"
+    ],
+    "OWASP_ASVS_L3": [
+      "V1_5_2",
+      "V5_5_1",
+      "V5_5_3"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The application calls the registerReceiver method with the argument flags set to RECEIVER_EXPORTED.",
+  "references": {
+    "Safer exporting of context-registered receivers (Android Developer)": "https://developer.android.google.cn/about/versions/13/features#runtime-receivers"
+  },
+  "title": "Insecure Register Receiver Flag",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_4"
+    ],
+    "GDPR": [
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

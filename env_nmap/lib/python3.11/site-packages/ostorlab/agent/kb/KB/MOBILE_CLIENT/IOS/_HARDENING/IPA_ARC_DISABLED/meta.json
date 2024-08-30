@@ -1,0 +1,28 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "The application does not enforce Automatic Reference Counting (ARC) binary protection.",
+  "references": {
+    "Automatic Reference Counting (Wikipedia) ": "https://en.wikipedia.org/wiki/Automatic_Reference_Counting",
+    "Automatic Reference Counting (LLVM)": "http://clang.llvm.org/docs/AutomaticReferenceCounting.html",
+    "Automatic Reference Counting for Swift (Apple developer)": "https://developer.apple.com/library/ios/documentation/Swift/Conceptual/Swift_Programming_Language/AutomaticReferenceCounting.html"
+  },
+  "title": "Automatic Reference Counting (ARC) not enforced",
+  "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_9"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_9"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_4"
+    ]
+  }
+}

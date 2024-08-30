@@ -1,0 +1,20 @@
+{
+  "risk_rating": "info",
+  "short_description": "Logging API calls in the application",
+  "references": {
+    "DRD04-J. Do not log sensitive information": "https://www.securecoding.cert.org/confluence/display/android/DRD04-J.+Do+not+log+sensitive+information",
+    "ERR02-J. Prevent exceptions while logging data": "https://www.securecoding.cert.org/confluence/display/java/ERR02-J.+Prevent+exceptions+while+logging+data",
+    "Logging methods ( Log sparingly )": "https://source.android.com/setup/contribute/code-style#log-sparingly"
+  },
+  "title": "Call to logging API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_9"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_9"
+    ]
+  }
+}

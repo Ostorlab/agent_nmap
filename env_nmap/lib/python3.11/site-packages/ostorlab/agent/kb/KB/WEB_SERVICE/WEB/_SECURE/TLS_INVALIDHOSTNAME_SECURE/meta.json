@@ -1,0 +1,10 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Application performs proper server certificate validation.",
+  "references": {
+    "Properly verify server certificate on SSL/TLS (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=134807561"
+  },
+  "title": "Secure TLS certificate validation",
+  "privacy_issue": true,
+  "security_issue": true
+}

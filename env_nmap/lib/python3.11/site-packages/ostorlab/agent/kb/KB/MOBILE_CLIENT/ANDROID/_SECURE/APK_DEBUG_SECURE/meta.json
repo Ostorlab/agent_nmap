@@ -1,0 +1,11 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Application is compiled with debug mode disabled",
+  "references": {
+    "DRD10-J Do not release apps that are debuggable (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/android/DRD10-X.+Do+not+release+apps+that+are+debuggable"
+  },
+  "title": "Debug mode disabled",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {}
+}

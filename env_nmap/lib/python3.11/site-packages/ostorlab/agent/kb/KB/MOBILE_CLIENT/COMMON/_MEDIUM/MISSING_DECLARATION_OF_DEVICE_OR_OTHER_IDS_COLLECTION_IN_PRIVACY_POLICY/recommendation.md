@@ -1,0 +1,1 @@
+To mitigate the vulnerability of collecting users' device or other IDs, ensure that your privacy policy clearly states the purpose for collecting this data and obtain explicit consent from users before doing so. Additionally, implement strong data security measures to protect this information from unauthorized access or misuse.

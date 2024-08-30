@@ -1,0 +1,1 @@
+To mitigate vulnerability, ensure that your privacy policy clearly outlines the rights of users under the GDPR, including the right to access, rectify, and erase personal data, as well as the right to data portability and the right to object to processing. Additionally, regularly review and update your privacy policy to ensure compliance with any changes to GDPR regulations.

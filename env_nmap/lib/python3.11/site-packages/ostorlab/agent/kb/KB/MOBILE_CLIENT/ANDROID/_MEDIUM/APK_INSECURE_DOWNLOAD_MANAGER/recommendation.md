@@ -1,0 +1,1 @@
+The application should allow the users to use either the Wi-Fi or a mobile network connection. A common strategy for apps is to only fetch large data if a Wi-Fi network is available.

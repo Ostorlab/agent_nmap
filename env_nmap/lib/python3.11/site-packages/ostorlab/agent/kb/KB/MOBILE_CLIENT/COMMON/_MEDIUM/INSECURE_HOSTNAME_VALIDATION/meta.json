@@ -1,0 +1,38 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The hostname validation uses insecure and simplistic string checks",
+  "references": {
+    "CWE-359: Improperly Implemented Security Check for Standard": "https://cwe.mitre.org/data/definitions/358.html",
+    "CWE-693: Protection Mechanism Failure": "https://cwe.mitre.org/data/definitions/693.html"
+  },
+  "title": "Insecure hostname validation check",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_2"
+    ],
+    "CWE_TOP_25": [
+      "CWE_20"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_4"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

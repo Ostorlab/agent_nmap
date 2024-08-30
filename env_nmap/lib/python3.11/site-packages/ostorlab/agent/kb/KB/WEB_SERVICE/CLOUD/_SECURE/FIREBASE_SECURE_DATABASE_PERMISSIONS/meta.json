@@ -1,0 +1,11 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Firebase database enforces secure database permissions preventing non-authenticated access.",
+  "references": {
+    "Firebase - Understand Firebase Realtime Database Rules": "https://firebase.google.com/docs/database/security",
+    "Firebase - Secure Your Data": "https://firebase.google.com/docs/database/security/securing-data"
+  },
+  "title": "Secure Firebase Database Permissions",
+  "privacy_issue": false,
+  "security_issue": true
+}

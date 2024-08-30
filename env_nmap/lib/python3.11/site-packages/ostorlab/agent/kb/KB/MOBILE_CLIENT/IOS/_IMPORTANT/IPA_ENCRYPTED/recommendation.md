@@ -1,0 +1,1 @@
+Please provide an unencrypted application with tools like `lldb-dumpdecrypted` or `Clutch`.

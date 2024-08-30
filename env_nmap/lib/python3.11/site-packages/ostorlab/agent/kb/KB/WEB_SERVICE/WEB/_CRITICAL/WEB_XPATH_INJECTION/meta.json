@@ -1,0 +1,29 @@
+{
+  "risk_rating": "critical",
+  "short_description": "The web application is susceptible to an XPath Injection vulnerability.",
+  "references": {
+    "OWASP":"https://owasp.org/www-community/attacks/XPATH_Injection",
+    "Portswigger": "https://portswigger.net/kb/issues/00100600_xpath-injection"
+  },
+  "title": "XPath Injection",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "GDPR": [
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_4",
+      "REQ_6_5"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

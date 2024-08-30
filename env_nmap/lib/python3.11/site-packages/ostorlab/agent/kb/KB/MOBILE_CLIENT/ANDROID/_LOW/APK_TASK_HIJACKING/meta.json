@@ -1,0 +1,41 @@
+{
+  "risk_rating": "low",
+  "short_description": "The application does not protect against task hijacking, malicious application on the device can takeover the application foreground task",
+  "references": {
+    "Understand Tasks and Back Stack - Android Documentation": "https://developer.android.com/guide/components/activities/tasks-and-back-stack",
+    "Towards Discovering and Understanding Task Hijacking in Android": "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf",
+    "StrandHogg Attack": "https://promon.co/security-news/strandhogg/",
+    "StandHogg Attack 2.0": "https://promon.co/strandhogg-2-0/",
+    "Task Hijacking exploited by Mobile Banking Malware": "https://arstechnica.com/information-technology/2019/12/vulnerability-in-fully-patched-android-phones-under-active-attack-by-bank-thieves/",
+    "CVE-2020-0267: WindowManager Confused Deputy": "https://www.incibe-cert.es/en/early-warning/vulnerabilities/cve-2020-0267"
+  },
+  "title": "Task Hijacking",
+  "privacy_issue": true,
+  "security_issue": true,
+  "targeted_by_malware": true,
+  "has_public_exploit": true,
+  "categories": {
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_9"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_25",
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

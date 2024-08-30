@@ -1,0 +1,1 @@
+It has been identified that the Phone Number data type declaration in your privacy policy does not accurately match the actual usage of phone numbers within your system, potentially exposing user phone numbers to unauthorized access or misuse.

@@ -1,0 +1,26 @@
+{
+  "risk_rating": "high",
+  "short_description": "Application suffers from heartbleed (CVE-2014-0160) vulnerability.",
+  "references": {},
+  "title": "Heartbleed (CVE-2014-0160)",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_4_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

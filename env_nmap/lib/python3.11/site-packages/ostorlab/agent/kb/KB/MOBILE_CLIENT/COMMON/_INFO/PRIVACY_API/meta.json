@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of calls to privacy methods.",
+  "references": {},
+  "title": "Calls to Privacy API",
+  "privacy_issue": true,
+  "security_issue": false
+}

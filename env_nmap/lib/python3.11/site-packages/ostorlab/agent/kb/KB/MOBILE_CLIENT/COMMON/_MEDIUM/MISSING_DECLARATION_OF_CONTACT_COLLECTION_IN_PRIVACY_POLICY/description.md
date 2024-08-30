@@ -1,0 +1,1 @@
+If your privacy policy mentions collection of your users' contacts but this data type is not declared in your Play Data Safety Section, it could lead to a potential violation of user privacy and data protection regulations. It is important to ensure that all data collection practices are accurately disclosed to users to maintain transparency and trust.

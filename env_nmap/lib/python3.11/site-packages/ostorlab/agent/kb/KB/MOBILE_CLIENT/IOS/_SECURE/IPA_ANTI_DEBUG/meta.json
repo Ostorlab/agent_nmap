@@ -1,0 +1,11 @@
+{
+  "risk_rating": "secure",
+  "short_description": "The application implements anti-debug techniques to prevent dynamic analysis of the application.",
+  "references": {
+    "iOS Runtime Headers (limneos)": "http://developer.limneos.net/",
+    "iOS Runtime Headers (nst Git)": "https://github.com/nst/iOS-Runtime-Headers"
+  },
+  "title": "Application implements anti-debug techniques",
+  "privacy_issue": false,
+  "security_issue": true
+}

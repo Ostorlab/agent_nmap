@@ -1,0 +1,26 @@
+{
+  "risk_rating": "low",
+  "short_description": "List all the crash stacks obtained during the dynamic runs.",
+  "references": {
+    "CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')": "http://cwe.mitre.org/data/definitions/534.html",
+    "CWE-209: Information Exposure Through an Error Message": "http://cwe.mitre.org/data/definitions/209.html",
+    "CWE-20: Improper Input Validation": "http://cwe.mitre.org/data/definitions/20.html"
+  },
+  "title": "Process crashes",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_6"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_6"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_4"
+    ]
+  }
+}

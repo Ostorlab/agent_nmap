@@ -1,0 +1,1 @@
+The application does not mention in its privacy policy that users have the right to delete their data, leaving users unsure of their ability to control their personal information stored by the application.

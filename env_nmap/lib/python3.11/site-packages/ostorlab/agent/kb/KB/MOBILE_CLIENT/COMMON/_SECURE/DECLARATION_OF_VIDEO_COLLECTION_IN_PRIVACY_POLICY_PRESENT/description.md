@@ -1,0 +1,1 @@
+The application properly mentions in the privacy policy the collection of users' videos and matches expected usage.

@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all Intent methods used in the application.",
+  "references": {},
+  "title": "Recorded calls to Intent API",
+  "privacy_issue": false,
+  "security_issue": true
+}

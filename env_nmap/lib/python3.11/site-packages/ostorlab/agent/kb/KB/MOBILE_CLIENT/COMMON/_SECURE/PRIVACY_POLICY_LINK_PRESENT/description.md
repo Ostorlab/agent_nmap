@@ -1,0 +1,1 @@
+Privacy policy link is present in the application store.

@@ -1,0 +1,12 @@
+{
+  "risk_rating": "important",
+  "short_description": "The flutter code is obfuscated, which limits detection capabilities.",
+  "references": {
+    "Lack of Binary Protections (OWASP Mobile Top 10)": "https://www.owasp.org/index.php/Mobile_Top_10_2014-M10",
+    "Proguard (Android developer)": "http://developer.android.com/tools/help/proguard.html",
+    "Obfuscate Dart Code (Flutter Documentation)": "https://docs.flutter.dev/deployment/obfuscate"
+  },
+  "title": "Obfuscated Flutter code",
+  "privacy_issue": false,
+  "security_issue": true
+}

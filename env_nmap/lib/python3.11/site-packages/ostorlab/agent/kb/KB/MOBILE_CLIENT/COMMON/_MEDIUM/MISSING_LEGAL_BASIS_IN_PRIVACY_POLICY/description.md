@@ -1,0 +1,1 @@
+The vulnerability exists in the privacy policy of the system as it fails to mention the legal basis relied upon for processing users' data, which could lead to potential legal and compliance issues.

@@ -1,0 +1,1 @@
+The application does mention users' right to access the data held about them in its privacy policy.

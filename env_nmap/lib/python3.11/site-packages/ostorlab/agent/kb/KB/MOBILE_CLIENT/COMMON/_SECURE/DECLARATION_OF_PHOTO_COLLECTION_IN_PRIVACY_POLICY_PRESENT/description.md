@@ -1,0 +1,1 @@
+The app's privacy policy accurately reflects the collection of users' photos.

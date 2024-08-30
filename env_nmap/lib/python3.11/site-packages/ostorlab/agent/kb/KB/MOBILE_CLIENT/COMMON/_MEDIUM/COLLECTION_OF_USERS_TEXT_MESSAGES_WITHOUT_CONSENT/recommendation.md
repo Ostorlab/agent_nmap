@@ -1,0 +1,1 @@
+To mitigate the vulnerability of collecting users' text messages, ensure that your privacy policy clearly states that you do not collect or store any text messages from users. Additionally, regularly review and update your privacy policy to reflect any changes in data collection practices.

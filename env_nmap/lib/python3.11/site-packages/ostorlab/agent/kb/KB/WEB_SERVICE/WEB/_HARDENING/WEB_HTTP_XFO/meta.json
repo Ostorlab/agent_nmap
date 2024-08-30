@@ -1,0 +1,28 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Insecure HTTP Header Setting: X-Frame-Options.",
+  "references": {
+    "X-Frame-Options": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options"
+  },
+  "title": "Insecure HTTP Header Setting: X-Frame-Options",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L1": [
+      "V14_4_7"
+    ],
+    "OWASP_ASVS_L2": [
+      "V14_4_7"
+    ],
+    "OWASP_ASVS_L3": [
+      "V14_4_7"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ]
+  }
+}

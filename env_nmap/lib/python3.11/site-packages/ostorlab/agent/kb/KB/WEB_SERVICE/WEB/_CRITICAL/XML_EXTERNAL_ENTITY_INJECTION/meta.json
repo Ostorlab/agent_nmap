@@ -1,0 +1,33 @@
+{
+  "risk_rating": "critical",
+  "short_description": "The web application is susceptible to an XML External Entity (XXE) vulnerability.",
+  "references": {
+    "OWASP":"https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)",
+    "Portswigger": "https://portswigger.net/web-security/xxe#what-is-xml-external-entity-injection"
+  },
+  "title": "XML External Entity (XXE) Injection",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_611"
+    ],
+    "GDPR": [
+      "ART_25",
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_4",
+      "REQ_6_5"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

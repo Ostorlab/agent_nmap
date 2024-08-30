@@ -1,0 +1,28 @@
+{
+  "title": "Android Class Loading Hijacking",
+  "short_description": "Android class loaded from an insecure path.",
+  "risk_rating": "medium",
+  "references": {
+  },
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_9"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "risk_rating": "high",
+  "short_description": "The application is vulnerable to a Cross-Site Scripting vulnerability due to unsanitized input.",
+  "references": {
+    "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')": "https://cwe.mitre.org/data/definitions/79.html",
+    "CWE-80: Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)": "https://cwe.mitre.org/data/definitions/80.html",
+    "CWE-116: Improper Encoding or Escaping of Output": "https://cwe.mitre.org/data/definitions/116.html",
+    "CWE-159: Failure to Sanitize Special Element": "https://cwe.mitre.org/data/definitions/159.html"
+  },
+  "title": "Cross-Site Scripting (XSS)",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L1": [
+      "V5_2_1",
+      "V5_3_1",
+      "V13_1_1"
+    ],
+    "OWASP_ASVS_L2": [
+      "V5_2_1",
+      "V1_5_4",
+      "V5_3_1",
+      "V13_1_1"
+    ],
+    "OWASP_ASVS_L3": [
+      "V5_2_1",
+      "V1_5_4",
+      "V5_3_1",
+      "V13_1_1"
+    ], "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

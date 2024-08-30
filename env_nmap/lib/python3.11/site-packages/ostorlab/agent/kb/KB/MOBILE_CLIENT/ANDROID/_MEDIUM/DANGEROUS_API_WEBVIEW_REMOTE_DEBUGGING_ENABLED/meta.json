@@ -1,0 +1,31 @@
+{
+  "risk_rating": "medium",
+  "short_description": "WebView remote debugging is enabled, exposing a unix socket with access restrictions.",
+  "references": {
+    "setWebContentsDebuggingEnabled Android Documentation": "https://developer.android.com/reference/android/webkit/WebView#setWebContentsDebuggingEnabled(boolean)"
+  },
+  "title": "Webview Remote Debugging Enabled",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_2",
+      "MSTG_CODE_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_2",
+      "MSTG_CODE_4"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_1_2",
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_2",
+      "MASVS_RESILIENCE_3"
+    ]
+  }
+}

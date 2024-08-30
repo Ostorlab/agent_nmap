@@ -1,0 +1,1 @@
+If the Health and Biometric data type declaration in your privacy policy does not match the actual usage of such data, it could lead to potential legal and regulatory issues, as well as erode trust with users who may feel their sensitive information is not being handled appropriately.

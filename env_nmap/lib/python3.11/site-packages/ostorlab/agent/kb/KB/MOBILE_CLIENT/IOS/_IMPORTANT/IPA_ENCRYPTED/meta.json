@@ -1,0 +1,13 @@
+{
+  "risk_rating": "important",
+  "short_description": "Application is encrypted by Apple, limiting analysis capabilities.",
+  "references": {
+    "Decryption apps guide": "https://kov4l3nko.github.io/blog/2016-03-01-decrypting-apps-from-appstore/",
+    "Repackaging applications guide": "https://labs.mwrinfosecurity.com/blog/repacking-and-resigning-ios-applications/",
+    "lldb-dumpdecrypted": "https://github.com/BlueCocoa/dumpdecrypted-lldb",
+    "Clutch": "https://github.com/KJCracks/Clutch"
+  },
+  "title": "Mach-O encrypted",
+  "privacy_issue": false,
+  "security_issue": false
+}

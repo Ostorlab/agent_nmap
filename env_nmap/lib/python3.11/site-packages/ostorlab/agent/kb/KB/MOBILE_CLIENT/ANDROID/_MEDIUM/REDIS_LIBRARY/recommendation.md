@@ -1,0 +1,1 @@
+Replace direct access to Redis with a secure API with proper authentication and authorization.

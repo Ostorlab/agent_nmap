@@ -1,0 +1,19 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all command execution API calls",
+  "references": {
+    "Client Side Injection (OWASP Mobile Top 10)": "https://www.owasp.org/index.php/Mobile_Top_10_2014-M7",
+    "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')": "https://cwe.mitre.org/data/definitions/78.html"
+  },
+  "title": "Recorded calls to command execution API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+  "OWASP_MASVS_L1": [
+    "MSTG_CODE_6"
+    ],
+  "OWASP_MASVS_L2": [
+    "MSTG_CODE_6"
+    ]
+  }
+}

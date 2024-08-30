@@ -1,0 +1,1 @@
+If your privacy policy does not mention the collection of your users' in-app search history, but this data type is declared in your Play Data Safety Section, there is a discrepancy in the information provided to users regarding the data being collected from them. This lack of transparency can lead to a breach of trust and potential privacy concerns for users.

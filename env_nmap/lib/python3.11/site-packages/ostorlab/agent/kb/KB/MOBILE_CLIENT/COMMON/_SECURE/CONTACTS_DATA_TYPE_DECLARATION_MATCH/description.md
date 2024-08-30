@@ -1,0 +1,1 @@
+It has been identified that the Contacts data type declaration in your privacy policy does accurately match the actual usage of this data.

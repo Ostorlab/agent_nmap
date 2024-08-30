@@ -1,0 +1,25 @@
+{
+  "risk_rating": "low",
+  "short_description": "Django debug mode enabled may leak information about configurations or internal operations.",
+  "references": {
+    "Django documentation": "https://docs.djangoproject.com/en/5.0/ref/settings/#debug"
+  },
+  "title": "Django Debug Mode Enabled",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N,",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_6_5"
+    ],
+    "OWASP_ASVS_L3": [
+      "V14_3_2"
+    ],
+    "OWASP_ASVS_L2": [
+      "V14_3_2"
+    ],
+    "OWASP_ASVS_L1": [
+      "V14_3_2"
+    ]
+  }
+}

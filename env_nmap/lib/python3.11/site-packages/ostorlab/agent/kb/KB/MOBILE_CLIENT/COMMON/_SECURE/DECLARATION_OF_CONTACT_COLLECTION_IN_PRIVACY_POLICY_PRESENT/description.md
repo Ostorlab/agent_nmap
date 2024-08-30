@@ -1,0 +1,1 @@
+The privacy policy mentions collection of users' contacts and properly matches the application usage.

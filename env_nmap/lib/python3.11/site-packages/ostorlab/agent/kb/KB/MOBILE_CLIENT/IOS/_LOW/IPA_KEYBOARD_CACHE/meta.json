@@ -1,0 +1,30 @@
+{
+  "risk_rating": "low",
+  "short_description": "The application does not disable caching by the keyboard of sensitive data.",
+  "references": {
+    "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor": "https://cwe.mitre.org/data/definitions/200.html",
+    "OWASP: Finding Sensitive Data in Keyboard Cache": "https://mobile-security.gitbook.io/mobile-security-testing-guide/ios-testing-guide/0x06d-testing-data-storage#finding-sensitive-data-in-the-keyboard-cache-MSTG_storage_5"
+  },
+  "title": "iOS Sensitive data stored in keyboard cache",
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_5"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_5"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_3_2",
+      "REQ_3_3",
+      "REQ_3_5",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_STORAGE_1",
+      "MASVS_STORAGE_2"
+    ]
+  }
+}

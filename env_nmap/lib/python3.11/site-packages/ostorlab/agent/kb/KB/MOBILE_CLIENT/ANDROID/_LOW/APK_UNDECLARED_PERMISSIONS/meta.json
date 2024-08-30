@@ -1,0 +1,39 @@
+{
+  "risk_rating": "low",
+  "short_description": "Custom permissions used in <activity> <service> <provider> <receiver> tags, but not declared  in <permission> tag.",
+  "references": {
+    "Typo in permission name allows to write contacts without user knowledge": "https://hackerone.com/reports/440749"
+  },
+  "title": "Undeclared Permissions",
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_4"
+    ],
+    "CWE_TOP_25": [
+      "CWE_276"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PRIVACY_4"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

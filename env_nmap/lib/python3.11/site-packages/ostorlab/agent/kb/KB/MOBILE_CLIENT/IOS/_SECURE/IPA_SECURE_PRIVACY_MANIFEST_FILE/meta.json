@@ -1,0 +1,12 @@
+{
+  "risk_rating": "secure",
+  "short_description": "The application and its third-party SDK declare Privacy manifest files.",
+  "references": {
+        "Privacy manifest files": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
+        "Describing use of required reason API": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api"
+  },
+  "title": "Privacy manifest files",
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {}
+}

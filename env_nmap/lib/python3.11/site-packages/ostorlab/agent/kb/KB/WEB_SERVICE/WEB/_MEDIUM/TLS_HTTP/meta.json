@@ -1,0 +1,45 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The application is accessing data over unencrypted channel, undermining the confidentiality and integrity of data in transit.",
+  "references": {
+    "Missing Encryption of Sensitive Data (CWE-311)": "http://cwe.mitre.org/data/definitions/311.html",
+    "Testing for Weak SSL/TLS Ciphers, Insufficient Transport Layer Protection": "https://www.owasp.org/index.php/Testing_for_Weak_SSL/TLS_Ciphers,_Insufficient_Transport_Layer_Protection_(OTG-CRYPST-001)",
+    "Top 10 2013-A6-Sensitive Data Exposure": "https://www.owasp.org/index.php/Top_10_2013-A6-Sensitive_Data_Exposure",
+    "Insufficient Transport Layer": "http://projects.webappsec.org/Insufficient-Transport-Layer-Protection",
+    "Cleartext Transmission of Sensitive Information (CWE-319)": "http://cwe.mitre.org/data/definitions/319.html"
+  },
+  "title": "Clear text HTTP request",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L1": [
+      "V9_1_1"
+    ],
+    "OWASP_ASVS_L2": [
+      "V1_9_1",
+      "V9_1_1"
+    ],
+    "OWASP_ASVS_L3": [
+      "V1_9_1",
+      "V9_1_1"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_4_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_7",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

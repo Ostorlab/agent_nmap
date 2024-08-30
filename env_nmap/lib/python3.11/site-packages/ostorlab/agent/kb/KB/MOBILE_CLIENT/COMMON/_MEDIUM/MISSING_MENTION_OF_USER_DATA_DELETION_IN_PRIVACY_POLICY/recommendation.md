@@ -1,0 +1,1 @@
+To mitigate this vulnerability, ensure that your privacy policy clearly outlines the process for users to request the deletion of their data, including the steps they need to take and the timeframe in which their data will be deleted. Additionally, regularly review and update your privacy policy to ensure it remains compliant with relevant data protection regulations.

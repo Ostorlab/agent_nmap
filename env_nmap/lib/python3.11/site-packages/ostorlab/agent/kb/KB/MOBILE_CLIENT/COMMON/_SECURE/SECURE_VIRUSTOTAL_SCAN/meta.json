@@ -1,0 +1,10 @@
+{
+  "risk_rating": "secure",
+  "short_description": "VirusTotal Malware analysis.",
+  "references": {
+    "Virustotal": "https://www.virustotal.com/"
+  },
+  "title": "Secure Virustotal malware analysis (MD5 based search)",
+  "privacy_issue": false,
+  "security_issue": false
+}

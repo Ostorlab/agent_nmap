@@ -1,0 +1,33 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The application is vulnerable to intent spoofing which may lead to inappropriate access like data modification, information disclosure and data injection.",
+  "references": {
+    "Do not act on malicious intent (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/android/DRD06.+Do+not+act+on+malicious+intents",
+    "Improper Access Control (CWE-284)": "https://cwe.mitre.org/data/definitions/284.html",
+    "Intent Spoof (CAPEC-502)": "https://capec.mitre.org/data/definitions/502.html",
+    "Analyzing Inter-Application Communication in Android": "https://people.eecs.berkeley.edu/~daw/papers/intents-mobisys11.pdf"
+  },
+  "title": "Intent Spoofing",
+  "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_276"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

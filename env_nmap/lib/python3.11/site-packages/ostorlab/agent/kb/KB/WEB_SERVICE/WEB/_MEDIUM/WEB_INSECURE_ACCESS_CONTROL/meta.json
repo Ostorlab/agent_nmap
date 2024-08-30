@@ -1,0 +1,49 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The application does not enforce proper access control. An attacker may access unauthorized data or perform unauthorized business actions.",
+  "references": {
+    "Prevent of Insecure Direct Object reference (OWASP)": "https://www.owasp.org/index.php/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet",
+    "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')": "https://cwe.mitre.org/data/definitions/22.html",
+    "CWE-284: Improper Access Control": "https://cwe.mitre.org/data/definitions/284.html",
+    "CWE-285: Improper Authorization": "https://cwe.mitre.org/data/definitions/285.html",
+    "CWE-639: Authorization Bypass Through User-Controlled Key": "CWE-639: Authorization Bypass Through User-Controlled Key"
+  },
+  "title": "Insecure Access Control",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_276"
+    ],
+    "OWASP_ASVS_L1": [
+      "V4_1_5"
+    ],
+    "OWASP_ASVS_L2": [
+      "V4_1_5",
+      "V1_4_4",
+      "V1_10_1"
+    ],
+    "OWASP_ASVS_L3": [
+      "V4_1_5",
+      "V1_4_4",
+      "V1_10_1"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

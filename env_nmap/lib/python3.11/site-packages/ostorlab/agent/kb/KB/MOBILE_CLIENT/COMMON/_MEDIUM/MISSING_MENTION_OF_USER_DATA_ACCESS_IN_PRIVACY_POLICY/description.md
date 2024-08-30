@@ -1,0 +1,1 @@
+The application does not mention users' right to access the data held about them in its privacy policy, leaving users unaware of their rights regarding their personal information.
