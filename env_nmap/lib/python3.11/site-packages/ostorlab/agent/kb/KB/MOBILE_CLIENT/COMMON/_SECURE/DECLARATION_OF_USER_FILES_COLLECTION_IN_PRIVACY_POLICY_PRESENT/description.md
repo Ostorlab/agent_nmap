@@ -1,1 +1,0 @@
-The application's properly disclose the collection of users' files or documents in the privacy policy and matches usage.

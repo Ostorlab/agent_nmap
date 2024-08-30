@@ -1,1 +1,0 @@
-The Application signing certificate has expired.

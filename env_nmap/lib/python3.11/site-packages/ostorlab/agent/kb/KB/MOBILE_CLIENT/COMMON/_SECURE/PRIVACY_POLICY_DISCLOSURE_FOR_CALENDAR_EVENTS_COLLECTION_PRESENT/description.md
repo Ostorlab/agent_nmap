@@ -1,1 +1,0 @@
-The app's privacy policy does mention the collection of users' calendar events.

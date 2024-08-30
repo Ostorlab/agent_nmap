@@ -1,1 +1,0 @@
-The privacy policy's explicitly reference the rights granted to users in the EU under the General Data Protection Regulation (GDPR).

@@ -1,1 +1,0 @@
-The application does mention in its privacy policy that users have the right to delete their data.

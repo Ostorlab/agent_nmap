@@ -1,1 +1,0 @@
-The application's properly disclose the collection of user IDs in the privacy policy.

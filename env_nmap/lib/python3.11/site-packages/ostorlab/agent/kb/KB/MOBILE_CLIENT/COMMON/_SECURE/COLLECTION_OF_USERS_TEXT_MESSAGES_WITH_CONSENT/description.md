@@ -1,1 +1,0 @@
-The app's privacy policy properly mentions the collection of users' text messages.

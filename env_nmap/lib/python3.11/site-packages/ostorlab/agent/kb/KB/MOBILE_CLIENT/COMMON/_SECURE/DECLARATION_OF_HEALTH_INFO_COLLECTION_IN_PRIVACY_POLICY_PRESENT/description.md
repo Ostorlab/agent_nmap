@@ -1,1 +1,0 @@
-The app's privacy policy accurately reflect the collection of users' health information.

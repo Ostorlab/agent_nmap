@@ -1,1 +1,0 @@
-The privacy policy references rights under the CCPA.

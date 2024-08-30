@@ -1,1 +1,0 @@
-User Account Info data type declaration in the privacy policy does accurately match the actual usage of this data.

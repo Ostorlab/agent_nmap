@@ -1,1 +1,0 @@
-List of all hardcoded URLs constant strings in the application.

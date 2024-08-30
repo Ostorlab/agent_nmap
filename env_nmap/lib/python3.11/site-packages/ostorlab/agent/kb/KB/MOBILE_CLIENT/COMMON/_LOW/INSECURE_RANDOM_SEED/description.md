@@ -1,1 +1,0 @@
-Random number generator is seeded using constant value which results in the generation of predictable numbers.

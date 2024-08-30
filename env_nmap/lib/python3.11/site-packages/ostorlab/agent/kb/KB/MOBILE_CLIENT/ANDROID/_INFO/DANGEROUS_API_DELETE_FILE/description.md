@@ -1,1 +1,0 @@
-Call to `file.delete()` do not securely erase the file unless overwritten. Due to way NAND manages block allocation, traditional file overwriting approaches are inefficient.

@@ -1,1 +1,0 @@
-The vulnerability exists in the app's privacy policy as it fails to mention the collection of users' email addresses, even though this data type is declared in the Play Data Safety Section, potentially leading to a lack of transparency and potential privacy concerns for users.
