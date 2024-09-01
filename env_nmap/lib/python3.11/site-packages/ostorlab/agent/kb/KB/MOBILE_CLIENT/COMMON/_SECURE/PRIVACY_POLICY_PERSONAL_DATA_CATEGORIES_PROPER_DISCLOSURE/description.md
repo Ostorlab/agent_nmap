@@ -1,1 +1,0 @@
-The privacy policy's mentions specific categories of collected personal data.

@@ -1,1 +1,0 @@
-The vulnerability arises because the system fails to verify whether the privacy policy references rights under the CCPA, potentially leaving users' data unprotected and violating legal requirements.

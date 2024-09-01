@@ -1,1 +1,0 @@
-The vulnerability exists in the system as it fails to check if contact information is included in the privacy policy, leaving users at risk of not being able to easily reach out for support or clarification on privacy-related issues.

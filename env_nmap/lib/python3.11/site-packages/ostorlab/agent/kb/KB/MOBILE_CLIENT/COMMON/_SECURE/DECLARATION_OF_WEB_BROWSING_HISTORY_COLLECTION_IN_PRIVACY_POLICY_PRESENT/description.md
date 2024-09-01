@@ -1,1 +1,0 @@
-The application's accurately reflect the collection of users' web browsing history in the privacy policy.

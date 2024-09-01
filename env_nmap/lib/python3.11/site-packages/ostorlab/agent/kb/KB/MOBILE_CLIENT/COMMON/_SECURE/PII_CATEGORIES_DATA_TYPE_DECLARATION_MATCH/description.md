@@ -1,1 +1,0 @@
-The PII Categories data type declaration in the privacy policy does accurately reflect the actual usage.

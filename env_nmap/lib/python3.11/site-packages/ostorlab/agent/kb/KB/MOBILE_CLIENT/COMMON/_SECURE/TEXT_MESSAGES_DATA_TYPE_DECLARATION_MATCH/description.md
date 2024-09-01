@@ -1,1 +1,0 @@
-The Text Messages data type declaration in your privacy policy does not accurately match the actual usage of this data, potentially leaving users' personal information vulnerable to misuse or unauthorized access.

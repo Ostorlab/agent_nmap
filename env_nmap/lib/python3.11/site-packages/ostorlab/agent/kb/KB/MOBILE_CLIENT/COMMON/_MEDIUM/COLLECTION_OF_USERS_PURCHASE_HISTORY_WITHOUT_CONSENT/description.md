@@ -1,1 +1,0 @@
-The vulnerability exists in the app's privacy policy as it fails to mention the collection of users' purchase history, even though this data type is declared in the Play Data Safety Section, potentially exposing users' sensitive information without their knowledge or consent.

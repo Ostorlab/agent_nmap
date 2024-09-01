@@ -1,1 +1,0 @@
-The privacy policy does mention the collection of your users' fitness information.

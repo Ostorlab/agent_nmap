@@ -1,1 +1,0 @@
-List of Swift frameworks included in the application.

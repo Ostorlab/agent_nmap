@@ -1,1 +1,0 @@
-This vulnerability arises when the declared data type for sensitive information does not align with how it is used, potentially allowing unauthorized access or exposure of the sensitive data.

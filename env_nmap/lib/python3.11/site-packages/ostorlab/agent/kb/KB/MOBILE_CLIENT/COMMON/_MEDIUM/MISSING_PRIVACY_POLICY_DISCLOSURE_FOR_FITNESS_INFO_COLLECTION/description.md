@@ -1,1 +1,0 @@
-If your privacy policy does not mention the collection of your users' fitness information, but this data type is declared in your Play Data Safety Section, it could lead to a discrepancy in the information provided to users regarding the collection and use of their personal data, potentially causing confusion and mistrust among users.

@@ -1,1 +1,0 @@
-The privacy policy of the system mentions the legal basis relied upon for processing users' data.

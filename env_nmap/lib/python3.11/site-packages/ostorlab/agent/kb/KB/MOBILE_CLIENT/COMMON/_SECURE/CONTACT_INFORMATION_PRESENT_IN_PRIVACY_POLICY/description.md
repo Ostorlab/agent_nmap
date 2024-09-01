@@ -1,1 +1,0 @@
-Contact information is included in the privacy policy.

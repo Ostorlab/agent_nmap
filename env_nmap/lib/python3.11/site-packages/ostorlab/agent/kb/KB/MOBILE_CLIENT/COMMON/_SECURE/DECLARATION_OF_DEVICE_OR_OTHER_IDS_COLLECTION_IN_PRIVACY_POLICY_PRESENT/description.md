@@ -1,1 +1,0 @@
-The app's privacy policy mentions the collection of users' device or other IDs.
