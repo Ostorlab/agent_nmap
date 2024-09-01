@@ -1,0 +1,1 @@
+The vulnerability exists in the application's failure to properly check if the privacy policy mentions the collection of users' emails when this data type is declared in the Play Data Safety Section, potentially exposing users' personal information without their consent.

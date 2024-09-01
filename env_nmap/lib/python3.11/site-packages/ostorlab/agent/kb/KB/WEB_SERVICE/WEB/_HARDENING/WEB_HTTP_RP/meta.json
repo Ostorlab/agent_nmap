@@ -1,0 +1,28 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Insecure HTTP Header Setting: Insecure Referrer Policy.",
+  "references": {
+    "Referrer-Policy": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy"
+  },
+  "title": "Insecure HTTP Header Setting: Insecure Referrer Policy",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L1": [
+      "V14_4_6"
+    ],
+    "OWASP_ASVS_L2": [
+      "V14_4_6"
+    ],
+    "OWASP_ASVS_L3": [
+      "V14_4_6"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ]
+  }
+}

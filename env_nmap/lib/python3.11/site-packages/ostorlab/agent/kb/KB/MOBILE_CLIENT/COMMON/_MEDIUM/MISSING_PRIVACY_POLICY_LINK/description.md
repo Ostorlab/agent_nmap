@@ -1,0 +1,1 @@
+Failure to include a working link to your privacy policy in your store listing can leave your users uninformed about how their personal information is being collected, used, and protected, potentially leading to privacy concerns and lack of trust in your app.

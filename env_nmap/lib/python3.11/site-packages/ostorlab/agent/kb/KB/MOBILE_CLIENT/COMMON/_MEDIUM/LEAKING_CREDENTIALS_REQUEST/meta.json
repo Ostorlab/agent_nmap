@@ -1,0 +1,36 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Inclusion of Sensitive Information in URLs.",
+  "references": {
+    "CWE-200: Information Exposure": "http://cwe.mitre.org/data/definitions/200.html",
+    "CWE-598: Information Exposure Through Query Strings in GET Request": "https://cwe.mitre.org/data/definitions/598.html",
+    "CWE-384: Session Fixation": "https://cwe.mitre.org/data/definitions/384.html",
+    "CWE-359: Exposure of Private Information (\"Privacy Violation\")": "http://cwe.mitre.org/data/definitions/359.html"
+  },
+  "title": "Credentials exposed in URLs",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_AUTH_3"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_AUTH_3"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_AUTH_1"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

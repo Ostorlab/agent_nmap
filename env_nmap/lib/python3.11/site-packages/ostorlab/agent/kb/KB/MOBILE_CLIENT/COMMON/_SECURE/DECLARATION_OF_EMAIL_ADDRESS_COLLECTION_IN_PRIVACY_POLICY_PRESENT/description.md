@@ -1,0 +1,1 @@
+The app's privacy policy as it fails to mention the collection of users' email addresses.

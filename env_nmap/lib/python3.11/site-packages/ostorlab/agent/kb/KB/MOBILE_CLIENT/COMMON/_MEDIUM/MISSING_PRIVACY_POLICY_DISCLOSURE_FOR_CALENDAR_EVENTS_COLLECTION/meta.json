@@ -1,0 +1,57 @@
+{
+    "risk_rating": "medium",
+    "short_description": "Privacy policy does not mention collection of users' calendar events",
+    "references": {
+        "Android Privacy Guidelines": "https://developer.android.com/privacy-and-security/about",
+        "Privacy Policies for Mobile Apps": "https://www.privacypolicies.com/blog/mobile-apps-privacy-policy/",
+        "Apple Privacy Manifest": "https://developer.apple.com/documentation/bundleresources/privacy_manifest_files",
+        "CWE-359: Exposure of Private Information (\"Privacy Violation\")": "http://cwe.mitre.org/data/definitions/359.html"
+    },
+    "title": "Missing Privacy Policy Disclosure for Calendar Events Collection",
+    "privacy_issue": true,
+    "security_issue": false,
+    "categories": {
+         "OWASP_MASVS_L1": [],
+    "OWASP_MASVS_L2": [],
+    "OWASP_MASVS_RESILIENCE": [],
+    "CWE_TOP_25": [],
+    "GDPR": [
+      "ART_5",
+      "ART_6",
+      "ART_7",
+      "ART_9",
+      "ART_11",
+      "ART_13",
+      "ART_15",
+      "ART_16",
+      "ART_17",
+      "ART_32"
+    ],
+    "CCPA": [
+      "CCPA_1798_100",
+      "CCPA_1798_105",
+      "CCPA_1798_110",
+      "CCPA_1798_115",
+      "CCPA_1798_120",
+      "CCPA_1798_125",
+      "CCPA_1798_130",
+      "CCPA_1798_135",
+      "CCPA_1798_140",
+      "CCPA_1798_150"
+    ],
+    "PCI_STANDARDS": [],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PRIVACY_1",
+      "MASVS_PRIVACY_2",
+      "MASVS_PRIVACY_3",
+      "MASVS_PRIVACY_4"
+    ],
+    "OWASP_ASVS_L1": [],
+    "OWASP_ASVS_L2": [],
+    "OWASP_ASVS_L3": [],
+    "SOC2_CONTROLS": [
+      "CC_2_3",
+      "CC_5_3"
+    ]
+    }
+}

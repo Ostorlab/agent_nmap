@@ -1,0 +1,27 @@
+{
+  "risk_rating": "low",
+  "short_description": "Debug Symbols were found in the application, which can help with reverse engineering the application or leaking internal information.",
+  "references": {
+  },
+  "title": "Debug Symbols Present in the Application",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_3",
+      "MSTG_CODE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_3",
+      "MSTG_CODE_2"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_3",
+      "MASVS_RESILIENCE_4"
+    ]
+  }
+}

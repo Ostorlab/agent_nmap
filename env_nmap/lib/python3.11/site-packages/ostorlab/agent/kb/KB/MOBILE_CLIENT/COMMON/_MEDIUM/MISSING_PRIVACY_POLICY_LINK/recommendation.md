@@ -1,0 +1,1 @@
+To mitigate the vulnerability of not having a working link to your privacy policy in your store listing, ensure that the link is regularly checked and updated to ensure it directs users to the correct and up-to-date privacy policy. Additionally, consider including the privacy policy directly on the store listing page to make it easily accessible to users.

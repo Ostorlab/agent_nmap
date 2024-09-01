@@ -1,0 +1,9 @@
+{
+  "risk_rating": "info",
+  "short_description": "Detected an intersting response.",
+  "references": {
+  },
+  "title": "Interesting response",
+  "privacy_issue": false,
+  "security_issue": true
+}

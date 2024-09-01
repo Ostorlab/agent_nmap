@@ -1,0 +1,1 @@
+Unclaimed Cocoapods allowed malicious actors to claim ownership of pods and insert malicious code into popular apps. The exploitation of these vulnerabilities have significant financial and reputational risks for the targeted organization.

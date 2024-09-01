@@ -1,0 +1,20 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The backend application implements an insecure Cross-Origin Resource Sharing Policy (CORS), allowing access from any domain.",
+  "references": {
+    "Cross-Origin Resource Sharing (Mozilla Developer)": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+  },
+  "title": "Insecure Cross-Origin Resource Sharing (CORS) policy",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_8_3",
+      "REQ_11_3"
+    ]
+  }
+}

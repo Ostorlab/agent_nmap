@@ -1,0 +1,26 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "The application does not specify a network security configuration or sets insecure settings.",
+  "references": {
+    "Network Security Configuration (Android developer)": "https://developer.android.com/training/articles/security-config"
+  },
+  "title": "Insecure Network Configuration Settings",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_NETWORK_1"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_NETWORK_1"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_NETWORK_1"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_1_2",
+      "REQ_2_2"
+    ]
+  }
+}

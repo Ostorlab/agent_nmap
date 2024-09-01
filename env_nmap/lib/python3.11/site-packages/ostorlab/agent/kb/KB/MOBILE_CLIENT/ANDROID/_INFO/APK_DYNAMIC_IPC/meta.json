@@ -1,0 +1,30 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of Inter-Process Communication (IPC) calls",
+  "references": {
+    "Binders (Android developer)": "http://developer.android.com/reference/android/os/Binder.html",
+    "Bundle (Android developer)": "http://developer.android.com/reference/android/os/Bundle.html",
+    "Security tips (Android developer)": "http://developer.android.com/training/articles/security-tips.html#UserData",
+    "Intents (Android developer)": "http://developer.android.com/reference/android/content/Intent.html"
+  },
+  "title": "Recorded calls to Inter-Process-Communication (IPC) API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+  "OWASP_MASVS_L1": [
+    "MSTG_PLATFORM_1",
+    "MSTG_PLATFORM_2",
+    "MSTG_PLATFORM_3"
+    ],
+  "OWASP_MASVS_L2": [
+    "MSTG_PLATFORM_1",
+    "MSTG_PLATFORM_2",
+    "MSTG_PLATFORM_3"
+    ],
+  "OWASP_MASVS_v2_1": [
+    "MASVS_PLATFORM_1",
+    "MASVS_PLATFORM_2",
+    "MASVS_PLATFORM_3"
+    ]
+  }
+}

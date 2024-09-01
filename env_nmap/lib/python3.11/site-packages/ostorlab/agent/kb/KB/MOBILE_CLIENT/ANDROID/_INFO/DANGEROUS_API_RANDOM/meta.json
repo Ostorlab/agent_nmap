@@ -1,0 +1,22 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of random API calls",
+  "references": {
+    "CWE-330: Use of Insufficiently Random Values": "https://cwe.mitre.org/data/definitions/330.html",
+    "MSC02-J. Generate strong random numbers (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/java/MSC02-J.+Generate+strong+random+numbers"
+  },
+  "title": "Call to Random API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CRYPTO_6"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CRYPTO_6"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CRYPTO_1"
+    ]
+  }
+}

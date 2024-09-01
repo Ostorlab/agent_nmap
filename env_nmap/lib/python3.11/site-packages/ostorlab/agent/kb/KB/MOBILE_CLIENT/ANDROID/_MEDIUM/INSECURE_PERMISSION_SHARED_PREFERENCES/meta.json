@@ -1,0 +1,45 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Shared Preferences are set with insecure permissions (WORLD_READABLE or WORLD_WRITABLE).",
+  "references": {
+    "Shared Preferences (Android Developer)": "http://developer.android.com/reference/android/content/SharedPreferences.html"
+  },
+  "title": "Insecure Shared Preferences Permissions",
+  "cvss_v3_vector": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_4"
+    ],
+    "CWE_TOP_25": [
+      "CWE_276"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

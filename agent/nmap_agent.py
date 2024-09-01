@@ -422,7 +422,9 @@ class NmapAgent(
                 for data in generators.get_services(scan_results):
                     if data.get("service") in BLACKLISTED_SERVICES:
                         continue
-                    if data.get("product") is not None and data.get("product") != "":
+                    data_product = data.get("product")
+                    data_banner = data.get("banner")
+                    if data_product is not None and data_product != "":
                         logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
                             "host": data.get("host"),
@@ -432,12 +434,12 @@ class NmapAgent(
                             "service": data.get("service"),
                             "port": data.get("port"),
                             "protocol": data.get("protocol"),
-                            "library_name": data.get("product"),
+                            "library_name": data_product,
                             "library_version": data.get("product_version"),
-                            "detail": data.get("product"),
+                            "detail": data_product,
                         }
                         self.emit(selector, fingerprint_data)
-                    if data.get("banner") is not None and data.get("banner") != "":
+                    if data_banner is not None and data_banner != "":
                         logger.debug("sending results to selector %s", selector)
                         fingerprint_data = {
                             "host": data.get("host"),
@@ -447,20 +449,17 @@ class NmapAgent(
                             "service": data.get("service"),
                             "port": data.get("port"),
                             "protocol": data.get("protocol"),
-                            "library_name": data.get("banner"),
-                            "detail": data.get("banner"),
+                            "library_name": data_banner,
+                            "detail": data_banner,
                         }
                         self.emit(selector, fingerprint_data)
                     if domain_name is not None:
-                        if (
-                            data.get("product") is not None
-                            and data.get("product") != ""
-                        ):
+                        if data_product is not None and data_product != "":
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),
                                 "schema": data.get("service"),
-                                "library_name": data.get("product"),
+                                "library_name": data_product,
                                 "library_version": data.get("product_version"),
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('service')} on {domain_name}",
@@ -469,12 +468,12 @@ class NmapAgent(
                                 selector="v3.fingerprint.domain_name.service.library",
                                 data=msg_data,
                             )
-                        if data.get("banner") is not None and data.get("banner") != "":
+                        if data_banner is not None and data_banner != "":
                             msg_data = {
                                 "name": domain_name,
                                 "port": data.get("port"),
                                 "schema": data.get("service"),
-                                "library_name": data.get("banner"),
+                                "library_name": data_banner,
                                 "library_version": None,
                                 "library_type": "BACKEND_COMPONENT",
                                 "detail": f"Nmap Detected {data.get('service')} on {domain_name}",

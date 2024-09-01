@@ -1,0 +1,1 @@
+The privacy policy does mention the collection of users' voice or sound recordings and matches expected usage.

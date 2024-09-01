@@ -1,0 +1,25 @@
+{
+  "risk_rating": "potentially",
+  "short_description": "Dangerous Sink method is called using potentially user controlled parameters or untrusted Source method.",
+  "references": {
+  },
+  "title": "Source to Sink",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_2"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_4"
+    ]
+  }
+}

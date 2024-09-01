@@ -1,0 +1,23 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Application is using Redis library without proper authentication.",
+  "references": {},
+  "title": "Redis Library detected",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_287",
+      "CWE_862"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_3_5",
+      "REQ_6_2",
+      "REQ_7_3"
+    ],
+    "OWASP_MASVS_v2_1":[
+      "MASVS_AUTH_1"
+    ]
+  }
+}

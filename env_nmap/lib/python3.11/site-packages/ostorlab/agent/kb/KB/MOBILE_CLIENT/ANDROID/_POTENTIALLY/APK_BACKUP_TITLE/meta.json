@@ -1,0 +1,26 @@
+{
+  "risk_rating": "potentially",
+  "short_description": "Application is enabling backup mode.",
+  "references": {
+    "Random Musings on the M Developer Preview: the Ugly (Part Two)": "https://commonsware.com/blog/2015/06/04/random-musings-m-developer-preview-bad-part-two.html",
+    "DRD22. Do not cache sensitive information": "https://www.securecoding.cert.org/confluence/display/android/DRD22.+Do+not+cache+sensitive+information"
+  },
+  "title": "Backup mode enabled",
+  "cvss_v3_vector": "CVSS:3.0/AV:P/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N",
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_6"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_6"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_STORAGE_2"
+    ]
+  }
+}

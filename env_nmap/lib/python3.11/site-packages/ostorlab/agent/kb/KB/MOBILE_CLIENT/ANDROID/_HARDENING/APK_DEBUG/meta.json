@@ -1,0 +1,22 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Application is compiled with debug mode enabled.",
+  "references": {
+    "DRD10-J Do not release apps that are debuggable (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/android/DRD10-X.+Do+not+release+apps+that+are+debuggable"
+  },
+  "title": "Debug mode enabled",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_2"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2"
+    ]
+  }
+}

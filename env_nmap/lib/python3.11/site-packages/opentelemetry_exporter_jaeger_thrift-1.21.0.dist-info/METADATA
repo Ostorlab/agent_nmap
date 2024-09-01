@@ -1,0 +1,68 @@
+Metadata-Version: 2.1
+Name: opentelemetry-exporter-jaeger-thrift
+Version: 1.21.0
+Summary: Jaeger Thrift Exporter for OpenTelemetry
+Project-URL: Homepage, https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-jaeger-thrift
+Author-email: OpenTelemetry Authors <cncf-opentelemetry-contributors@lists.cncf.io>
+License-Expression: Apache-2.0
+License-File: LICENSE
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Typing :: Typed
+Requires-Python: >=3.7
+Requires-Dist: opentelemetry-api~=1.3
+Requires-Dist: opentelemetry-sdk~=1.11
+Requires-Dist: thrift>=0.10.0
+Provides-Extra: test
+Description-Content-Type: text/x-rst
+
+OpenTelemetry Jaeger Thrift Exporter
+====================================
+
+.. warning::
+    Since v1.35, the Jaeger supports OTLP natively. Please use the OTLP exporter instead.
+    Support for this exporter will end July 2023.
+
+    This package is no longer being tested.
+
+|pypi|
+
+.. |pypi| image:: https://badge.fury.io/py/opentelemetry-exporter-jaeger-thrift.svg
+   :target: https://pypi.org/project/opentelemetry-exporter-jaeger-thrift/
+
+This library allows to export tracing data to `Jaeger <https://www.jaegertracing.io/>`_ using Thrift.
+
+Installation
+------------
+
+::
+
+    pip install opentelemetry-exporter-jaeger-thrift
+
+
+.. _Jaeger: https://www.jaegertracing.io/
+.. _OpenTelemetry: https://github.com/open-telemetry/opentelemetry-python/
+
+Configuration
+-------------
+
+OpenTelemetry Jaeger Exporter can be configured by setting `JaegerExporter parameters
+<https://github.com/open-telemetry/opentelemetry-python/blob/main/exporter/opentelemetry-exporter-jaeger-thrift
+/src/opentelemetry/exporter/jaeger/thrift/__init__.py#L88>`_ or by setting
+`environment variables <https://github.com/open-telemetry/opentelemetry-specification/blob/main/
+specification/sdk-environment-variables.md#jaeger-exporter>`_
+
+References
+----------
+
+* `OpenTelemetry Jaeger Exporter <https://opentelemetry-python.readthedocs.io/en/latest/exporter/jaeger/jaeger.html>`_
+* `Jaeger <https://www.jaegertracing.io/>`_
+* `OpenTelemetry Project <https://opentelemetry.io/>`_

@@ -1,0 +1,9 @@
+{
+  "risk_rating": "info",
+  "short_description": "Web Generic Entry",
+  "references": {
+  },
+  "title": "Generic Web Entry",
+  "privacy_issue": false,
+  "security_issue": true
+}

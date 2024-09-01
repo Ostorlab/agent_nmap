@@ -1,0 +1,11 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all permissions declared in the application.",
+  "references": {
+    "Working with System Permissions": "http://developer.android.com/training/permissions/index.html",
+    "System Permissions": "http://developer.android.com/guide/topics/security/permissions.html"
+  },
+  "title": "Declared permissions list",
+  "privacy_issue": false,
+  "security_issue": false
+}

@@ -1,0 +1,1 @@
+Update the privacy policy to include detailed information about any third-party sharing of personal data. Specify the types of data shared, the purposes for sharing, and the identities of the third parties involved. This ensures transparency and helps maintain user trust and compliance with legal requirements.

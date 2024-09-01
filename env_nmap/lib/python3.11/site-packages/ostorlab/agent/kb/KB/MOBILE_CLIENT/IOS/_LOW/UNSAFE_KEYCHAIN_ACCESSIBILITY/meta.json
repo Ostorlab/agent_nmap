@@ -1,0 +1,36 @@
+{
+  "risk_rating": "low",
+  "short_description": "The platform uses the keychain for storage, but it's configured with insecure flags.",
+  "references": {
+    "Apple documentation: Restricting keychain item accessibility": "https://developer.apple.com/documentation/security/keychain_services/keychain_items/restricting_keychain_item_accessibility",
+    "Secure Mobile Biometric Authentication": "https://blog.ostorlab.co/secure-mobile-biometric-authentication.html"
+  },
+  "title": "Insecure Keychain Storage",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L2": [
+      "MSTG_AUTH_8"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_25",
+      "ART_32"
+    ],
+    "PCI_STANDARDS": [
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_8_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

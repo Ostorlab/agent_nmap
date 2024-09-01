@@ -1,0 +1,26 @@
+{
+  "risk_rating": "low",
+  "short_description": "PhoneGap is compiled with debug mode enabled.",
+  "references": {},
+  "title": "Cordova debug mode enabled",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_2"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_10_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_2",
+      "MASVS_RESILIENCE_3"
+    ]
+  }
+}

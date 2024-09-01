@@ -1,0 +1,24 @@
+{
+    "risk_rating": "high",
+    "short_description": "Report for domain name and IP addresses reputation score using multiple scanning APIs and databases.",
+    "references": {
+        "UrlScan" : "https://urlscan.io/",
+        "AbuseIPDB" : "https://www.abuseipdb.com/",
+        "GoogleSaveBrowsing" : "https://safebrowsing.google.com/"
+    },
+    "title": "Domain name and IP address reputation report",
+    "privacy_issue": false,
+    "security_issue": true,
+    "categories": {
+        "SOC2_CONTROLS": [
+          "CC_2_1",
+          "CC_3_4",
+          "CC_4_1",
+          "CC_6_8",
+          "CC_7_1",
+          "CC_7_2",
+          "CC_7_4",
+          "CC_7_5"
+        ]
+  }
+}

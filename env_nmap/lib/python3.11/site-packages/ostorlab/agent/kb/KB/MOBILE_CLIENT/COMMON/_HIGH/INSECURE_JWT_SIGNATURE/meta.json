@@ -1,0 +1,52 @@
+{
+  "risk_rating": "high",
+  "short_description": "The application uses weak or outdated signature algorithms, insufficient secret key management, or flawed validation logic, which can be exploited by attackers to forge or tamper with JWTs and gain unauthorized access.",
+  "references": {
+    "Insecure JWT Attacks": "https://www.thehacker.recipes/web/inputs/jwt",
+    "JWT Attacks explained": "https://portswigger.net/web-security/jwt"
+  },
+  "title": "Insecure JWT Signature Validation",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CRYPTO_2",
+      "MSTG_CRYPTO_3",
+      "MSTG_CRYPTO_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CRYPTO_2",
+      "MSTG_CRYPTO_3",
+      "MSTG_CRYPTO_4"
+    ],
+    "CWE_TOP_25": [
+    ],
+      "GDPR": [
+        "ART_5",
+        "ART_32"
+      ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_3_6",
+      "REQ_3_7",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_8_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CRYPTO_1",
+      "MASVS_CRYPTO_2"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

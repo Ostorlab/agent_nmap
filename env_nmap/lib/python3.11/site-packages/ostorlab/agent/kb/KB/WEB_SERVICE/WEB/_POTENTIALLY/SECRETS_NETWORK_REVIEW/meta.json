@@ -1,0 +1,16 @@
+{
+  "risk_rating": "potentially",
+  "short_description": "Passwords, Tokens or other sensitive information are transmitted over the network.",
+  "references": {
+    "CWE-200: Data Exposure": "https://cwe.mitre.org/data/definitions/200.html",
+    "What Is AWS Secrets Manager?": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html"
+  },
+  "title": "Secret information transmitted over the network",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_1_2"
+    ]
+  }
+}

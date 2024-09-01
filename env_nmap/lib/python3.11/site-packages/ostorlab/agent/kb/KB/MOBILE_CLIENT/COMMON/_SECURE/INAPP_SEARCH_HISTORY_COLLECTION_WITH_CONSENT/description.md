@@ -1,0 +1,1 @@
+The privacy policy does mention the collection of your users' in-app search history and does match the actual usage of such data.

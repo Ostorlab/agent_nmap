@@ -1,0 +1,12 @@
+{
+    "risk_rating": "secure",
+    "short_description": "Report for domain name and IP addresses reputation score using multiple scanning APIs and databases.",
+    "references": {
+        "UrlScan" : "https://urlscan.io/",
+        "AbuseIPDB" : "https://www.abuseipdb.com/",
+        "GoogleSaveBrowsing" : "https://safebrowsing.google.com/"
+    },
+    "title": "Domain name and IP address reputation report",
+    "privacy_issue": false,
+    "security_issue": false
+}

@@ -1,0 +1,1 @@
+Setting Shared Preferences with insecure permissions either world readable or world writable may expose sensitive information stored in shared preferences to arbitrary read or write by a malicious attacker.

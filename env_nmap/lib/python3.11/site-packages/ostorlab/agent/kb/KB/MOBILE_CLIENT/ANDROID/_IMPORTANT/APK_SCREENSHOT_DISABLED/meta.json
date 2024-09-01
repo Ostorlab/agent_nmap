@@ -1,0 +1,23 @@
+{
+  "risk_rating": "important",
+  "short_description": "Application disables taking screenshots, preventing dynamic testing from computing coverage.",
+  "references": {
+    "Android Developer FLAG_SECURE": "https://developer.android.com/reference/android/view/WindowManager.LayoutParams#FLAG_SECURE",
+    "Android Developer MediaProjection": "https://developer.android.com/reference/android/media/projection/MediaProjection",
+    "Android Developer MediaProjectionManager": "https://developer.android.com/reference/android/media/projection/MediaProjectionManager"
+  },
+  "title": "Application prevents taking screenshots",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ]
+  }
+}

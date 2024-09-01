@@ -1,0 +1,18 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Application trusts user-supplied host header, leading to host header poisoning.",
+  "references": {
+    "Testing for Host Header Injection (OWASP Web Security Testing Guide)": "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/17-Testing_for_Host_Header_Injection"
+  },
+  "title": "HTTP Host Header Poisoning",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ]
+  }
+}

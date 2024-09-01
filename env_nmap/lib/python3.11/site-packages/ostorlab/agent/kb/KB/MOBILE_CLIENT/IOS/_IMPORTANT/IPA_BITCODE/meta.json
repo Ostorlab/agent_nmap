@@ -1,0 +1,9 @@
+{
+  "risk_rating": "important",
+  "short_description": "Application contains only bitcode.",
+  "references": {
+  },
+  "title": "IPA contains only bitcode",
+  "privacy_issue": false,
+  "security_issue": false
+}

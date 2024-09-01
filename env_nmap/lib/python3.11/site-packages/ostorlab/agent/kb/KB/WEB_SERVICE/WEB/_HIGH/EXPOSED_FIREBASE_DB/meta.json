@@ -1,0 +1,29 @@
+{
+  "title": "Publicly exposed Firebase Database",
+  "short_description": "publicly exposing a Firebase database, which can lead to unauthorized access, data tampering, information disclosure, malicious attacks, and a loss of reputation.",
+  "risk_rating": "high",
+  "references": {
+    "Firebase Security Rules": "https://firebase.google.com/docs/rules/basics",
+    "10 Firebase Realtime Database Rule Templates": "https://medium.com/@juliomacr/10-firebase-realtime-database-rule-templates-d4894a118a98"
+  },
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_7_2",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

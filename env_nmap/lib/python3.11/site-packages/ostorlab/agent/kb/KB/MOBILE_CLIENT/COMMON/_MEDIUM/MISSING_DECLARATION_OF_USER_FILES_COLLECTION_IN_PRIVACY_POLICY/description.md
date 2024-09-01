@@ -1,0 +1,1 @@
+The vulnerability exists in the application's failure to properly disclose the collection of users' files or documents in the privacy policy, as required by the Play Data Safety Section. This lack of transparency puts users at risk of having their sensitive data collected without their knowledge or consent.

@@ -1,0 +1,27 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Application do not enforce binary protections (ASLR, NX, RELRO, Stack canaries).",
+  "references": {
+    "Address Space Layout Randomization (ASLR)": "https://en.wikipedia.org/wiki/Address_space_layout_randomization",
+    "No Execute (NX/DEP)": "https://en.wikipedia.org/wiki/NX_bit",
+    "Buffer Overflow Protection": "https://en.wikipedia.org/wiki/Buffer_overflow_protection"
+  },
+  "title": "ELF binaries do not enforce secure binary properties",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_9"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_9"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2"
+    ]
+  }
+}

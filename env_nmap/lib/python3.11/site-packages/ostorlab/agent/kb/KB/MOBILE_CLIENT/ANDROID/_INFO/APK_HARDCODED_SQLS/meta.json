@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "Hardcoded SQL queries constant strings",
+  "references": {},
+  "title": "Hardcoded SQL queries list",
+  "privacy_issue": false,
+  "security_issue": false
+}

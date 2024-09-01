@@ -1,0 +1,22 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all Serialization methods used in the application.",
+  "references": {},
+  "title": "Recorded calls to Serialization API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_502"
+    ],
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_8"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_8"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_4"
+    ]
+  }
+}

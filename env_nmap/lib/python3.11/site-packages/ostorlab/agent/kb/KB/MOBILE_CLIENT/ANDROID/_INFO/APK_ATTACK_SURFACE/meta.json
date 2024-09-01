@@ -1,0 +1,13 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of components potentially accepting user input",
+  "references": {
+    "Content Provider (Android Developper Documentation)": "http://developer.android.com/guide/topics/providers/content-providers.html",
+    "Service (Android Developper Documentation)": "http://developer.android.com/reference/android/app/Service.html",
+    "Activity (Android Developper Documentation)": "http://developer.android.com/reference/android/app/Activity.html",
+    "Broadcast Receiver (Android Developper Documentation)": "http://developer.android.com/reference/android/content/BroadcastReceiver.html"
+  },
+  "title": "APK attack surface",
+  "privacy_issue": false,
+  "security_issue": false
+}

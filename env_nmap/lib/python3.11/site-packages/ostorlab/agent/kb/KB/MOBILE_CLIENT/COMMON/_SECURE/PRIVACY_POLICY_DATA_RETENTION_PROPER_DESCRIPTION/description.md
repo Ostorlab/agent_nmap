@@ -1,0 +1,1 @@
+The privacy policy accurately describes data retention practices.

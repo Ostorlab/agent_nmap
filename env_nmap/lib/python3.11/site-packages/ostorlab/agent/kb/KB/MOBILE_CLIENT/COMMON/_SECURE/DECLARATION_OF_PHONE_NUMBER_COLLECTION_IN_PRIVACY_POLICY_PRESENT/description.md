@@ -1,0 +1,1 @@
+The app's privacy policy mentions the collection of users' phone numbers.

@@ -1,0 +1,1 @@
+The app's properly reflect the collection of users' approximate location in the privacy policy.

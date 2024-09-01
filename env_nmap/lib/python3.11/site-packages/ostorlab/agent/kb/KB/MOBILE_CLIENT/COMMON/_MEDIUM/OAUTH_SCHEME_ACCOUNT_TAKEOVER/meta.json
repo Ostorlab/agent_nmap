@@ -1,0 +1,46 @@
+{
+  "risk_rating": "medium",
+  "short_description": "This vulnerability occurs when an application uses a custom scheme in the 'redirect_uri' parameter during OAuth authentication.",
+  "references": {
+    "Danielfett": "https://danielfett.de/2020/11/27/improving-app2app/",
+    "PortSwigger": "https://portswigger.net/web-security/oauth",
+    "Android Developer": "https://developer.android.com/training/app-links/verify-android-applinks",
+    "Apple Developer": "https://developer.apple.com/documentation/xcode/supporting-associated-domains",
+    "Google Developer": "https://developers.googleblog.com/2023/10/enhancing-oauth-app-impersonation-protections.html"
+  },
+  "title": "OAuth Account Takeover by hijacking custom schemes",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_3",
+      "MSTG_PLATFORM_4",
+      "MSTG_STORAGE_6"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_3",
+      "MSTG_PLATFORM_4",
+      "MSTG_NETWORK_5",
+      "MSTG_STORAGE_6"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_8_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

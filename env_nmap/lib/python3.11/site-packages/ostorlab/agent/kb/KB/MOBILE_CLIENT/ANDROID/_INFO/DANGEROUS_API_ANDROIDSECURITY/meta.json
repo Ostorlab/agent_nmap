@@ -1,0 +1,30 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of Android Security API calls (Keystore and Keychain)",
+  "references": {
+    "Android Keystore System (Android developer)": "http://developer.android.com/training/articles/keystore.html",
+    "CWE-522: Insufficiently Protected Credentials": "http://cwe.mitre.org/data/definitions/522.html",
+    "Android Keychain System (Android developer)": "http://developer.android.com/reference/android/security/KeyChain.html",
+    "CWE-312: Cleartext Storage of Sensitive Information": "http://cwe.mitre.org/data/definitions/312.html",
+    "Insecure Data Storage (OWASP Mobile Top 10)": "https://www.owasp.org/index.php/Mobile_Top_10_2014-M2",
+    "Security tips (Android developer)": "http://developer.android.com/training/articles/security-tips.html#StoringData"
+  },
+  "title": "Call to Android Security API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CRYPTO_1",
+      "MSTG_CRYPTO_2",
+      "MSTG_CRYPTO_3"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CRYPTO_1",
+      "MSTG_CRYPTO_2",
+      "MSTG_CRYPTO_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CRYPTO_2"
+    ]
+  }
+}

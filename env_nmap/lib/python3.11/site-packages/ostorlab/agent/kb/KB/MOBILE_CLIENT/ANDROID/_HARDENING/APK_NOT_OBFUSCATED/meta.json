@@ -1,0 +1,24 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "Application's source code is not obfuscated and could be decompiled to retrieve the initial source code.",
+  "references": {
+    "Lack of Binary Protections (OWASP Mobile Top 10)": "https://www.owasp.org/index.php/Mobile_Top_10_2014-M10",
+    "Proguard (Android developer)": "http://developer.android.com/tools/help/proguard.html"
+  },
+  "title": "Application code not obfuscated",
+  "cvss_v3_vector": "CVSS:3.0/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_RESILIENCE": [
+      "MSTG_RESILIENCE_9",
+      "MSTG_RESILIENCE_12"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_RESILIENCE_3"
+    ]
+  }
+}

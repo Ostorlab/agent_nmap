@@ -1,0 +1,27 @@
+{
+  "risk_rating": "hardening",
+  "short_description": "The application uses a deprecated component or library.",
+  "references": {
+    "CWE-477: Use of Obsolete Function": "https://cwe.mitre.org/data/definitions/477.html",
+    "Top 10 A9-Using Components with Known Vulnerabilities": "https://owasp.org/www-pdf-archive/OWASP_Top_10-2017_%28en%29.pdf.pdf"
+  },
+  "title": "Use of Deprecated Component",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CODE_5"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CODE_5"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_3"
+    ]
+  }
+}

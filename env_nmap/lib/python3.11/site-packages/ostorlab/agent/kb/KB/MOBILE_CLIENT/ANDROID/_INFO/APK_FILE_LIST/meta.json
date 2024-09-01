@@ -1,0 +1,11 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all files shipped in the application.",
+  "references": {
+    "Inside the Android Application Framework (Google I/O 2008)": "https://sites.google.com/site/io/inside-the-android-application-framework",
+    "Android Application Package (Wikipedia)": "https://en.wikipedia.org/wiki/Android_application_package"
+  },
+  "title": "APK files list",
+  "privacy_issue": false,
+  "security_issue": false
+}

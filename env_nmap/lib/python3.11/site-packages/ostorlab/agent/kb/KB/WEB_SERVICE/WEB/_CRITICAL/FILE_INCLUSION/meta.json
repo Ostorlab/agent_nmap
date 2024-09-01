@@ -1,0 +1,33 @@
+{
+  "risk_rating": "critical",
+  "short_description": "The web server application is vulnerable to file inclusion vulnerability.",
+  "references": {
+    "OWASP":"https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.1-Testing_for_Local_File_Inclusion",
+    "BrightSec":"https://brightsec.com/blog/file-inclusion-vulnerabilities/"
+  },
+  "title": "File inclusion vulnerability",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_22"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_5",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+    "risk_rating": "medium",
+    "short_description": "CORS misconfiguration vulnerability allows unauthorized cross-origin requests to access sensitive data or perform actions on behalf of the user.",
+    "references": {
+        "CORS Misconfiguration": "https://crashtest-security.com/cors-misconfiguration/",
+        "CWE-942: Permissive Cross-domain Policy": "https://cwe.mitre.org/data/definitions/942.html"
+    },
+    "title": "CORS Misconfiguration Vulnerability",
+    "privacy_issue": false,
+    "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_8_3",
+      "REQ_11_3"
+    ]
+  }
+}

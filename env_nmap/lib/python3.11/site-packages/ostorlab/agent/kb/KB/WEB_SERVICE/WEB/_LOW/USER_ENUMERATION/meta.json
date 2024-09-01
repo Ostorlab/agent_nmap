@@ -1,0 +1,18 @@
+{
+  "risk_rating": "low",
+  "short_description": "User enumeration flaws provide attackers with a method to determine whether a specified username exists.",
+  "references": {
+    "Username Enumeration": "https://guides.codepath.com/websecurity/Username-Enumeration"
+  },
+  "title": "Username enumeration",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4"
+    ]
+  }
+}

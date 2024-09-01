@@ -1,0 +1,44 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The application exposes a file provider with insecure path settings.",
+  "references": {
+    "Exploiting content providers": "https://erev0s.com/blog/exploiting-content-providers-through-an-insecure-setresult-implementation/",
+    "Security Tips (Android developer)": "http://developer.android.com/training/articles/security-tips.html",
+    "FileProvider (Android developer)": "https://developer.android.com/reference/androidx/core/content/FileProvider"
+  },
+  "title": "Insecure File Provider Paths Setting",
+  "cvss_v3_vector": "CVSS:3.0/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_4"
+    ],
+    "CWE_TOP_25": [
+      "CWE_22"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

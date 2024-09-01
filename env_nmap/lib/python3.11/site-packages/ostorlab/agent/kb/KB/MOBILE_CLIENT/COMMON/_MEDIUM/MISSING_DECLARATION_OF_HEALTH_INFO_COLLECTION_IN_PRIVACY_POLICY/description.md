@@ -1,0 +1,1 @@
+The vulnerability exists in the app's failure to accurately reflect the collection of users' health information in the privacy policy, potentially leading to a breach of user privacy and data protection regulations.

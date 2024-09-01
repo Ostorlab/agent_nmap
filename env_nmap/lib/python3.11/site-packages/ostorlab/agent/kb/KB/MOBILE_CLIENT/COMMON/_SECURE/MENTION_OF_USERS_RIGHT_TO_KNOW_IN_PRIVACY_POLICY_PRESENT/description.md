@@ -1,0 +1,1 @@
+The privacy policy does mention users' right to know about information sharing.

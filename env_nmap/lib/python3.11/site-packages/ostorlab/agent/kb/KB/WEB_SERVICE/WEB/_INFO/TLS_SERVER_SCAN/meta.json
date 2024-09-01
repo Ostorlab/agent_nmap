@@ -1,0 +1,10 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of ciphers and protocols supported by TLS server endpoint.",
+  "references": {
+    "Server Side TLS (Mozilla Wiki)": "https://wiki.mozilla.org/Security/Server_Side_TLS"
+  },
+  "title": "TLS/SSL Server Configuration Settings",
+  "privacy_issue": true,
+  "security_issue": true
+}

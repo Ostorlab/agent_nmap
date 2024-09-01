@@ -1,0 +1,1 @@
+Server accepts anonymous authentication.

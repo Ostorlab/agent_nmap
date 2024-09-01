@@ -1,0 +1,1 @@
+The application does not mention users' right to correct inaccuracies within their data in its privacy policy, leaving users vulnerable to potential inaccuracies in their personal information.

@@ -1,0 +1,22 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of ZIP API calls",
+  "references": {
+    "<code>java.util.zip.ZipOutputStream</code> Android developer documentation": "http://developer.android.com/reference/java/util/zip/ZipOutputStream.html",
+    "<code>java.util.zip.ZipFile</code> Android developer documentation": "http://developer.android.com/reference/java/util/zip/ZipFile.html"
+  },
+  "title": "Call to ZIP API",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_4"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "risk_rating": "high",
+  "short_description": "The application accepts notifications from untrusted sources, exposing users to phishing and unauthorized access.",
+  "references": {
+    "Cordova Push Plugin Security Issue": "https://github.com/phonegap/phonegap-plugin-push/issues/2207"
+  },
+  "title": "Notification Spoofing",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_AUTH_12"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_AUTH_12"
+    ],
+    "CWE_TOP_25": [
+      "CWE_20",
+      "CWE_276"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_32"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

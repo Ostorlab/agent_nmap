@@ -1,0 +1,10 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all application Java classes",
+  "references": {
+    "Do not use deprecated or obsolete classes or methods": "https://www.securecoding.cert.org/confluence/display/java/MET02-J.+Do+not+use+deprecated+or+obsolete+classes+or+methods"
+  },
+  "title": "Classes list",
+  "privacy_issue": false,
+  "security_issue": false
+}

@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all TLS Pinning methods used in the application.",
+  "references": {},
+  "title": "Recorded calls to TLS Pinning API",
+  "privacy_issue": false,
+  "security_issue": true
+}

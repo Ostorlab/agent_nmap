@@ -1,0 +1,1 @@
+List of all calls to methods using Java Native Interface to interact with native code (written in C/C++).

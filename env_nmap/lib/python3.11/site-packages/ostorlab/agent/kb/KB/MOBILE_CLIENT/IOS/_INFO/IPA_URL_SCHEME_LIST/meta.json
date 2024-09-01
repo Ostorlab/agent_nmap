@@ -1,0 +1,11 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of URL schemes supported by the application.",
+  "references": {
+    "URL Schemes (Apple developer)": "https://developer.apple.com/library/content/featuredarticles/iPhoneURLScheme_Reference/Introduction/Introduction.html",
+    "Custom URL Schemes (Apple developer)": "https://developer.apple.com/documentation/uikit/core_app/communicating_with_other_apps_using_custom_urls"
+  },
+  "title": "URL Scheme list",
+  "privacy_issue": false,
+  "security_issue": false
+}

@@ -1,0 +1,1 @@
+If your privacy policy does not mention the collection of your users' voice or sound recordings, but this data type is declared in your Play Data Safety Section, it could leave your users vulnerable to having their personal information collected without their knowledge or consent.

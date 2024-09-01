@@ -1,0 +1,33 @@
+{
+  "risk_rating": "critical",
+  "short_description": "The web application is vulnerable to Expression Language (EL) Injection.",
+  "references": {
+    "OWASP": "https://owasp.org/www-community/vulnerabilities/Expression_Language_Injection"
+  },
+  "title": "Expression Language (EL) Injection",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_20"
+    ],
+    "GDPR": [
+      "ART_5",
+      "ART_32"
+    ],
+    "PCI_STANDARDS": [
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

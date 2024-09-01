@@ -1,0 +1,1 @@
+Improper XML parsing could lead to several vulnerabilities which could to arbitrary file access (External XML Entities injection, XML injection) or denial of service (Billion laughs, quadratic blowup).

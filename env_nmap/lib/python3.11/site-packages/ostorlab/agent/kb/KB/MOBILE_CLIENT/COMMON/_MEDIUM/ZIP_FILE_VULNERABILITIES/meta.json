@@ -1,0 +1,37 @@
+{
+   "risk_rating":"medium",
+   "short_description":"The ZIP file extraction process is vulnerable to path traversal, zip symbolic link, and zip extension spoofing attacks.",
+   "references":{
+      "Path Traversal (OWASP)":"https://owasp.org/www-community/attacks/Path_Traversal",
+      "Symbolic Link (Cybrary)":"https://www.cybrary.it/blog/symlink-attacks",
+      "Zip Slip (Rapid7)":"https://blog.rapid7.com/2018/07/27/zip-slip-attacks-are-now-25-years-old-and-more-dangerous-than-ever/"
+   },
+   "title":"ZIP Vulnerabilities: Path Traversal, Zip Symbolic Link, and Zip Extension Spoofing",
+   "privacy_issue":false,
+   "security_issue":true,
+   "categories":{
+      "OWASP_MASVS_L1":[
+         "MSTG_PLATFORM_2"
+      ],
+     "OWASP_MASVS_L2":[
+         "MSTG_PLATFORM_2"
+      ],
+      "PCI_STANDARDS":[
+        "REQ_2_2",
+        "REQ_6_2",
+        "REQ_6_3",
+        "REQ_11_3"
+      ],
+      "OWASP_MASVS_v2_1":[
+          "MASVS_CODE_4"
+      ],
+      "SOC2_CONTROLS": [
+        "CC_2_1",
+        "CC_4_1",
+        "CC_7_1",
+        "CC_7_2",
+        "CC_7_4",
+        "CC_7_5"
+      ]
+   }
+}

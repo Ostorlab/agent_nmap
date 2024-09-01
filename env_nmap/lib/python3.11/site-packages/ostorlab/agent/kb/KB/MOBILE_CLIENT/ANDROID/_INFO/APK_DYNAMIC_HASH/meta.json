@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all Hash methods used in the application.",
+  "references": {},
+  "title": "Recorded calls to Hash API",
+  "privacy_issue": true,
+  "security_issue": true
+}

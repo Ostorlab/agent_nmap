@@ -1,0 +1,25 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of WebView API calls",
+  "references": {
+    "DRD02-J. Do not allow WebView to access sensitive local resource through file scheme (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/android/DRD02-J.+Do+not+allow+WebView+to+access+sensitive+local+resource+through+file+scheme",
+    "DRD13. Do not provide addJavascriptInterface method access in a WebView which could contain untrusted content (CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=129859614"
+  },
+  "title": "Call to dangerous WebView settings API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_6",
+      "MSTG_PLATFORM_5"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_6",
+      "MSTG_PLATFORM_5"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_2",
+      "MASVS_PLATFORM_3"
+    ]
+  }
+}

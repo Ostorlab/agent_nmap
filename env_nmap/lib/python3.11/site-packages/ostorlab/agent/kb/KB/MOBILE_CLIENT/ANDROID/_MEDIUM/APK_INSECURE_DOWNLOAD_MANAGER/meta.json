@@ -1,0 +1,17 @@
+{
+  "risk_rating": "medium",
+  "short_description": "The application forces the use of mobile network connection.",
+  "references": {
+  },
+  "title": "Abuse of mobile network connection",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L2": [
+      "MSTG_NETWORK_4"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_NETWORK_2"
+    ]
+  }
+}

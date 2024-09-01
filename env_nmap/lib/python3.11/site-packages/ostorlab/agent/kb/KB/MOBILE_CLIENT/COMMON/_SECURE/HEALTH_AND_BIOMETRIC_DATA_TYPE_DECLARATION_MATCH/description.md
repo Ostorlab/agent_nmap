@@ -1,0 +1,1 @@
+The Health and Biometric data type declaration in your privacy policy does match the actual usage of such data.

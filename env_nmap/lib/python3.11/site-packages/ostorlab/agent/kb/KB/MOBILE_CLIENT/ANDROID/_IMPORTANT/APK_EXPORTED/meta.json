@@ -1,0 +1,27 @@
+{
+  "risk_rating": "important",
+  "short_description": "List of all exported components (activities, services, broadcast receivers, content providers).",
+  "references": {
+    "Service (Android developer)": "http://developer.android.com/reference/android/app/Service.html",
+    "Activity (Android developer)": "http://developer.android.com/reference/android/app/Activity.html",
+    "Content Provider (Android developer)": "http://developer.android.com/guide/topics/providers/content-providers.html",
+    "Broadcast Receiver (Android developer)": "http://developer.android.com/reference/android/content/BroadcastReceiver.html"
+  },
+  "title": "Exported activites, services and broadcast receivers list",
+  "privacy_issue": false,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_4"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ]
+  }
+}

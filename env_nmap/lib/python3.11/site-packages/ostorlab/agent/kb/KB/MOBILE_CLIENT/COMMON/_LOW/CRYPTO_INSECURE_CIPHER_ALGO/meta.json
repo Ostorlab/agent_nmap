@@ -1,0 +1,44 @@
+{
+  "risk_rating": "low",
+  "short_description": "The client supports combinations of cipher suites that suffer from known cryptographic weaknesses.",
+  "references": {
+    "Cryptographic Vulnerability (OWASP)": "https://www.owasp.org/index.php/Category:Cryptographic_Vulnerability",
+    "CWE-327: Use of a Broken or Risky Cryptographic Algorithm": "https://cwe.mitre.org/data/definitions/327.html",
+    "5 Common Encryption Algorithms and the Unbreakables of the Future": "https://www.storagecraft.com/blog/5-common-encryption-algorithms/"
+  },
+  "title": "Cryptographic Vulnerability: Insecure Algorithm",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_CRYPTO_2",
+      "MSTG_CRYPTO_3",
+      "MSTG_CRYPTO_4"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_CRYPTO_2",
+      "MSTG_CRYPTO_3",
+      "MSTG_CRYPTO_4"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_3_6",
+      "REQ_3_7",
+      "REQ_4_2",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CRYPTO_1",
+      "MASVS_CRYPTO_2"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_7",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+    "risk_rating": "high",
+    "short_description": "Insecure Authorization Restriction http vulnerability allows an attacker to bypass access controls by manipulating HTTP requests to gain access to restricted resources or perform actions they are not supposed to.",
+    "references": {
+        "wikipedia": "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#4xx_client_errors",
+        "Hacktricks": "https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/403-and-401-bypasses",
+        "cheatsheetseries.owasp": "https://cheatsheetseries.owasp.org/assets/REST_Security_Cheat_Sheet_Bypassing_VBAAC_with_HTTP_Verb_Tampering.pdf"
+    },
+    "title": "Insecure Authorization Restriction",
+    "privacy_issue": true,
+    "security_issue": true,
+    "categories": {
+        "OWASP_ASVS_L1": [
+            "V4_1_1",
+            "V4_1_2",
+            "V4_1_3",
+            "V4_1_5",
+            "V5_1_1",
+            "V5_1_2",
+            "V5_1_3",
+            "V5_1_4",
+            "V5_2_2"
+        ],
+        "OWASP_ASVS_L2": [
+            "V4_1_1",
+            "V4_1_2",
+            "V4_1_3",
+            "V4_1_5",
+            "V5_1_1",
+            "V5_1_2",
+            "V5_1_3",
+            "V5_1_4",
+            "V5_2_2"
+        ],
+        "OWASP_ASVS_L3": [
+            "V4_1_1",
+            "V4_1_2",
+            "V4_1_3",
+            "V4_1_5",
+            "V5_1_1",
+            "V5_1_2",
+            "V5_1_3",
+            "V5_1_4",
+            "V5_2_2"
+        ],
+        "PCI_STANDARDS": [
+            "REQ_2_2"
+        ]
+    }
+}

@@ -1,0 +1,24 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of external storage API calls",
+  "references": {
+    "CWE-922: Insecure Storage of Sensitive Information": "https://cwe.mitre.org/data/definitions/922.html",
+    "CWE-312: Cleartext Storage of Sensitive Information": "https://cwe.mitre.org/data/definitions/312.html",
+    "Security tips (Android developer)": "http://developer.android.com/training/articles/security-tips.html#StoringData",
+    "Insecure Data Storage (OWASP)": "https://www.owasp.org/index.php/Mobile_Top_10_2014-M2"
+  },
+  "title": "Call to External Storage API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_STORAGE_2"
+    ]
+  }
+}

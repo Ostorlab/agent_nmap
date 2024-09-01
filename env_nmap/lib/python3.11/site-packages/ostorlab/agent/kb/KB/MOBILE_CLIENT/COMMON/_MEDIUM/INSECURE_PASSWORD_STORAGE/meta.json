@@ -1,0 +1,41 @@
+{
+  "title": "Insecure password storage",
+  "short_description": "Password is stored in cleartext or trivially encoded which could lead to user's account compromise.",
+  "risk_rating": "medium",
+  "references": {
+    "OWASP Insecure Cryptographic Storage": "https://www.owasp.org/index.php/Top_10_2010-A7-Insecure_Cryptographic_Storage",
+    "OWASP Insecure Storage": "https://www.owasp.org/index.php/Insecure_Storage",
+    "CWE-522 Insufficiently Protected Credentials": "https://cwe.mitre.org/data/definitions/522.html",
+    "CWE-312 Cleartext Storage of Sensitive Information": "CWE-312: Cleartext Storage of Sensitive Information",
+    "CWE-256 Plaintext Storage of a Password": "https://cwe.mitre.org/data/definitions/256.html"
+  },
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_2"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_3_6",
+      "REQ_3_7",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_STORAGE_1",
+      "MASVS_STORAGE_2"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_7",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

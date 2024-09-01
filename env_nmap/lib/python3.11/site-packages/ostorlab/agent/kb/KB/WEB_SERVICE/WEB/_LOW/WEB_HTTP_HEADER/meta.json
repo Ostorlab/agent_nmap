@@ -1,0 +1,23 @@
+{
+  "risk_rating": "low",
+  "short_description": "The application header setting is either missing or setting insecure or unsafe header values.",
+  "references": {
+  },
+  "title": "Insecure HTTP Header Setting",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_ASVS_L1": [
+      "V5_1_3",
+      "V14_5_3"
+    ],
+    "OWASP_ASVS_L2": [
+      "V5_1_3",
+      "V14_5_3"
+    ],
+    "OWASP_ASVS_L3": [
+      "V5_1_3",
+      "V14_5_3"
+    ]
+  }
+}

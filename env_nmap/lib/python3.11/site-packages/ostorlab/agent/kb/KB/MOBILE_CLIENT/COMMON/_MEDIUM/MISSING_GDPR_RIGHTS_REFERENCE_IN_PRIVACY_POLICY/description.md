@@ -1,0 +1,1 @@
+The vulnerability exists in the privacy policy's failure to explicitly reference the rights granted to users in the EU under the General Data Protection Regulation (GDPR), potentially leaving users unaware of their rights and protections under the law.

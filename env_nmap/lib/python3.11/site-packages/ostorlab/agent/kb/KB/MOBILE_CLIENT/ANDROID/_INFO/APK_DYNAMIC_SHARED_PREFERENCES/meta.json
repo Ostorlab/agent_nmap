@@ -1,0 +1,8 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all Shared Preferences methods used in the application.",
+  "references": {},
+  "title": "Recorded calls to Shared Preferences API",
+  "privacy_issue": false,
+  "security_issue": true
+}

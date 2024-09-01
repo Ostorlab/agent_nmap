@@ -1,0 +1,1 @@
+The app uses an insecure Bluetooth connection, with encryption switched off. An attacker who is in the physical vicinity of connected devices can use a Man in the Middle attack to intercept and/or modify transmitted data.

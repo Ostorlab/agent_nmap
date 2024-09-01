@@ -1,0 +1,41 @@
+{
+  "risk_rating": "medium",
+  "short_description": "Filesystem access using weak permissions.",
+  "references": {
+    "Ensure sensitive data are kept secret(CERT Secure Coding)": "https://www.securecoding.cert.org/confluence/display/android/DRD11.+Ensure+that+sensitive+data+is+kept+secure"
+  },
+  "title": "Insecure Filesystem Access",
+  "cvss_v3_vector": "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:H/I:H/A:N",
+  "privacy_issue": true,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_2"
+    ],
+    "CWE_TOP_25": [
+      "CWE_276"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_7_3",
+      "REQ_11_3"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_STORAGE_2"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

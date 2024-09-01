@@ -1,0 +1,23 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of XML parsing API calls",
+  "references": {
+    "External XML Entities Injection (OWASP)": "https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing",
+    "XML Injection (OWASP)": "https://www.owasp.org/index.php/Testing_for_XML_Injection_(OTG-INPVAL-008)",
+    "Parsing XML (Android developer)": "http://developer.android.com/training/basics/network-ops/xml.html"
+  },
+  "title": "Call to XML parsing API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_L2": [
+      "MSTG_PLATFORM_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_CODE_4"
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+It has been identified that the Contacts data type declaration in your privacy policy does not accurately match the actual usage of this data, potentially leading to a discrepancy in the level of protection and transparency provided to users regarding their personal information.

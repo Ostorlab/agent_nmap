@@ -1,0 +1,1 @@
+The privacy policy mentions the collection of your users' precise location data and matches expected usage.

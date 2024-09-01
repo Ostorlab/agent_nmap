@@ -1,0 +1,10 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of reflection API calls",
+  "references": {
+    "SEC05-J. Do not use reflection to increase accessibility of classes, methods, or fields": "https://www.securecoding.cert.org/confluence/display/java/SEC05-J.+Do+not+use+reflection+to+increase+accessibility+of+classes,+methods,+or+fields"
+  },
+  "title": "Call to Reflection API",
+  "privacy_issue": false,
+  "security_issue": true
+}

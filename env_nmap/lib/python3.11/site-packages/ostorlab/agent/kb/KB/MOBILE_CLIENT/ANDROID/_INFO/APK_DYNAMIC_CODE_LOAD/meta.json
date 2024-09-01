@@ -1,0 +1,20 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of dynamic code loading API calls",
+  "references": {
+    "DexClassLoader documentation (Android developer)": "http://developer.android.com/reference/dalvik/system/DexClassLoader.html"
+  },
+  "title": "Recorded calls to dynamic code loading API",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+  "OWASP_MASVS_L1": [
+    "MSTG_CODE_5",
+    "MSTG_CODE_7"
+    ],
+  "OWASP_MASVS_L2": [
+    "MSTG_CODE_5",
+    "MSTG_CODE_7"
+    ]
+  }
+}

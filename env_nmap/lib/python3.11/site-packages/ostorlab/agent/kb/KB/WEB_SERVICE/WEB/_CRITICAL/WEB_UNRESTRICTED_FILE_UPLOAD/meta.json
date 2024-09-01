@@ -1,0 +1,32 @@
+{
+  "risk_rating": "critical",
+  "short_description": "The application doesn't restrict uploaded file based on file metadata or content.",
+  "references": {
+    "Unrestricted File Upload (OWASP)": "https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload"
+  },
+  "title": "Unrestricted file upload",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "CWE_TOP_25": [
+      "CWE_434"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_6_2",
+      "REQ_6_3",
+      "REQ_6_4",
+      "REQ_11_3"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_3_4",
+      "CC_4_1",
+      "CC_6_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+  }
+}

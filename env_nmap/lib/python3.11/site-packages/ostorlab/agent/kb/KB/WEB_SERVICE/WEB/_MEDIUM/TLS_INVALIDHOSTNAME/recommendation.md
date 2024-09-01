@@ -1,0 +1,1 @@
+TLS certificate validation is enabled by default in almost all networking libraries, review your code and configuration to make sure you have not explicitly disabled it.

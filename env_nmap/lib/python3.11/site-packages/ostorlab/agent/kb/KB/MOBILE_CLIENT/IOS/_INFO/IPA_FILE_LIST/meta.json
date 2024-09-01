@@ -1,0 +1,11 @@
+{
+  "risk_rating": "info",
+  "short_description": "List of all files shipped in the application.",
+  "references": {
+    "iOS App Store Package (Wikipedia)": "https://en.wikipedia.org/wiki/.ipa_(file_extension)",
+    "IPA file format": "https://www.theiphonewiki.com/wiki/IPA_File_Format"
+  },
+  "title": "IPA files list",
+  "privacy_issue": false,
+  "security_issue": false
+}

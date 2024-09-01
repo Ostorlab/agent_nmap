@@ -1,0 +1,21 @@
+{
+  "risk_rating": "low",
+  "short_description": "Application sets the targetSdkVersion attribute to allow usage of older API level of Android which may expose users to security vulnerabilities.",
+  "references": {
+    "Android API Levels": "https://developer.android.com/guide/topics/manifest/uses-sdk-element#min",
+    "Target API level deprecation notice" : "https://support.google.com/googleplay/android-developer/answer/11926878?hl=en"
+  },
+  "title": "Deprecated Target API Version",
+  "cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N",
+  "privacy_issue": false,
+  "security_issue": true,
+  "categories": {
+    "PCI_STANDARDS":[
+      "REQ_6_2",
+      "REQ_6_3"
+    ],
+    "OWASP_MASVS_v2_1":[
+      "MASVS_CODE_1"
+    ]
+  }
+}

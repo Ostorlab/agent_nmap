@@ -1,0 +1,11 @@
+{
+  "risk_rating": "secure",
+  "short_description": "Assign a unique name and/or number for identifying and tracking user identity.",
+  "references": {
+    "HIPAA Security Rules": "http://www.access.gpo.gov/nara/cfr/waisidx_07/45cfr160_07.html",
+    "Security Standards: Technical Safeguards": "https://www.hhs.gov/sites/default/files/ocr/privacy/hipaa/administrative/securityrule/techsafeguards.pdf"
+  },
+  "title": "Assign a unique name and/or number for\nidentifying and tracking user identity",
+  "privacy_issue": true,
+  "security_issue": true
+}

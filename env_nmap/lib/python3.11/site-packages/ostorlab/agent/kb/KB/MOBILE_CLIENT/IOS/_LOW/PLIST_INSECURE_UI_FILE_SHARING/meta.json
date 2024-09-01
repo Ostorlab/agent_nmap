@@ -1,0 +1,37 @@
+{
+  "risk_rating": "low",
+  "short_description": "Enabled iTunes file sharing. Files not intended for user access via the file sharing feature can be accessed physically by an attacker.",
+  "references": {
+    "Common Weakness Enumeration CWE-359": "https://cwe.mitre.org/data/definitions/359.html",
+    "Apple Developer documentation": "https://developer.apple.com/documentation/bundleresources/information_property_list/uifilesharingenabled"
+  },
+  "title": "iTunes UI File Sharing Enabled",
+  "privacy_issue": true,
+  "security_issue": false,
+  "categories": {
+    "OWASP_MASVS_L1": [
+      "MSTG_STORAGE_6"
+    ],
+        "OWASP_MASVS_L2": [
+      "MSTG_STORAGE_6"
+    ],
+    "PCI_STANDARDS":[
+      "REQ_2_2",
+      "REQ_3_5",
+      "REQ_6_2"
+    ],
+    "OWASP_MASVS_v2_1": [
+      "MASVS_PLATFORM_1"
+    ],
+    "SOC2_CONTROLS": [
+      "CC_2_1",
+      "CC_4_1",
+      "CC_7_1",
+      "CC_7_2",
+      "CC_7_4",
+      "CC_7_5"
+    ]
+
+  }
+}
+
