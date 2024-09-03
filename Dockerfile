@@ -18,9 +18,6 @@ COPY requirement.txt /requirement.txt
 RUN python3.11 -m pip install -r /requirement.txt
 RUN mkdir -p /app/agent
 ENV PYTHONPATH=/app
-COPY agent /app/agent
-COPY ostorlab.yaml /app/agent/ostorlab.yaml
-WORKDIR /app
 
 FROM base AS builder
 
@@ -42,12 +39,16 @@ RUN wget https://nmap.org/dist/nmap-${NMAP_VERSION}.tar.bz2 \
     && cd /tmp/nmap-${NMAP_VERSION} \
     && ./configure \
     && make \
-    && sudo make install \
+    && make install \
     && cd / \
     && rm -rf /tmp/nmap-$(NMAP_VERSION)
 
 FROM base
 
 COPY --from=builder /usr/local /usr/local
+
+COPY agent /app/agent
+COPY ostorlab.yaml /app/agent/ostorlab.yaml
+WORKDIR /app
 
 CMD ["python3.11", "/app/agent/nmap_agent.py"]

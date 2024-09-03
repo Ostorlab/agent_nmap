@@ -1,0 +1,543 @@
+# Nmap 7.95 scan initiated Tue Sep  3 15:05:15 2024 as: nmap -sS -sU -p- -sV -sC -O -A -T4 --script vuln,default,discovery,exploit,auth,brute --script-args vulns.showall --open -PE -PP -PS21,22,23,25,80,113,443,445,3389,5000,5900,8080 -PU53,67,68,69,123,135,137,138,161,162,500,520,631,1434,1900 --min-rate 1000 --max-retries 2 --reason --version-all --traceroute -oA comprehensive_scan_output 143.109.120.194
+Pre-scan script results:
+| broadcast-igmp-discovery: 
+|   192.168.1.5
+|     Interface: enp5s0
+|     Version: 2
+|     Group: 224.0.2.3
+|     Description: EPSON-disc-set
+|   192.168.1.5
+|     Interface: enp5s0
+|     Version: 2
+|     Group: 239.255.255.250
+|     Description: Organization-Local Scope (rfc2365)
+|_  Use the newtargets script-arg to add the results as targets
+| broadcast-avahi-dos: 
+|   Discovered hosts:
+|     224.0.0.251
+|   After NULL UDP avahi packet DoS (CVE-2011-1002).
+|_  Hosts are all up (not vulnerable).
+| targets-ipv6-multicast-slaac: 
+|   IP: fe80::daec:e5ff:fe9f:44dd  MAC: d8:ec:e5:9f:44:dd  IFACE: enp5s0
+|   IP: fe80::783b:6431:64b6:f82a  MAC: fc:34:97:9e:cf:33  IFACE: enp5s0
+|   IP: fe80::877:577a:cae3:a4af   MAC: a0:36:bc:e6:aa:b0  IFACE: enp5s0
+|   IP: fe80::1292:ca75:7d7f:d83   MAC: d8:43:ae:57:68:80  IFACE: enp5s0
+|   IP: fe80::e35c:90e6:9443:a6c   MAC: d8:43:ae:24:88:fa  IFACE: enp5s0
+|   IP: fe80::79d1:988:901e:2b50   MAC: d8:43:ae:57:68:80  IFACE: enp5s0
+|   IP: fe80::64e9:8b36:2590:e899  MAC: d8:43:ae:57:68:7a  IFACE: enp5s0
+|   IP: fe80::d574:1f65:7048:d229  MAC: 2c:f0:5d:dd:a7:9e  IFACE: enp5s0
+|   IP: fe80::5795:5d6b:dc5b:62b6  MAC: d8:5e:d3:a5:72:cb  IFACE: enp5s0
+|   IP: fe80::9c78:4c28:b07a:2248  MAC: 04:7c:16:7f:1c:94  IFACE: enp5s0
+|   IP: fe80::766:aed2:3001:b707   MAC: fc:34:97:9e:cf:33  IFACE: enp5s0
+|   IP: fe80::bd4b:a13:d1f7:f3e    MAC: 2c:f0:5d:dd:94:64  IFACE: enp5s0
+|   IP: fe80::abf8:5896:ef8:244c   MAC: 2c:f0:5d:dd:94:64  IFACE: enp5s0
+|   IP: fe80::fb78:1834:12a3:6cc7  MAC: d8:43:ae:24:88:fe  IFACE: enp5s0
+|   IP: fe80::cfd8:72fb:ab29:b580  MAC: 04:7c:16:7f:1c:32  IFACE: enp5s0
+|   IP: fe80::f4e9:ca2d:998e:8e83  MAC: 2c:f0:5d:dd:a7:ac  IFACE: enp5s0
+|   IP: fe80::1a8d:bf81:6b16:5a3   MAC: 08:8f:c3:85:91:27  IFACE: enp5s0
+|   IP: fe80::1565:a283:2505:2e55  MAC: 2c:f0:5d:55:09:5a  IFACE: enp5s0
+|   IP: fe80::7884:dcfa:821b:55f8  MAC: a0:36:bc:e6:aa:b0  IFACE: enp5s0
+|   IP: fe80::99e:2240:69b2:f71f   MAC: d8:43:ae:24:88:fe  IFACE: enp5s0
+|   IP: fe80::80db:4b08:17a5:41f4  MAC: 04:7c:16:7f:1c:94  IFACE: enp5s0
+|   IP: fe80::9aa1:f5b1:4007:f312  MAC: 2c:f0:5d:dd:a7:9e  IFACE: enp5s0
+|   IP: fe80::3b8e:c3c0:7bfe:f2b4  MAC: d8:5e:d3:a5:c5:11  IFACE: enp5s0
+|   IP: fe80::f855:d3a8:dbb8:1f6d  MAC: 2c:f0:5d:dd:a7:ac  IFACE: enp5s0
+|   IP: fe80::9c02:b21b:424:6102   MAC: d8:5e:d3:a5:c5:11  IFACE: enp5s0
+|   IP: fe80::501e:ed1c:d0cc:60d0  MAC: d8:43:ae:57:68:7a  IFACE: enp5s0
+|   IP: fe80::36fa:55a0:83cf:ba79  MAC: 04:7c:16:7f:1c:32  IFACE: enp5s0
+|   IP: fe80::94a7:6e2b:3909:5835  MAC: 2c:f0:5d:55:09:5a  IFACE: enp5s0
+|   IP: fe80::b3d7:88a3:fea1:3fff  MAC: 08:8f:c3:85:91:27  IFACE: enp5s0
+|   IP: fe80::9b90:8418:86f1:f37c  MAC: d8:43:ae:24:88:fa  IFACE: enp5s0
+|   IP: fe80::285:cd2d:48ec:acf    MAC: d8:5e:d3:a5:72:cb  IFACE: enp5s0
+|_  Use --script-args=newtargets to add the results as targets
+| targets-ipv6-multicast-mld: 
+|   IP: fe80::1                    MAC: 40:33:06:81:b1:32  IFACE: enp5s0
+|   IP: fe80::1bf4:ad44:7f4f:55cf  MAC: 08:8f:c3:85:91:27  IFACE: enp5s0
+|   IP: fe80::212:72d1:5854:fb2    MAC: fc:34:97:9e:cf:33  IFACE: enp5s0
+|   IP: fe80::2dbd:6019:5f2d:23db  MAC: d8:43:ae:57:68:80  IFACE: enp5s0
+|   IP: fe80::4aa5:c351:76d:8042   MAC: d8:43:ae:57:68:7a  IFACE: enp5s0
+|   IP: fe80::6807:6c28:2266:1dc   MAC: a0:36:bc:e6:aa:b0  IFACE: enp5s0
+|   IP: fe80::7867:50f9:9b0e:c6df  MAC: 2c:f0:5d:dd:a7:9e  IFACE: enp5s0
+|   IP: fe80::7a1f:446d:3dee:4066  MAC: d8:43:ae:24:88:fe  IFACE: enp5s0
+|   IP: fe80::855a:d1c9:82bb:288e  MAC: d8:43:ae:24:88:fa  IFACE: enp5s0
+|   IP: fe80::99:a921:a86c:ea0c    MAC: d8:5e:d3:a5:c5:11  IFACE: enp5s0
+|   IP: fe80::99cf:99a4:4dca:abd1  MAC: 2c:f0:5d:dd:94:64  IFACE: enp5s0
+|   IP: fe80::bff7:dd37:2773:8a16  MAC: 04:7c:16:7f:1c:32  IFACE: enp5s0
+|   IP: fe80::d177:b17b:9fb8:6eb6  MAC: 2c:f0:5d:dd:a7:ac  IFACE: enp5s0
+|   IP: fe80::d195:1420:492d:de0a  MAC: d8:5e:d3:a5:72:cb  IFACE: enp5s0
+|   IP: fe80::daec:e5ff:fe9f:44dd  MAC: d8:ec:e5:9f:44:dd  IFACE: enp5s0
+|   IP: fe80::de39:c929:cc5d:5763  MAC: 2c:f0:5d:55:09:5a  IFACE: enp5s0
+|   IP: fe80::eec2:581f:bc01:da6d  MAC: 04:7c:16:7f:1c:94  IFACE: enp5s0
+| 
+|_  Use --script-args=newtargets to add the results as targets
+| ipv6-multicast-mld-list: 
+|   fe80::99cf:99a4:4dca:abd1: 
+|     device: enp5s0
+|     mac: 2c:f0:5d:dd:94:64
+|     multicast_ips: 
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:fff8:244c         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::1:fff8:244c         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::1:fff8:244c         (Solicited-Node Address)
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::1:fff8:244c         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fff8:244c         (Solicited-Node Address)
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:fff7:f3e          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffca:abd1         (NDP Solicited-node)
+|       ff02::1:fff8:244c         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|   fe80::4aa5:c351:76d:8042: 
+|     device: enp5s0
+|     mac: d8:43:ae:57:68:7a
+|     multicast_ips: 
+|       ff02::1:ff6d:8042         (NDP Solicited-node)
+|       ff02::1:ff6d:8042         (NDP Solicited-node)
+|       ff02::1:ffcc:60d0         (Solicited-Node Address)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffcc:60d0         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff6d:8042         (NDP Solicited-node)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::1:ff6d:8042         (NDP Solicited-node)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::1:ffcc:60d0         (Solicited-Node Address)
+|       ff02::1:ff6d:8042         (NDP Solicited-node)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffcc:60d0         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffcc:60d0         (Solicited-Node Address)
+|       ff02::1:ff90:e899         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff6d:8042         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|   fe80::2dbd:6019:5f2d:23db: 
+|     device: enp5s0
+|     mac: d8:43:ae:57:68:80
+|     multicast_ips: 
+|       ff02::1:ff2d:23db         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff7f:d83          (Solicited-Node Address)
+|       ff02::1:ff2d:23db         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff1e:2b50         (Solicited-Node Address)
+|       ff02::1:ff7f:d83          (Solicited-Node Address)
+|       ff02::1:ff2d:23db         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff1e:2b50         (Solicited-Node Address)
+|       ff02::1:ff7f:d83          (Solicited-Node Address)
+|       ff02::1:ff2d:23db         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff7f:d83          (Solicited-Node Address)
+|       ff02::1:ff1e:2b50         (Solicited-Node Address)
+|       ff02::1:ff1e:2b50         (Solicited-Node Address)
+|       ff02::1:ff2d:23db         (NDP Solicited-node)
+|       ff02::1:ff7f:d83          (Solicited-Node Address)
+|       ff02::1:ff1e:2b50         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff2d:23db         (NDP Solicited-node)
+|   fe80::855a:d1c9:82bb:288e: 
+|     device: enp5s0
+|     mac: d8:43:ae:24:88:fa
+|     multicast_ips: 
+|       ff02::1:ffbb:288e         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fff1:f37c         (Solicited-Node Address)
+|       ff02::1:ff43:a6c          (Solicited-Node Address)
+|       ff02::1:ffbb:288e         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffbb:288e         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff43:a6c          (Solicited-Node Address)
+|       ff02::1:ffbb:288e         (NDP Solicited-node)
+|       ff02::1:fff1:f37c         (Solicited-Node Address)
+|       ff02::1:fff1:f37c         (Solicited-Node Address)
+|       ff02::1:ff43:a6c          (Solicited-Node Address)
+|       ff02::1:ffbb:288e         (NDP Solicited-node)
+|       ff02::1:ff43:a6c          (Solicited-Node Address)
+|       ff02::1:fff1:f37c         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fff1:f37c         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fff1:f37c         (Solicited-Node Address)
+|       ff02::1:ffbb:288e         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff43:a6c          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|   fe80::d195:1420:492d:de0a: 
+|     device: enp5s0
+|     mac: d8:5e:d3:a5:72:cb
+|     multicast_ips: 
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::1:ff2d:de0a         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff5b:62b6         (Solicited-Node Address)
+|       ff02::1:ff2d:de0a         (NDP Solicited-node)
+|       ff02::1:ff5b:62b6         (Solicited-Node Address)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::1:ff2d:de0a         (NDP Solicited-node)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::1:ff5b:62b6         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::1:ff2d:de0a         (NDP Solicited-node)
+|       ff02::1:ff5b:62b6         (Solicited-Node Address)
+|       ff02::1:ff2d:de0a         (NDP Solicited-node)
+|       ff02::1:ff5b:62b6         (Solicited-Node Address)
+|       ff02::1:ffec:acf          (Solicited-Node Address)
+|       ff02::1:ff2d:de0a         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|   fe80::6807:6c28:2266:1dc: 
+|     device: enp5s0
+|     mac: a0:36:bc:e6:aa:b0
+|     multicast_ips: 
+|       ff02::1:ff66:1dc          (NDP Solicited-node)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|       ff02::1:ff66:1dc          (NDP Solicited-node)
+|       ff02::1:ffe3:a4af         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff66:1dc          (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|       ff02::1:ffe3:a4af         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff66:1dc          (NDP Solicited-node)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|       ff02::1:ffe3:a4af         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffe3:a4af         (Solicited-Node Address)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|       ff02::1:ff66:1dc          (NDP Solicited-node)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff66:1dc          (NDP Solicited-node)
+|       ff02::1:ffe3:a4af         (Solicited-Node Address)
+|       ff02::1:ff1b:55f8         (Solicited-Node Address)
+|   fe80::de39:c929:cc5d:5763: 
+|     device: enp5s0
+|     mac: 2c:f0:5d:55:09:5a
+|     multicast_ips: 
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::1:ff5d:5763         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff09:5835         (Solicited-Node Address)
+|       ff02::1:ff5d:5763         (NDP Solicited-node)
+|       ff02::1:ff09:5835         (Solicited-Node Address)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::1:ff5d:5763         (NDP Solicited-node)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::1:ff09:5835         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::1:ff5d:5763         (NDP Solicited-node)
+|       ff02::1:ff09:5835         (Solicited-Node Address)
+|       ff02::1:ff5d:5763         (NDP Solicited-node)
+|       ff02::1:ff09:5835         (Solicited-Node Address)
+|       ff02::1:ff05:2e55         (Solicited-Node Address)
+|       ff02::1:ff5d:5763         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|   fe80::7a1f:446d:3dee:4066: 
+|     device: enp5s0
+|     mac: d8:43:ae:24:88:fe
+|     multicast_ips: 
+|       ff02::1:ffee:4066         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffb2:f71f         (Solicited-Node Address)
+|       ff02::1:ffa3:6cc7         (Solicited-Node Address)
+|       ff02::1:ffee:4066         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffee:4066         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffa3:6cc7         (Solicited-Node Address)
+|       ff02::1:ffee:4066         (NDP Solicited-node)
+|       ff02::1:ffb2:f71f         (Solicited-Node Address)
+|       ff02::1:ffb2:f71f         (Solicited-Node Address)
+|       ff02::1:ffa3:6cc7         (Solicited-Node Address)
+|       ff02::1:ffee:4066         (NDP Solicited-node)
+|       ff02::1:ffa3:6cc7         (Solicited-Node Address)
+|       ff02::1:ffb2:f71f         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffb2:f71f         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffb2:f71f         (Solicited-Node Address)
+|       ff02::1:ffee:4066         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffa3:6cc7         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|   fe80::eec2:581f:bc01:da6d: 
+|     device: enp5s0
+|     mac: 04:7c:16:7f:1c:94
+|     multicast_ips: 
+|       ff02::1:ff01:da6d         (NDP Solicited-node)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|       ff02::1:ff01:da6d         (NDP Solicited-node)
+|       ff02::1:ff7a:2248         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff01:da6d         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|       ff02::1:ff7a:2248         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff01:da6d         (NDP Solicited-node)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|       ff02::1:ff7a:2248         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff7a:2248         (Solicited-Node Address)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|       ff02::1:ff01:da6d         (NDP Solicited-node)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff01:da6d         (NDP Solicited-node)
+|       ff02::1:ff7a:2248         (Solicited-Node Address)
+|       ff02::1:ffa5:41f4         (Solicited-Node Address)
+|   fe80::212:72d1:5854:fb2: 
+|     device: enp5s0
+|     mac: fc:34:97:9e:cf:33
+|     multicast_ips: 
+|       ff02::1:ff54:fb2          (NDP Solicited-node)
+|       ff02::1:ffb6:f82a         (Solicited-Node Address)
+|       ff02::1:ff01:b707         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff54:fb2          (NDP Solicited-node)
+|       ff02::1:ff54:fb2          (NDP Solicited-node)
+|       ff02::1:ff01:b707         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff54:fb2          (NDP Solicited-node)
+|       ff02::1:ffb6:f82a         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff01:b707         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff01:b707         (Solicited-Node Address)
+|       ff02::1:ffb6:f82a         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffb6:f82a         (Solicited-Node Address)
+|       ff02::1:ff54:fb2          (NDP Solicited-node)
+|       ff02::1:ffb6:f82a         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff54:fb2          (NDP Solicited-node)
+|       ff02::1:ff01:b707         (Solicited-Node Address)
+|       ff02::1:ffb6:f82a         (Solicited-Node Address)
+|   fe80::1bf4:ad44:7f4f:55cf: 
+|     device: enp5s0
+|     mac: 08:8f:c3:85:91:27
+|     multicast_ips: 
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|       ff02::1:ff16:5a3          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff16:5a3          (Solicited-Node Address)
+|       ff02::1:ffa1:3fff         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|       ff02::1:ffa1:3fff         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff16:5a3          (Solicited-Node Address)
+|       ff02::1:ffa1:3fff         (Solicited-Node Address)
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|       ff02::1:ff16:5a3          (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|       ff02::1:ff16:5a3          (Solicited-Node Address)
+|       ff02::1:ffa1:3fff         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffa1:3fff         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff16:5a3          (Solicited-Node Address)
+|       ff02::1:ffa1:3fff         (Solicited-Node Address)
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|       ff02::1:ff4f:55cf         (NDP Solicited-node)
+|   fe80::1: 
+|     device: enp5s0
+|     mac: 40:33:06:81:b1:32
+|     multicast_ips: 
+|       ff02::16                  (All MLDv2-capable routers)
+|       ff02::1:ff00:0            (Solicited-Node Address)
+|       ff02::1:ff00:1            (NDP Solicited-node)
+|       ff02::1:2                 (All-dhcp-agents)
+|       ff05::1:3                 (unknown)
+|       ff02::2                   (All Routers Address)
+|   fe80::d177:b17b:9fb8:6eb6: 
+|     device: enp5s0
+|     mac: 2c:f0:5d:dd:a7:ac
+|     multicast_ips: 
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff8e:8e83         (Solicited-Node Address)
+|       ff02::1:ffb8:6eb6         (NDP Solicited-node)
+|       ff02::1:ff8e:8e83         (Solicited-Node Address)
+|       ff02::1:ffb8:1f6d         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffb8:1f6d         (Solicited-Node Address)
+|       ff02::1:ff8e:8e83         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffb8:6eb6         (NDP Solicited-node)
+|       ff02::1:ffb8:1f6d         (Solicited-Node Address)
+|       ff02::1:ffb8:1f6d         (Solicited-Node Address)
+|       ff02::1:ffb8:6eb6         (NDP Solicited-node)
+|       ff02::1:ff8e:8e83         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|   fe80::daec:e5ff:fe9f:44dd: 
+|     device: enp5s0
+|     mac: d8:ec:e5:9f:44:dd
+|     multicast_ips: 
+|       ff02::1:ff9f:44dd         (NDP Solicited-node)
+|   fe80::bff7:dd37:2773:8a16: 
+|     device: enp5s0
+|     mac: 04:7c:16:7f:1c:32
+|     multicast_ips: 
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffcf:ba79         (Solicited-Node Address)
+|       ff02::1:ff73:8a16         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffcf:ba79         (Solicited-Node Address)
+|       ff02::1:ff29:b580         (Solicited-Node Address)
+|       ff02::1:ffcf:ba79         (Solicited-Node Address)
+|       ff02::1:ff73:8a16         (NDP Solicited-node)
+|       ff02::1:ff73:8a16         (NDP Solicited-node)
+|       ff02::1:ff29:b580         (Solicited-Node Address)
+|       ff02::1:ff29:b580         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ffcf:ba79         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|   fe80::99:a921:a86c:ea0c: 
+|     device: enp5s0
+|     mac: d8:5e:d3:a5:c5:11
+|     multicast_ips: 
+|       ff02::1:ff6c:ea0c         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff24:6102         (Solicited-Node Address)
+|       ff02::1:fffe:f2b4         (Solicited-Node Address)
+|       ff02::1:ff6c:ea0c         (NDP Solicited-node)
+|       ff02::1:fffe:f2b4         (Solicited-Node Address)
+|       ff02::1:ff6c:ea0c         (NDP Solicited-node)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fffe:f2b4         (Solicited-Node Address)
+|       ff02::1:ff6c:ea0c         (NDP Solicited-node)
+|       ff02::1:ff24:6102         (Solicited-Node Address)
+|       ff02::1:ff24:6102         (Solicited-Node Address)
+|       ff02::1:ff24:6102         (Solicited-Node Address)
+|       ff02::1:ff6c:ea0c         (NDP Solicited-node)
+|       ff02::1:ff24:6102         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:fffe:f2b4         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff6c:ea0c         (NDP Solicited-node)
+|       ff02::1:fffe:f2b4         (Solicited-Node Address)
+|       ff02::1:ff24:6102         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|   fe80::7867:50f9:9b0e:c6df: 
+|     device: enp5s0
+|     mac: 2c:f0:5d:dd:a7:9e
+|     multicast_ips: 
+|       ff02::1:ff0e:c6df         (NDP Solicited-node)
+|       ff02::1:ff0e:c6df         (NDP Solicited-node)
+|       ff02::1:ff48:d229         (Solicited-Node Address)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff48:d229         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff0e:c6df         (NDP Solicited-node)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::1:ff0e:c6df         (NDP Solicited-node)
+|       ff02::1:ff48:d229         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff0e:c6df         (NDP Solicited-node)
+|       ff02::1:ff48:d229         (Solicited-Node Address)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::fb                  (mDNSv6)
+|       ff02::1:ff48:d229         (Solicited-Node Address)
+|       ff02::1:ff07:f312         (Solicited-Node Address)
+|       ff02::1:ff0e:c6df         (NDP Solicited-node)
+|_      ff02::fb                  (mDNSv6)
+| targets-ipv6-multicast-invalid-dst: 
+|   IP: fe80::99:a921:a86c:ea0c    MAC: d8:5e:d3:a5:c5:11  IFACE: enp5s0
+|   IP: fe80::2dbd:6019:5f2d:23db  MAC: d8:43:ae:57:68:80  IFACE: enp5s0
+|   IP: fe80::d177:b17b:9fb8:6eb6  MAC: 2c:f0:5d:dd:a7:ac  IFACE: enp5s0
+|   IP: fe80::855a:d1c9:82bb:288e  MAC: d8:43:ae:24:88:fa  IFACE: enp5s0
+|   IP: fe80::99cf:99a4:4dca:abd1  MAC: 2c:f0:5d:dd:94:64  IFACE: enp5s0
+|   IP: fe80::eec2:581f:bc01:da6d  MAC: 04:7c:16:7f:1c:94  IFACE: enp5s0
+|   IP: fe80::4aa5:c351:76d:8042   MAC: d8:43:ae:57:68:7a  IFACE: enp5s0
+|   IP: fe80::de39:c929:cc5d:5763  MAC: 2c:f0:5d:55:09:5a  IFACE: enp5s0
+|   IP: fe80::d195:1420:492d:de0a  MAC: d8:5e:d3:a5:72:cb  IFACE: enp5s0
+|   IP: fe80::7a1f:446d:3dee:4066  MAC: d8:43:ae:24:88:fe  IFACE: enp5s0
+|   IP: fe80::6807:6c28:2266:1dc   MAC: a0:36:bc:e6:aa:b0  IFACE: enp5s0
+|   IP: fe80::bff7:dd37:2773:8a16  MAC: 04:7c:16:7f:1c:32  IFACE: enp5s0
+|   IP: fe80::7867:50f9:9b0e:c6df  MAC: 2c:f0:5d:dd:a7:9e  IFACE: enp5s0
+|   IP: fe80::1bf4:ad44:7f4f:55cf  MAC: 08:8f:c3:85:91:27  IFACE: enp5s0
+|   IP: fe80::1                    MAC: 40:33:06:81:b1:32  IFACE: enp5s0
+|   IP: fe80::daec:e5ff:fe9f:44dd  MAC: d8:ec:e5:9f:44:dd  IFACE: enp5s0
+|_  Use --script-args=newtargets to add the results as targets
+| targets-ipv6-multicast-echo: 
+|   IP: fe80::855a:d1c9:82bb:288e  MAC: d8:43:ae:24:88:fa  IFACE: enp5s0
+|   IP: fe80::99:a921:a86c:ea0c    MAC: d8:5e:d3:a5:c5:11  IFACE: enp5s0
+|   IP: fe80::212:72d1:5854:fb2    MAC: fc:34:97:9e:cf:33  IFACE: enp5s0
+|   IP: fe80::de39:c929:cc5d:5763  MAC: 2c:f0:5d:55:09:5a  IFACE: enp5s0
+|   IP: fe80::d195:1420:492d:de0a  MAC: d8:5e:d3:a5:72:cb  IFACE: enp5s0
+|   IP: fe80::d177:b17b:9fb8:6eb6  MAC: 2c:f0:5d:dd:a7:ac  IFACE: enp5s0
+|   IP: fe80::7867:50f9:9b0e:c6df  MAC: 2c:f0:5d:dd:a7:9e  IFACE: enp5s0
+|   IP: fe80::99cf:99a4:4dca:abd1  MAC: 2c:f0:5d:dd:94:64  IFACE: enp5s0
+|   IP: fe80::6807:6c28:2266:1dc   MAC: a0:36:bc:e6:aa:b0  IFACE: enp5s0
+|   IP: fe80::2dbd:6019:5f2d:23db  MAC: d8:43:ae:57:68:80  IFACE: enp5s0
+|   IP: fe80::1bf4:ad44:7f4f:55cf  MAC: 08:8f:c3:85:91:27  IFACE: enp5s0
+|   IP: fe80::eec2:581f:bc01:da6d  MAC: 04:7c:16:7f:1c:94  IFACE: enp5s0
+|   IP: fe80::7a1f:446d:3dee:4066  MAC: d8:43:ae:24:88:fe  IFACE: enp5s0
+|   IP: fe80::bff7:dd37:2773:8a16  MAC: 04:7c:16:7f:1c:32  IFACE: enp5s0
+|   IP: fe80::4aa5:c351:76d:8042   MAC: d8:43:ae:57:68:7a  IFACE: enp5s0
+|   IP: fe80::1                    MAC: 40:33:06:81:b1:32  IFACE: enp5s0
+|   IP: fe80::daec:e5ff:fe9f:44dd  MAC: d8:ec:e5:9f:44:dd  IFACE: enp5s0
+|_  Use --script-args=newtargets to add the results as targets
+|_http-robtex-shared-ns: *TEMPORARILY DISABLED* due to changes in Robtex's API. See https://www.robtex.com/api/
+|_multicast-profinet-discovery: 0
+| targets-asn: 
+|_  targets-asn.asn is a mandatory parameter
+|_hostmap-robtex: *TEMPORARILY DISABLED* due to changes in Robtex's API. See https://www.robtex.com/api/
