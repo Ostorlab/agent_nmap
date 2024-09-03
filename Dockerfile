@@ -23,13 +23,12 @@ RUN tar jxvf nmap-7.95.tar.bz2
 WORKDIR /tmp/nmap-7.95
 
 RUN python3 -m pip install build
-RUN apt install python3.10-venv -y
+RUN apt install python3-venv -y
 RUN apt-get install automake -y
 RUN ./configure && make && sudo make install
 
 WORKDIR /
 RUN rm -rf /tmp/nmap-7.95
-
 
 RUN python3.11 -m pip install --upgrade pip
 COPY requirement.txt /requirement.txt
