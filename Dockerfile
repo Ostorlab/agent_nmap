@@ -11,8 +11,22 @@ RUN apt-get update && apt-get install -y build-essential \
     python3-pip \
     wireguard \
     iproute2 \
-    openresolv \
-    nmap
+    openresolv
+
+WORKDIR /tmp
+
+RUN apt-get install wget
+RUN wget https://nmap.org/dist/nmap-7.93.tar.bz2
+
+RUN tar jxvf nmap-7.93.tar.bz2
+
+WORKDIR /tmp/nmap-7.93
+
+RUN ./configure && make && sudo make install
+
+WORKDIR /
+RUN rm -rf /tmp/nmap-7.93
+
 
 RUN python3.11 -m pip install --upgrade pip
 COPY requirement.txt /requirement.txt

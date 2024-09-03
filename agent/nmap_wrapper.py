@@ -113,6 +113,7 @@ class NmapWrapper:
         with open(NORMAL_OUTPUT_PATH, "r", encoding="utf-8") as o:
             normal_results = o.read()
 
+        logger.info("Finished nmap scan")
         return scan_results, normal_results
 
     def scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
@@ -134,4 +135,5 @@ class NmapWrapper:
         with open(NORMAL_OUTPUT_PATH, "r", encoding="utf-8") as o:
             normal_results = o.read()
 
+        logger.info("Finished nmap scan")
         return scan_results, normal_results
