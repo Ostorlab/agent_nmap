@@ -16,16 +16,19 @@ RUN apt-get update && apt-get install -y build-essential \
 WORKDIR /tmp
 
 RUN apt-get install wget
-RUN wget https://nmap.org/dist/nmap-7.93.tar.bz2
+RUN wget https://nmap.org/dist/nmap-7.95.tar.bz2
 
-RUN tar jxvf nmap-7.93.tar.bz2
+RUN tar jxvf nmap-7.95.tar.bz2
 
-WORKDIR /tmp/nmap-7.93
+WORKDIR /tmp/nmap-7.95
 
+RUN python3 -m pip install build
+RUN apt install python3.10-venv -y
+RUN apt-get install automake -y
 RUN ./configure && make && sudo make install
 
 WORKDIR /
-RUN rm -rf /tmp/nmap-7.93
+RUN rm -rf /tmp/nmap-7.95
 
 
 RUN python3.11 -m pip install --upgrade pip
