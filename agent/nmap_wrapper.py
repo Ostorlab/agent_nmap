@@ -102,6 +102,7 @@ class NmapWrapper:
         Returns:
             result of the scan.
         """
+        logger.info("running the nmap scan")
         command = self.construct_command_host(hosts, mask)
 
         subprocess.run(command, check=True)
@@ -123,6 +124,7 @@ class NmapWrapper:
         Returns:
             result of the scan.
         """
+        logger.info("running the nmap scan")
         command = self._construct_command_domain(domain_name)
         subprocess.run(command, check=True)
 
