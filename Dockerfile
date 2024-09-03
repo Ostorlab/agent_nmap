@@ -1,18 +1,17 @@
-
 FROM ubuntu:22.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y software-properties-common  \
-&& add-apt-repository ppa:deadsnakes/ppa \
-&& apt-get remove -y python*
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get remove -y python*
 
 RUN apt-get update && apt-get install -y build-essential \
-python3.11 \
-python3.11-dev \
-python3-pip \
-wireguard \
-iproute2 \
-openresolv
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    wireguard \
+    iproute2 \
+    openresolv
 
 RUN python3.11 -m pip install --upgrade pip
 COPY requirement.txt /requirement.txt
