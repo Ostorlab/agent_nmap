@@ -245,15 +245,6 @@ class NmapAgent(
             )
         return ret
 
-    def _unpack_dict_list(
-        self, host: list[dict] | dict | None
-    ) -> Generator[dict, None, None]:
-        if isinstance(host, dict):
-            yield host
-            return
-        for entry in host:
-            yield entry
-
     def _emit_network_scan_finding(
         self, scan_results: Dict[str, Any], normal_results: str
     ) -> None:
@@ -263,7 +254,7 @@ class NmapAgent(
                 f"{scan_result_technical_detail}\n```xml\n{normal_results}\n```"
             )
             host = scan_results.get("nmaprun", {}).get("host", {})
-            for host_item in self._unpack_dict_list(host):
+            for host_item in generators.unpack_dict_list(host):
                 domains = host_item.get("hostnames", {})
                 ports = host_item.get("ports", {}).get("port", "")
                 address = host_item.get("address", {})
