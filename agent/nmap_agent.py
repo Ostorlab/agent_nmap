@@ -260,7 +260,7 @@ class NmapAgent(
                 domains = host.get("hostnames", {})
                 ports = host.get("ports", {}).get("port", "")
                 address = host.get("address", {})
-                if domains is not None and len(domains.values()):
+                if domains is not None and len(domains.values()) > 0:
                     domains = domains.get("hostname", {})
                     if isinstance(domains, List):
                         for domain_dict in domains:
