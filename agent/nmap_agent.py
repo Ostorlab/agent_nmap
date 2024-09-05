@@ -245,7 +245,7 @@ class NmapAgent(
             )
         return ret
 
-    def _generate_hosts_from_host_list(self, host: list[dict] | dict | None) -> Generator[dict, None, dict]:
+    def _unpack_dict_list(self, host: list[dict] | dict | None) -> Generator[dict, None, dict]:
         if isinstance(host, dict):
             return host
         for entry in host:
@@ -261,7 +261,7 @@ class NmapAgent(
             )
             host = scan_results.get("nmaprun", {}).get("host", {})
             
-            for host in self._generate_hosts_from_host_list(host):
+            for host in self._unpack_dict_list(host):
                 domains = host.get("domains", {})
                 ports = host.get("ports", {}).get("port", "")
                 address = host.get("address", {})
