@@ -194,7 +194,7 @@ class NmapAgent(
             os_detection=self.args.get("os", False),
         )
         client = nmap_wrapper.NmapWrapper(options)
-        logger.debug("scanning domain %s with options %s", domain_name, options)
+        logger.info("scanning domain %s with options %s", domain_name, options)
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
 
