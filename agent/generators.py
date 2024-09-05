@@ -12,6 +12,10 @@ logger = logging.getLogger(__name__)
 def unpack_dict_list(
         host: list[dict] | dict | None
     ) -> Generator[dict, None, None]:
+        """
+        """
+        if host is None:
+            return
         if isinstance(host, dict):
             yield host
             return
