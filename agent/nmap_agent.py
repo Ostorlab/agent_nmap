@@ -245,7 +245,9 @@ class NmapAgent(
             )
         return ret
 
-    def _unpack_dict_list(self, host: list[dict] | dict | None) -> Generator[dict, None, None]:
+    def _unpack_dict_list(
+        self, host: list[dict] | dict | None
+    ) -> Generator[dict, None, None]:
         if isinstance(host, dict):
             yield host
             return
@@ -261,9 +263,8 @@ class NmapAgent(
                 f"{scan_result_technical_detail}\n```xml\n{normal_results}\n```"
             )
             host = scan_results.get("nmaprun", {}).get("host", {})
-            print(type(host), "what is this?")
             for host_item in self._unpack_dict_list(host):
-                domains = host_item.get("domains", {})
+                domains = host_item.get("hostnames", {})
                 ports = host_item.get("ports", {}).get("port", "")
                 address = host_item.get("address", {})
                 if domains:

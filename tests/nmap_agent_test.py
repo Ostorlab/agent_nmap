@@ -1215,6 +1215,7 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
 
     assert any("fingerprint" in msg.selector for msg in agent_mock) is False
 
+
 SCAN_RESULT_HOST_AS_LIST = {
     "nmaprun": {
         "@scanner": "nmap",
@@ -1287,7 +1288,10 @@ SCAN_RESULT_HOST_AS_LIST = {
                     "extraports": {
                         "@state": "filtered",
                         "@count": "951236",
-                        "extrareasons": {"@reason": "no-responses", "@count": "6655151"},
+                        "extrareasons": {
+                            "@reason": "no-responses",
+                            "@count": "6655151",
+                        },
                     }
                 },
                 "os": {
@@ -1574,6 +1578,7 @@ scan_results1 = {
     }
 }
 
+
 def testAgentNmapOptions_whensssNmaprunHostIsList_noCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
@@ -1592,6 +1597,5 @@ def testAgentNmapOptions_whensssNmaprunHostIsList_noCrash(
     nmap_test_agent.process(domain_msg)
 
     print("hellow")
-
 
     # assert any("fingerprint" in msg.selector for msg in agent_mock) is False
