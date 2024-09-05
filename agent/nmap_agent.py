@@ -253,11 +253,13 @@ class NmapAgent(
             technical_detail = (
                 f"{scan_result_technical_detail}\n```xml\n{normal_results}\n```"
             )
-            host = scan_results.get("nmaprun", {}).get("host", {})
-            for host_item in generators.unpack_dict_list(host):
-                domains = host_item.get("hostnames", {})
-                ports = host_item.get("ports", {}).get("port", "")
-                address = host_item.get("address", {})
+            hosts = scan_results.get("nmaprun", {}).get("host", {})
+            if isinstance(hosts, dict):
+                hosts = [hosts]
+            for host in hosts:
+                domains = host.get("hostnames", {})
+                ports = host.get("ports", {}).get("port", "")
+                address = host.get("address", {})
                 if domains is not None and len(domains.values()):
                     domains = domains.get("hostname", {})
                     if isinstance(domains, List):

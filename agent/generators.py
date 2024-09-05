@@ -9,19 +9,6 @@ IP_VERSIONS = {"ipv4": 4, "ipv6": 6}
 logger = logging.getLogger(__name__)
 
 
-def unpack_dict_list(
-        host: list[dict] | dict | None
-    ) -> Generator[dict, None, None]:
-        """
-        """
-        if host is None:
-            return
-        if isinstance(host, dict):
-            yield host
-            return
-        for entry in host:
-            yield entry
-
 def get_services(
     scan_result: Dict[str, Dict[str, List[Dict[str, Any]] | Dict[str, Dict[str, Any]]]],
 ) -> Iterator[Dict[str, Optional[str]]]:
