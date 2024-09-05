@@ -9,7 +9,7 @@ import ipaddress
 import logging
 import re
 import subprocess
-from typing import Dict, Any, Tuple, Optional, List, cast
+from typing import Dict, Any, Tuple, Optional, List, cast, Generator
 from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions
@@ -122,7 +122,7 @@ class NmapAgent(
         )
 
         if len(hosts) > 0:
-            logger.info("Scanning hosts `%s`.", hosts)
+            logger.debug("Scanning hosts `%s`.", hosts)
             for host, mask in hosts:
                 if not self.add_ip_network(
                     b"agent_nmap_asset",
@@ -137,13 +137,13 @@ class NmapAgent(
                 except subprocess.CalledProcessError:
                     logger.error("Nmap command failed to scan host %s", host)
                     continue
-                logger.info("scan results %s", scan_results)
+                logger.debug("scan results %s", scan_results)
 
                 self._emit_services(scan_results, domain_name)
                 self._emit_network_scan_finding(scan_results, normal_results)
                 self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
-            logger.info("Scanning domain `%s`.", domain_name)
+            logger.debug("Scanning domain `%s`.", domain_name)
             if not self.set_add(b"agent_nmap_asset", domain_name):
                 logger.debug("target %s was processed before, exiting", domain_name)
                 return
@@ -154,7 +154,7 @@ class NmapAgent(
             except subprocess.CalledProcessError:
                 logger.error("Nmap command failed to scan domain name %s", domain_name)
                 return
-            logger.info("scan results %s", scan_results)
+            logger.debug("scan results %s", scan_results)
 
             self._emit_services(scan_results, domain_name)
             self._emit_network_scan_finding(scan_results, normal_results)
@@ -176,7 +176,7 @@ class NmapAgent(
         )
         client = nmap_wrapper.NmapWrapper(options)
 
-        logger.info("scanning target %s/%s with options %s", host, mask, options)
+        logger.debug("scanning target %s/%s with options %s", host, mask, options)
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
@@ -194,7 +194,7 @@ class NmapAgent(
             os_detection=self.args.get("os", False),
         )
         client = nmap_wrapper.NmapWrapper(options)
-        logger.info("scanning domain %s with options %s", domain_name, options)
+        logger.debug("scanning domain %s with options %s", domain_name, options)
         scan_results, normal_results = client.scan_domain(domain_name=domain_name)
         return scan_results, normal_results
 
@@ -245,6 +245,12 @@ class NmapAgent(
             )
         return ret
 
+    def _generate_hosts_from_host_list(self, host: list[dict] | dict | None) -> Generator[dict, None, dict]:
+        if isinstance(host, dict):
+            return host
+        for entry in host:
+            yield entry
+
     def _emit_network_scan_finding(
         self, scan_results: Dict[str, Any], normal_results: str
     ) -> None:
@@ -254,14 +260,27 @@ class NmapAgent(
                 f"{scan_result_technical_detail}\n```xml\n{normal_results}\n```"
             )
             host = scan_results.get("nmaprun", {}).get("host", {})
-            domains = host.get("hostnames", {})
-            ports = host.get("ports", {}).get("port", "")
-            address = host.get("address", {})
-            if domains:
-                domains = domains.get("hostname", {})
-                if isinstance(domains, List):
-                    for domain_dict in domains:
-                        domain = domain_dict.get("@name", "")
+            
+            for host in self._generate_hosts_from_host_list(host):
+                domains = host.get("domains", {})
+                ports = host.get("ports", {}).get("port", "")
+                address = host.get("address", {})
+                if domains:
+                    domains = domains.get("hostname", {})
+                    if isinstance(domains, List):
+                        for domain_dict in domains:
+                            domain = domain_dict.get("@name", "")
+                            self.report_vulnerability(
+                                entry=kb.KB.NETWORK_PORT_SCAN,
+                                technical_detail=technical_detail,
+                                risk_rating=vuln_mixin.RiskRating.INFO,
+                                vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                                    metadata=self._prepare_metadata(ports),
+                                    asset=domain_name_asset.DomainName(name=domain),
+                                ),
+                            )
+                    elif isinstance(domains, dict):
+                        domain = domains.get("@name", "")
                         self.report_vulnerability(
                             entry=kb.KB.NETWORK_PORT_SCAN,
                             technical_detail=technical_detail,
@@ -271,44 +290,33 @@ class NmapAgent(
                                 asset=domain_name_asset.DomainName(name=domain),
                             ),
                         )
-                elif isinstance(domains, dict):
-                    domain = domains.get("@name", "")
+                elif address.get("@addrtype", "") == "ipv4":
                     self.report_vulnerability(
                         entry=kb.KB.NETWORK_PORT_SCAN,
                         technical_detail=technical_detail,
                         risk_rating=vuln_mixin.RiskRating.INFO,
                         vulnerability_location=vuln_mixin.VulnerabilityLocation(
                             metadata=self._prepare_metadata(ports),
-                            asset=domain_name_asset.DomainName(name=domain),
+                            asset=ipv4_asset.IPv4(host=address.get("@addr", "")),
                         ),
                     )
-            elif address.get("@addrtype", "") == "ipv4":
-                self.report_vulnerability(
-                    entry=kb.KB.NETWORK_PORT_SCAN,
-                    technical_detail=technical_detail,
-                    risk_rating=vuln_mixin.RiskRating.INFO,
-                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                        metadata=self._prepare_metadata(ports),
-                        asset=ipv4_asset.IPv4(host=address.get("@addr", "")),
-                    ),
-                )
-            elif address.get("@addrtype", "") == "ipv6":
-                self.report_vulnerability(
-                    entry=kb.KB.NETWORK_PORT_SCAN,
-                    technical_detail=technical_detail,
-                    risk_rating=vuln_mixin.RiskRating.INFO,
-                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                        metadata=self._prepare_metadata(ports),
-                        asset=ipv6_asset.IPv6(host=address.get("@addr", "")),
-                    ),
-                )
+                elif address.get("@addrtype", "") == "ipv6":
+                    self.report_vulnerability(
+                        entry=kb.KB.NETWORK_PORT_SCAN,
+                        technical_detail=technical_detail,
+                        risk_rating=vuln_mixin.RiskRating.INFO,
+                        vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                            metadata=self._prepare_metadata(ports),
+                            asset=ipv6_asset.IPv6(host=address.get("@addr", "")),
+                        ),
+                    )
 
     def _emit_services(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
         if scan_results is not None and scan_results.get("nmaprun") is not None:
             if domain_name is not None:
-                logger.info("Services targeting domain `%s`.", domain_name)
+                logger.debug("Services targeting domain `%s`.", domain_name)
                 for data in generators.get_services(scan_results):
                     if data.get("service") in BLACKLISTED_SERVICES:
                         continue
@@ -318,7 +326,7 @@ class NmapAgent(
                         "schema": data.get("service"),
                         "state": data.get("state"),
                     }
-                    logger.info("Domain Service Identified %s.", domain_name_service)
+                    logger.debug("Domain Service Identified %s.", domain_name_service)
                     self.emit("v3.asset.domain_name.service", domain_name_service)
 
             up_hosts = scan_results["nmaprun"].get("host", [])
@@ -355,7 +363,7 @@ class NmapAgent(
     def _emit_fingerprints(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.info("Fingerprints targeting domain `%s`.", domain_name)
+        logger.debug("Fingerprints targeting domain `%s`.", domain_name)
         if (
             scan_results is not None
             and scan_results.get("nmaprun") is not None
@@ -485,7 +493,7 @@ class NmapAgent(
 
     def _connect_to_vpn(self) -> None:
         """Connect to VPN."""
-        logger.info("Trying to scan the asset with VPN")
+        logger.debug("Trying to scan the asset with VPN")
         try:
             with open(WIREGUARD_CONFIG_FILE_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._vpn_config))
@@ -495,7 +503,7 @@ class NmapAgent(
             with open(DNS_RESOLV_CONFIG_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._dns_config))
 
-            logger.info("connected with %s", WIREGUARD_CONFIG_FILE_PATH)
+            logger.debug("connected with %s", WIREGUARD_CONFIG_FILE_PATH)
 
         except RunCommandError as e:
             logger.warning("%s", e)
@@ -503,7 +511,7 @@ class NmapAgent(
     def _exec_command(self, command: List[str]) -> None:
         """Execute a command."""
         try:
-            logger.info("%s", " ".join(command))
+            logger.debug("%s", " ".join(command))
             output = subprocess.run(
                 command,
                 capture_output=True,
@@ -523,5 +531,5 @@ class NmapAgent(
 
 
 if __name__ == "__main__":
-    logger.info("starting agent ...")
+    logger.debug("starting agent ...")
     NmapAgent.main()
