@@ -2,7 +2,7 @@
 
 import logging
 
-from typing import Dict, Iterator, Generator, List, Optional, Any
+from typing import Dict, Iterator, List, Optional, Any
 
 IP_VERSIONS = {"ipv4": 4, "ipv6": 6}
 

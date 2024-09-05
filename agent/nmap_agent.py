@@ -9,7 +9,7 @@ import ipaddress
 import logging
 import re
 import subprocess
-from typing import Dict, Any, Tuple, Optional, List, cast, Generator
+from typing import Dict, Any, Tuple, Optional, List, cast
 from urllib import parse
 
 from ostorlab.agent import agent, definitions as agent_definitions

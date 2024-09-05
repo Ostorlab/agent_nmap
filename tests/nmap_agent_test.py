@@ -1335,6 +1335,5 @@ def testAgentNmapOptions_whensssNmaprunHostIsList_noCrash(
     )
 
     nmap_test_agent.process(domain_msg)
-    for i in agent_mock:
-        print(i.selector, i.data, end="\n\n\n")
-    # assert any("fingerprint" in msg.selector for msg in agent_mock) is False
+
+    assert len(agent_mock) == 16
