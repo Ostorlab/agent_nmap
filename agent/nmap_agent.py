@@ -311,7 +311,7 @@ class NmapAgent(
     ) -> None:
         if scan_results is not None and scan_results.get("nmaprun") is not None:
             if domain_name is not None:
-                logger.debug("Services targeting domain `%s`.", domain_name)
+                logger.info("Services targeting domain `%s`.", domain_name)
                 for data in generators.get_services(scan_results):
                     if data.get("service") in BLACKLISTED_SERVICES:
                         continue
@@ -321,7 +321,7 @@ class NmapAgent(
                         "schema": data.get("service"),
                         "state": data.get("state"),
                     }
-                    logger.debug("Domain Service Identified %s.", domain_name_service)
+                    logger.info("Domain Service Identified %s.", domain_name_service)
                     self.emit("v3.asset.domain_name.service", domain_name_service)
 
             up_hosts = scan_results["nmaprun"].get("host", [])
@@ -358,7 +358,7 @@ class NmapAgent(
     def _emit_fingerprints(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.debug("Fingerprints targeting domain `%s`.", domain_name)
+        logger.info("Fingerprints targeting domain `%s`.", domain_name)
         if (
             scan_results is not None
             and scan_results.get("nmaprun") is not None
@@ -488,7 +488,7 @@ class NmapAgent(
 
     def _connect_to_vpn(self) -> None:
         """Connect to VPN."""
-        logger.debug("Trying to scan the asset with VPN")
+        logger.info("Trying to scan the asset with VPN")
         try:
             with open(WIREGUARD_CONFIG_FILE_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._vpn_config))
@@ -498,7 +498,7 @@ class NmapAgent(
             with open(DNS_RESOLV_CONFIG_PATH, "w", encoding="utf-8") as conf_file:
                 conf_file.write(cast(str, self._dns_config))
 
-            logger.debug("connected with %s", WIREGUARD_CONFIG_FILE_PATH)
+            logger.info("connected with %s", WIREGUARD_CONFIG_FILE_PATH)
 
         except RunCommandError as e:
             logger.warning("%s", e)
@@ -506,7 +506,7 @@ class NmapAgent(
     def _exec_command(self, command: List[str]) -> None:
         """Execute a command."""
         try:
-            logger.debug("%s", " ".join(command))
+            logger.info("%s", " ".join(command))
             output = subprocess.run(
                 command,
                 capture_output=True,
@@ -526,5 +526,5 @@ class NmapAgent(
 
 
 if __name__ == "__main__":
-    logger.debug("starting agent ...")
+    logger.info("starting agent ...")
     NmapAgent.main()
