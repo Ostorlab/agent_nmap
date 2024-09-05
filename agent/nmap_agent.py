@@ -254,7 +254,7 @@ class NmapAgent(
                 f"{scan_result_technical_detail}\n```xml\n{normal_results}\n```"
             )
             hosts = scan_results.get("nmaprun", {}).get("host", {})
-            if isinstance(hosts, dict):
+            if isinstance(hosts, dict) is True:
                 hosts = [hosts]
             for host in hosts:
                 domains = host.get("hostnames", {})
@@ -262,7 +262,7 @@ class NmapAgent(
                 address = host.get("address", {})
                 if domains is not None and len(domains.values()) > 0:
                     domains = domains.get("hostname", {})
-                    if isinstance(domains, List):
+                    if isinstance(domains, List) is True:
                         for domain_dict in domains:
                             domain = domain_dict.get("@name", "")
                             self.report_vulnerability(
@@ -274,7 +274,7 @@ class NmapAgent(
                                     asset=domain_name_asset.DomainName(name=domain),
                                 ),
                             )
-                    elif isinstance(domains, dict):
+                    elif isinstance(domains, dict) is True:
                         domain = domains.get("@name", "")
                         self.report_vulnerability(
                             entry=kb.KB.NETWORK_PORT_SCAN,
