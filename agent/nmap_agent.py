@@ -122,7 +122,7 @@ class NmapAgent(
         )
 
         if len(hosts) > 0:
-            logger.debug("Scanning hosts `%s`.", hosts)
+            logger.info("Scanning hosts `%s`.", hosts)
             for host, mask in hosts:
                 if not self.add_ip_network(
                     b"agent_nmap_asset",
@@ -137,13 +137,13 @@ class NmapAgent(
                 except subprocess.CalledProcessError:
                     logger.error("Nmap command failed to scan host %s", host)
                     continue
-                logger.debug("scan results %s", scan_results)
+                logger.info("scan results %s", scan_results)
 
                 self._emit_services(scan_results, domain_name)
                 self._emit_network_scan_finding(scan_results, normal_results)
                 self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
-            logger.debug("Scanning domain `%s`.", domain_name)
+            logger.info("Scanning domain `%s`.", domain_name)
             if not self.set_add(b"agent_nmap_asset", domain_name):
                 logger.debug("target %s was processed before, exiting", domain_name)
                 return
@@ -154,7 +154,7 @@ class NmapAgent(
             except subprocess.CalledProcessError:
                 logger.error("Nmap command failed to scan domain name %s", domain_name)
                 return
-            logger.debug("scan results %s", scan_results)
+            logger.info("scan results %s", scan_results)
 
             self._emit_services(scan_results, domain_name)
             self._emit_network_scan_finding(scan_results, normal_results)
@@ -176,7 +176,7 @@ class NmapAgent(
         )
         client = nmap_wrapper.NmapWrapper(options)
 
-        logger.debug("scanning target %s/%s with options %s", host, mask, options)
+        logger.info("scanning target %s/%s with options %s", host, mask, options)
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
