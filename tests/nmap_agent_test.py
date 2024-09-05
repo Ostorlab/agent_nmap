@@ -1297,7 +1297,7 @@ def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
     assert len(agent_mock) == 0
 
 
-def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
+def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
@@ -1305,8 +1305,8 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
     mocker: plugin.MockerFixture,
     fake_output_product: None | Dict[str, str],
 ) -> None:
-    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
-    the agents emits back messages of type service with banner.
+    """In case service in the scan results does not have a product field,
+    emit nothing instead of emitting blank entry.
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
@@ -1318,16 +1318,15 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
     assert any("fingerprint" in msg.selector for msg in agent_mock) is False
 
 
-def testAgentNmapOptions_whensssNmaprunHostIsList_noCrash(
+def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
-    the agents emits back messages of type service with banner.
-    """
+    """Test host in scan results is a list instead of a dict, the agent should not
+    crash, instead it completes its emitting process for each of the hosts in the host list."""
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(SCAN_RESULT_HOST_AS_LIST, HUMAN_OUTPUT),
