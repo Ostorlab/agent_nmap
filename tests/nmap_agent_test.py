@@ -1314,8 +1314,267 @@ SCAN_RESULT_HOST_AS_LIST = {
     }
 }
 
+scan_results1 = {
+    "nmaprun": {
+        "@scanner": "nmap",
+        "@args": "nmap -O -sV -n -p 0-65535 -T3 -sS --script banner -sC -oX /tmp/xmloutput -oN /tmp/normal 80.121.155.166/32",
+        "@start": "1725505109",
+        "@startstr": "Thu Sep  5 02:58:29 2024",
+        "@version": "7.95",
+        "@xmloutputversion": "1.05",
+        "scaninfo": {
+            "@type": "syn",
+            "@protocol": "tcp",
+            "@numservices": "65536",
+            "@services": "0-65535",
+        },
+        "verbose": {"@level": "0"},
+        "debugging": {"@level": "0"},
+        "hosthint": {
+            "status": {
+                "@state": "up",
+                "@reason": "unknown-response",
+                "@reason_ttl": "0",
+            },
+            "address": {"@addr": "80.121.155.166", "@addrtype": "ipv4"},
+            "hostnames": None,
+        },
+        "host": {
+            "@starttime": "1725505110",
+            "@endtime": "1725505440",
+            "status": {"@state": "up", "@reason": "echo-reply", "@reason_ttl": "53"},
+            "address": {"@addr": "80.121.155.166", "@addrtype": "ipv4"},
+            "hostnames": None,
+            "ports": {
+                "extraports": {
+                    "@state": "filtered",
+                    "@count": "65533",
+                    "extrareasons": {
+                        "@reason": "no-response",
+                        "@count": "65533",
+                        "@proto": "tcp",
+                        "@ports": "0-442,444-690,693-65535",
+                    },
+                },
+                "port": [
+                    {
+                        "@protocol": "tcp",
+                        "@portid": "443",
+                        "state": {
+                            "@state": "open",
+                            "@reason": "syn-ack",
+                            "@reason_ttl": "53",
+                        },
+                        "service": {"@name": "ssl", "@method": "probed", "@conf": "10"},
+                    },
+                    {
+                        "@protocol": "tcp",
+                        "@portid": "691",
+                        "state": {
+                            "@state": "open",
+                            "@reason": "syn-ack",
+                            "@reason_ttl": "53",
+                        },
+                        "service": {"@name": "resvc", "@method": "table", "@conf": "3"},
+                    },
+                    {
+                        "@protocol": "tcp",
+                        "@portid": "692",
+                        "state": {
+                            "@state": "open",
+                            "@reason": "syn-ack",
+                            "@reason_ttl": "116",
+                        },
+                        "service": {
+                            "@name": "hyperwave-isp",
+                            "@method": "table",
+                            "@conf": "3",
+                        },
+                    },
+                ],
+            },
+            "os": {
+                "portused": {"@state": "open", "@proto": "tcp", "@portid": "443"},
+                "osmatch": [
+                    {
+                        "@name": "OpenWrt 21.02 (Linux 5.4)",
+                        "@accuracy": "96",
+                        "@line": "72530",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "5.X",
+                            "@accuracy": "96",
+                            "cpe": "cpe:/o:linux:linux_kernel:5.4",
+                        },
+                    },
+                    {
+                        "@name": "Linux 5.4",
+                        "@accuracy": "94",
+                        "@line": "72252",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "5.X",
+                            "@accuracy": "94",
+                            "cpe": "cpe:/o:linux:linux_kernel:5.4",
+                        },
+                    },
+                    {
+                        "@name": "Linux 4.15 - 5.19",
+                        "@accuracy": "90",
+                        "@line": "70534",
+                        "osclass": [
+                            {
+                                "@type": "general purpose",
+                                "@vendor": "Linux",
+                                "@osfamily": "Linux",
+                                "@osgen": "4.X",
+                                "@accuracy": "90",
+                                "cpe": "cpe:/o:linux:linux_kernel:4",
+                            },
+                            {
+                                "@type": "general purpose",
+                                "@vendor": "Linux",
+                                "@osfamily": "Linux",
+                                "@osgen": "5.X",
+                                "@accuracy": "90",
+                                "cpe": "cpe:/o:linux:linux_kernel:5",
+                            },
+                        ],
+                    },
+                    {
+                        "@name": "Linux 5.0 - 5.14",
+                        "@accuracy": "90",
+                        "@line": "71713",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "5.X",
+                            "@accuracy": "90",
+                            "cpe": "cpe:/o:linux:linux_kernel:5",
+                        },
+                    },
+                    {
+                        "@name": "Linux 2.6.18",
+                        "@accuracy": "90",
+                        "@line": "52738",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "2.6.X",
+                            "@accuracy": "90",
+                            "cpe": "cpe:/o:linux:linux_kernel:2.6.18",
+                        },
+                    },
+                    {
+                        "@name": "OpenWrt 19.07 (Linux 4.14)",
+                        "@accuracy": "90",
+                        "@line": "71435",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "4.X",
+                            "@accuracy": "90",
+                            "cpe": "cpe:/o:linux:linux_kernel:4.14",
+                        },
+                    },
+                    {
+                        "@name": "Linux 2.6.32 - 3.10",
+                        "@accuracy": "90",
+                        "@line": "59874",
+                        "osclass": [
+                            {
+                                "@type": "general purpose",
+                                "@vendor": "Linux",
+                                "@osfamily": "Linux",
+                                "@osgen": "2.6.X",
+                                "@accuracy": "90",
+                                "cpe": "cpe:/o:linux:linux_kernel:2.6",
+                            },
+                            {
+                                "@type": "general purpose",
+                                "@vendor": "Linux",
+                                "@osfamily": "Linux",
+                                "@osgen": "3.X",
+                                "@accuracy": "90",
+                                "cpe": "cpe:/o:linux:linux_kernel:3",
+                            },
+                        ],
+                    },
+                    {
+                        "@name": "OpenWrt 22.03 (Linux 5.10)",
+                        "@accuracy": "90",
+                        "@line": "72603",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "5.X",
+                            "@accuracy": "90",
+                            "cpe": "cpe:/o:linux:linux_kernel:5.10",
+                        },
+                    },
+                    {
+                        "@name": "Linux 4.19",
+                        "@accuracy": "89",
+                        "@line": "70644",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "4.X",
+                            "@accuracy": "89",
+                            "cpe": "cpe:/o:linux:linux_kernel:4.19",
+                        },
+                    },
+                    {
+                        "@name": "Linux 6.0",
+                        "@accuracy": "89",
+                        "@line": "72657",
+                        "osclass": {
+                            "@type": "general purpose",
+                            "@vendor": "Linux",
+                            "@osfamily": "Linux",
+                            "@osgen": "6.X",
+                            "@accuracy": "89",
+                            "cpe": "cpe:/o:linux:linux_kernel:6.0",
+                        },
+                    },
+                ],
+            },
+            "uptime": {"@seconds": "1695754", "@lastboot": "Fri Aug 16 12:01:26 2024"},
+            "tcpsequence": {
+                "@index": "263",
+                "@difficulty": "Good luck!",
+                "@values": "9E5D4BA6,21134533,1D20F78E,8DFC4918,C1176A34,F66299D",
+            },
+            "ipidsequence": {"@class": "All zeros", "@values": "0,0,0,0,0,0"},
+            "tcptssequence": {
+                "@class": "1000HZ",
+                "@values": "6512AE3F,6512AEA3,6512AF07,6512AF6C,6512AFD0,6512B035",
+            },
+            "times": {"@srtt": "33844", "@rttvar": "26758", "@to": "140876"},
+        },
+        "runstats": {
+            "finished": {
+                "@time": "1725505440",
+                "@timestr": "Thu Sep  5 03:04:00 2024",
+                "@summary": "Nmap done at Thu Sep  5 03:04:00 2024; 1 IP address (1 host up) scanned in 331.53 seconds",
+                "@elapsed": "331.53",
+                "@exit": "success",
+            },
+            "hosts": {"@up": "1", "@down": "0", "@total": "1"},
+        },
+    }
+}
 
-def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
+def testAgentNmapOptions_whensssNmaprunHostIsList_noCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
@@ -1327,9 +1586,12 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
-        return_value=(SCAN_RESULT_HOST_AS_LIST, HUMAN_OUTPUT),
+        return_value=(scan_results1, HUMAN_OUTPUT),
     )
 
     nmap_test_agent.process(domain_msg)
+
+    print("hellow")
+
 
     # assert any("fingerprint" in msg.selector for msg in agent_mock) is False
