@@ -245,6 +245,38 @@ class NmapAgent(
             )
         return ret
 
+    def _emit_network_domain_name_finding(
+        self,
+        domains: dict[str, dict[str, str]] | dict[str, list[dict[str, str]]],
+        technical_detail: str,
+        ports: list[dict[str, str]],
+    ) -> None:
+        print(domains, "dThis is the type for portzs")
+        domains = domains.get("hostname", {})
+        if isinstance(domains, list) is True:
+            for domain_dict in domains:
+                domain = domain_dict.get("@name", "")
+                self.report_vulnerability(
+                    entry=kb.KB.NETWORK_PORT_SCAN,
+                    technical_detail=technical_detail,
+                    risk_rating=vuln_mixin.RiskRating.INFO,
+                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                        metadata=self._prepare_metadata(ports),
+                        asset=domain_name_asset.DomainName(name=domain),
+                    ),
+                )
+        elif isinstance(domains, dict) is True:
+            domain = domains.get("@name", "")
+            self.report_vulnerability(
+                entry=kb.KB.NETWORK_PORT_SCAN,
+                technical_detail=technical_detail,
+                risk_rating=vuln_mixin.RiskRating.INFO,
+                vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                    metadata=self._prepare_metadata(ports),
+                    asset=domain_name_asset.DomainName(name=domain),
+                ),
+            )
+
     def _emit_network_scan_finding(
         self, scan_results: Dict[str, Any], normal_results: str
     ) -> None:
@@ -261,30 +293,9 @@ class NmapAgent(
                 ports = host.get("ports", {}).get("port", "")
                 address = host.get("address", {})
                 if domains is not None and len(domains.values()) > 0:
-                    domains = domains.get("hostname", {})
-                    if isinstance(domains, list) is True:
-                        for domain_dict in domains:
-                            domain = domain_dict.get("@name", "")
-                            self.report_vulnerability(
-                                entry=kb.KB.NETWORK_PORT_SCAN,
-                                technical_detail=technical_detail,
-                                risk_rating=vuln_mixin.RiskRating.INFO,
-                                vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                    metadata=self._prepare_metadata(ports),
-                                    asset=domain_name_asset.DomainName(name=domain),
-                                ),
-                            )
-                    elif isinstance(domains, dict) is True:
-                        domain = domains.get("@name", "")
-                        self.report_vulnerability(
-                            entry=kb.KB.NETWORK_PORT_SCAN,
-                            technical_detail=technical_detail,
-                            risk_rating=vuln_mixin.RiskRating.INFO,
-                            vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                                metadata=self._prepare_metadata(ports),
-                                asset=domain_name_asset.DomainName(name=domain),
-                            ),
-                        )
+                    self._emit_network_domain_name_finding(
+                        domains, technical_detail, ports
+                    )
                 elif address.get("@addrtype", "") == "ipv4":
                     self.report_vulnerability(
                         entry=kb.KB.NETWORK_PORT_SCAN,
