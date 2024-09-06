@@ -251,9 +251,11 @@ class NmapAgent(
         technical_detail: str,
         ports: list[dict[str, str]],
     ) -> None:
-        domains = domains.get("hostname", {})
-        if isinstance(domains, list) is True:
-            for domain_dict in domains:
+        domains_hostname: dict[str, str] | list[dict[str, str]] = domains.get(
+            "hostname", {}
+        )
+        if isinstance(domains_hostname, list):
+            for domain_dict in domains_hostname:
                 domain = domain_dict.get("@name", "")
                 self.report_vulnerability(
                     entry=kb.KB.NETWORK_PORT_SCAN,
@@ -264,8 +266,8 @@ class NmapAgent(
                         asset=domain_name_asset.DomainName(name=domain),
                     ),
                 )
-        elif isinstance(domains, dict) is True:
-            domain = domains.get("@name", "")
+        elif isinstance(domains_hostname, dict):
+            domain = domains_hostname.get("@name", "")
             self.report_vulnerability(
                 entry=kb.KB.NETWORK_PORT_SCAN,
                 technical_detail=technical_detail,
