@@ -251,7 +251,6 @@ class NmapAgent(
         technical_detail: str,
         ports: list[dict[str, str]],
     ) -> None:
-        print(domains, "dThis is the type for portzs")
         domains = domains.get("hostname", {})
         if isinstance(domains, list) is True:
             for domain_dict in domains:
