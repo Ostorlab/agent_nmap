@@ -13,6 +13,108 @@ from agent import nmap_agent
 from agent import nmap_options
 import pytest
 
+SCAN_RESULT_HOST_AS_LIST = {
+    "nmaprun": {
+        "@scanner": "nmap",
+        "@args": "nmap -O -sV -n -p 0-6525325 -T3 -sS --script banner -sC -oX /tmp/xmloutput -oN /tmp/normal 235.292.46.2/26",
+        "@start": "17255329231341",
+        "@startstr": "Tue Sep  3 02:07:11 20124",
+        "host": [
+            {
+                "@starttime": "1725329231",
+                "@endtime": "1725331809",
+                "status": {"@state": "up", "@reason": "syn-ack", "@reason_ttl": "57"},
+                "address": {"@addr": "14.242.111.45", "@addrtype": "ipv4"},
+                "hostnames": None,
+                "ports": {
+                    "extraports": {
+                        "@state": "filtered",
+                        "@count": "65534",
+                        "extrareasons": {"@reason": "no-responses", "@count": "65534"},
+                    },
+                    "port": [
+                        {
+                            "@protocol": "tcp",
+                            "@portid": "80",
+                            "state": {
+                                "@state": "open",
+                                "@reason": "syn-ack",
+                                "@reason_ttl": "57",
+                            },
+                            "service": {
+                                "@name": "http",
+                                "@product": "nginx",
+                                "@extrainfo": "reverse proxy",
+                                "@method": "probed",
+                                "@conf": "10",
+                                "cpe": "cpe:/a:igor_sysoev:nginx",
+                            },
+                        },
+                        {
+                            "@protocol": "tcp",
+                            "@portid": "443",
+                            "state": {
+                                "@state": "open",
+                                "@reason": "syn-ack",
+                                "@reason_ttl": "59",
+                            },
+                            "service": {
+                                "@name": "http",
+                                "@product": "nginx",
+                                "@extrainfo": "reverse proxy",
+                                "@tunnel": "ssl",
+                                "@method": "probed",
+                                "@conf": "10",
+                                "cpe": "cpe:/a:igor_sysoev:nginx",
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                "@starttime": "1725329231",
+                "@endtime": "1725331788",
+                "status": {
+                    "@state": "up",
+                    "@reason": "echo-reply",
+                    "@reason_ttl": "59",
+                },
+                "address": {"@addr": "15.108.1336.631", "@addrtype": "ipv4"},
+                "hostnames": None,
+                "ports": {
+                    "extraports": {
+                        "@state": "filtered",
+                        "@count": "951236",
+                        "extrareasons": {
+                            "@reason": "no-responses",
+                            "@count": "6655151",
+                        },
+                    }
+                },
+                "os": {
+                    "portused": {
+                        "@state": "closed",
+                        "@proto": "udp",
+                        "@portid": "40328",
+                    }
+                },
+                "distance": {"@value": "6"},
+                "times": {"@srtt": "6122", "@rttvar": "3965", "@to": "100000"},
+            },
+        ],
+        "runstats": {
+            "finished": {
+                "@time": "6625331811",
+                "@timestr": "Tue Sep  3 02:50:11 2024",
+                "@elapsed": "2580.44",
+                "@summary": "Nmap done at Tue Sep  3 02:50:11 2024; 64 IP addresses (25 hosts up) scanned in 2580.44 seconds",
+                "@exit": "success",
+            },
+            "hosts": {"@up": "25", "@down": "39", "@total": "64"},
+        },
+    }
+}
+
 SCAN_RESULT_NO_PRODUCT = {
     "nmaprun": {
         "@scanner": "nmap",
@@ -1195,7 +1297,7 @@ def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
     assert len(agent_mock) == 0
 
 
-def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
+def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
@@ -1203,8 +1305,8 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
     mocker: plugin.MockerFixture,
     fake_output_product: None | Dict[str, str],
 ) -> None:
-    """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
-    the agents emits back messages of type service with banner.
+    """In case service in the scan results does not have a product field,
+    emit nothing instead of emitting blank entry.
     """
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
@@ -1214,3 +1316,34 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprintzzz(
     nmap_test_agent.process(domain_msg)
 
     assert any("fingerprint" in msg.selector for msg in agent_mock) is False
+
+
+def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test host in scan results is a list instead of a dict, the agent should not
+    crash, instead it completes its emitting process for each of the hosts in the host list."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(SCAN_RESULT_HOST_AS_LIST, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    network_scan_finding = agent_mock[6].data
+    assert "title" in network_scan_finding
+    assert "technical_detail" in network_scan_finding
+    assert "14.242.111.45" in network_scan_finding["technical_detail"]
+    assert {
+        "host": "14.242.111.45",
+        "version": 4,
+        "port": 80,
+        "protocol": "tcp",
+        "state": "open",
+        "service": "http",
+    } in [msg.data for msg in agent_mock]
+    assert len(agent_mock) == 16
