@@ -262,7 +262,7 @@ class NmapAgent(
                 address = host.get("address", {})
                 if domains is not None and len(domains.values()) > 0:
                     domains = domains.get("hostname", {})
-                    if isinstance(domains, List) is True:
+                    if isinstance(domains,list) is True:
                         for domain_dict in domains:
                             domain = domain_dict.get("@name", "")
                             self.report_vulnerability(
