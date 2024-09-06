@@ -1334,4 +1334,16 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
 
     nmap_test_agent.process(domain_msg)
 
+    network_scan_finding = agent_mock[6].data
+    assert "title" in network_scan_finding
+    assert "technical_detail" in network_scan_finding
+    assert "14.242.111.45" in network_scan_finding["technical_detail"]
+    assert {
+        "host": "14.242.111.45",
+        "version": 4,
+        "port": 80,
+        "protocol": "tcp",
+        "state": "open",
+        "service": "http",
+    } in [msg.data for msg in agent_mock]
     assert len(agent_mock) == 16
