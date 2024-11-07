@@ -44,9 +44,9 @@ class NmapOptions:
 
     dns_resolution: bool = True
     dns_servers: List[str] | None = None
-    ports: Optional[str] = None
-    tcp_syn_ping_ports: Optional[str] = None
-    top_ports: Optional[int] = None
+    ports: str | None = None
+    tcp_syn_ping_ports: str | None = None
+    top_ports: None | int = None
     fast_mode: bool = False
     timing_template: TimingTemplate = TimingTemplate.T3
     script_default: bool = False
