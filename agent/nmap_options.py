@@ -45,6 +45,7 @@ class NmapOptions:
     dns_resolution: bool = True
     dns_servers: List[str] | None = None
     ports: Optional[str] = None
+    tcp_syn_ping_ports: Optional[str] = None
     top_ports: Optional[int] = None
     fast_mode: bool = False
     timing_template: TimingTemplate = TimingTemplate.T3
@@ -76,9 +77,11 @@ class NmapOptions:
             command_options.append("-sV")
         return command_options
 
-    def _set_no_ping_options(self) -> List[str]:
+    def _set_host_discovery_options(self) -> List[str]:
         if self.no_ping is True:
             return ["-Pn"]
+        elif self.tcp_syn_ping_ports is not None:
+            return [f"-PS{self.tcp_syn_ping_ports}"]
         else:
             return []
 
@@ -158,7 +161,7 @@ class NmapOptions:
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
         command_options.extend(self._set_port_scanning_techniques())
-        command_options.extend(self._set_no_ping_options())
+        command_options.extend(self._set_host_discovery_options())
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())
         command_options.extend(self._set_script_default())
