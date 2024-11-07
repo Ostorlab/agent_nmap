@@ -538,7 +538,7 @@ def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
         "version": 4,
         "service": "nping-echo",
         "port": 9929,
-        "protocol": "tcp",
+        "protocol": "nping-echo",
         "library_type": "BACKEND_COMPONENT",
         "library_name": "Dummy Banner 2",
         "detail": "Dummy Banner 2",
@@ -900,14 +900,53 @@ def testAgent_whenServiceWithProductAndVersion_fingerprintMessageShouldHaveLibra
     assert len(agent_mock) == 3
     assert agent_mock[0].selector == "v3.asset.ip.v4.port.service"
     assert agent_mock[1].selector == "v3.report.vulnerability"
-    fingerprint_msg = agent_mock[2]
-    assert fingerprint_msg.selector == "v3.fingerprint.ip.v4.service.library"
-    assert fingerprint_msg.data["host"] == "127.0.0.1"
-    assert fingerprint_msg.data["mask"] == "32"
-    assert fingerprint_msg.data["service"] == "ssh"
-    assert fingerprint_msg.data["port"] == 22
-    assert fingerprint_msg.data["library_name"] == "OpenSSH"
-    assert fingerprint_msg.data["library_version"] == "7.4"
+    assert agent_mock[2].selector == "v3.fingerprint.ip.v4.service.library"
+    assert agent_mock[0].data == {
+        "host": "127.0.0.1",
+        "port": 22,
+        "protocol": "ssh",
+        "service": "ssh",
+        "state": "open",
+        "version": 4,
+    }
+    assert agent_mock[1].data == {
+        "cvss_v3_vector": "",
+        "cvss_v4_vector": "",
+        "description": "A list of identified open ports corresponds to the application's internet-facing attack surface.\n",
+        "has_public_exploit": False,
+        "privacy_issue": False,
+        "recommendation": "This entry is informative, but no recommendations are applicable.\n",
+        "references": [
+            {
+                "title": "Port Scanner",
+                "url": "https://en.wikipedia.org/wiki/Port_scanner",
+            }
+        ],
+        "risk_rating": "INFO",
+        "security_issue": True,
+        "short_description": "List of open network ports.",
+        "targeted_by_malware": False,
+        "targeted_by_nation_state": False,
+        "targeted_by_ransomware": False,
+        "technical_detail": "|  Host   |Version|Port|Protocol|State|Service|  \n|---------|------:|---:|--------|-----|-------|  \n|127.0.0.1|      4|  22|ssh     |open |ssh    |  \n\n```xml\n\n```",
+        "title": "Network Port Scan",
+        "vulnerability_location": {
+            "ipv4": {"host": "127.0.0.1", "version": 4},
+            "metadata": [{"type": "PORT", "value": "22"}],
+        },
+    }
+    assert agent_mock[2].data == {
+        "detail": "OpenSSH",
+        "host": "127.0.0.1",
+        "library_name": "OpenSSH",
+        "library_type": "BACKEND_COMPONENT",
+        "library_version": "7.4",
+        "mask": "32",
+        "port": 22,
+        "protocol": "ssh",
+        "service": "ssh",
+        "version": 4,
+    }
 
 
 def testAgent_whenHostHaveOs_fingerprintMessageShouldHaveOs(
@@ -1342,7 +1381,7 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
         "host": "14.242.111.45",
         "version": 4,
         "port": 80,
-        "protocol": "tcp",
+        "protocol": "http",
         "state": "open",
         "service": "http",
     } in [msg.data for msg in agent_mock]

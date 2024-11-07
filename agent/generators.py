@@ -43,7 +43,9 @@ def get_services(
                 ports = [ports]
             for port in ports:
                 data["port"] = int(port.get("@portid"))
-                data["protocol"] = port.get("@protocol")
+                data["protocol"] = port.get("service", {}).get(
+                    "@name", None
+                ) or port.get("@protocol")
                 data["state"] = port.get("state", {}).get("@state", "closed")
                 data["service"] = port.get("service", {}).get("@name", "")
                 data["product"] = port.get("service", {}).get("@product", "")
