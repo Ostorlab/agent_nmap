@@ -94,7 +94,7 @@ args:
   - name: "no_ping"
     description: "Treat all hosts as online, skip host discovery."
     type: "boolean"
-    value: false
+    value: true
   - name: "version_info"
     description: "Probe open ports to determine service/version info."
     type: "boolean"
