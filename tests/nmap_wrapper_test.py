@@ -189,3 +189,43 @@ def testNmapWrapperParseOutput_whenXmlIsValid_returnsParsedXml() -> None:
             },
         }
     } == parsed_output
+
+
+def testNmapWrapper_whenTcpSynPingPortsIsUsed_returnCommand(
+    nmap_agent_fast_mode: agent.nmap_agent.NmapAgent,
+) -> None:
+    args = nmap_agent_fast_mode.args
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports=args.get("ports"),
+        top_ports=args.get("top_ports"),
+        fast_mode=args.get("fast_mode", False),
+        no_ping=args.get("no_ping", False),
+        tcp_syn_ping_ports=args.get("tcp_syn_ping_ports"),
+        timing_template=nmap_options.TimingTemplate[args["timing_template"]],
+        scripts=args.get("scripts"),
+        script_default=args.get("script_default", False),
+        version_detection=args.get("version_info", False),
+    )
+    client = nmap_wrapper.NmapWrapper(options)
+
+    command = client.construct_command_host("127.0.0.1", 24)
+
+    assert command == [
+        "nmap",
+        "-O",
+        "-sV",
+        "-n",
+        "-F",
+        "-T3",
+        "-sS",
+        "-PS21,22,25,53,68,80,110,123,143,443,465,631,993,995,3306,3389,8080",
+        "--script",
+        "banner",
+        "-sC",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "127.0.0.1/24",
+    ]
