@@ -78,12 +78,12 @@ class NmapOptions:
         return command_options
 
     def _set_host_discovery_options(self) -> List[str]:
+        options = []
         if self.no_ping is True:
-            return ["-Pn"]
-        elif self.tcp_syn_ping_ports is not None:
-            return [f"-PS{self.tcp_syn_ping_ports}"]
-        else:
-            return []
+            options.append("-Pn")
+        if self.tcp_syn_ping_ports is not None:
+            options.append(f"-PS{self.tcp_syn_ping_ports}")
+        return options
 
     def _set_privileged(self) -> List[str]:
         if self.privileged is True:
