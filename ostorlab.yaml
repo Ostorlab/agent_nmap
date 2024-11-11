@@ -74,9 +74,6 @@ out_selectors:
   - v3.fingerprint.ip.v4.service.library
   - v3.fingerprint.ip.v6.service.library
   - v3.fingerprint.domain_name.service.library
-supported_architectures:
-  - linux/arm64/v8
-  - linux/x86_64
 docker_file_path : Dockerfile
 docker_build_root : .
 args:
