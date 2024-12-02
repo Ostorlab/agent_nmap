@@ -63,6 +63,12 @@ class NmapOptions:
     no_ping: bool = True
     privileged: Optional[bool] = None
 
+    ping_timeout: int | None = None  # Example: Timeout for pings (in milliseconds)
+    min_rate: int | None = None  # Minimum number of packets per second
+    max_rate: int | None = None  # Maximum number of packets per second
+    max_retries: int | None = None  # Maximum number of retries for probes
+    fragment_mtu: int | None = None  # MTU for fragmented packets
+
     def _set_os_detection_option(self) -> List[str]:
         """Appends the os detection option to the list of nmap options."""
         command_options = []
@@ -151,6 +157,21 @@ class NmapOptions:
 
         return command
 
+    def _set_additional_options(self) -> List[str]:
+        """Appends additional options for fine-tuning Nmap behavior."""
+        command_options = []
+        if self.ping_timeout is not None:
+            command_options.append(f"--host-timeout {self.ping_timeout}ms")
+        if self.min_rate is not None:
+            command_options.append(f"--min-rate {self.min_rate}")
+        if self.max_rate is not None:
+            command_options.append(f"--max-rate {self.max_rate}")
+        if self.max_retries is not None:
+            command_options.append(f"--max-retries {self.max_retries}")
+        if self.fragment_mtu is not None:
+            command_options.append(f"--mtu {self.fragment_mtu}")
+        return command_options
+
     @property
     def command_options(self) -> List[str]:
         """Computes the list of nmap options."""
@@ -165,4 +186,5 @@ class NmapOptions:
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())
         command_options.extend(self._set_script_default())
+        command_options.extend(self._set_additional_options())
         return command_options

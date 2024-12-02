@@ -45,6 +45,10 @@ DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 DEFAULT_MASK_IPV6 = 128
 # scan up to 65536 host
 IPV6_CIDR_LIMIT = 112
+# More IPv6-specific constants
+IPV6_MIN_PREFIX = 8  # Minimum safe prefix length for IPv6
+IPV6_DEFAULT_PING_TIMEOUT = 1000  # ms
+IPV6_MAX_BATCH_SIZE = 100  # Maximum number of IPv6 addresses to scan in one batch
 
 BLACKLISTED_SERVICES = ["tcpwrapped"]
 
@@ -74,6 +78,33 @@ class NmapAgent(
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
         self._vpn_config: Optional[str] = self.args.get("vpn_config")
         self._dns_config: Optional[str] = self.args.get("dns_config")
+        self._validate_ipv6_settings()
+
+    def _validate_ipv6_settings(self) -> None:
+        """Validate IPv6-specific settings."""
+        max_mask = int(self.args.get("max_network_mask_ipv6", "128"))
+        if max_mask < IPV6_MIN_PREFIX or max_mask > 128:
+            raise ValueError(f"IPv6 prefix must be between {IPV6_MIN_PREFIX} and 128")
+
+    def _normalize_ipv6_address(self, address: str) -> str:
+        """Normalize IPv6 address format."""
+        try:
+            return str(ipaddress.IPv6Address(address).compressed)
+        except ipaddress.AddressValueError as e:
+            logger.error("Invalid IPv6 address: %s", e)
+            raise
+
+    def _get_ipv6_scan_options(self) -> dict[str, Any]:
+        """Get IPv6-specific scan options."""
+        return {
+            "ping_timeout": self.args.get(
+                "ipv6_ping_timeout", IPV6_DEFAULT_PING_TIMEOUT
+            ),
+            "min_rate": self.args.get("ipv6_min_rate", 100),
+            "max_rate": self.args.get("ipv6_max_rate", 1000),
+            "max_retries": self.args.get("ipv6_max_retries", 2),
+            "fragment_mtu": self.args.get("ipv6_fragment_mtu", 1280),
+        }
 
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
@@ -102,20 +133,37 @@ class NmapAgent(
             else:
                 hosts = [(host, mask)]
         elif "v6" in message.selector:
+            # Handle IPv6 address normalization
+            try:
+                normalized_host = self._normalize_ipv6_address(host)
+            except ipaddress.AddressValueError:
+                logger.error("Invalid IPv6 address: %s", host)
+                return
+
             mask = int(message.data.get("mask", DEFAULT_MASK_IPV6))
             if mask < IPV6_CIDR_LIMIT:
-                raise ValueError(
-                    f"Subnet mask below {IPV6_CIDR_LIMIT} is not supported"
+                logger.error(
+                    "IPv6 subnet mask below %s is not supported", IPV6_CIDR_LIMIT
                 )
+                return
 
+            # Validate the mask
             max_mask = int(self.args.get("max_network_mask_ipv6", "128"))
             if mask < max_mask:
-                for subnet in ipaddress.ip_network(
-                    f"{host}/{mask}", strict=False
-                ).subnets(new_prefix=max_mask):
-                    hosts.append((str(subnet.network_address), max_mask))
+                try:
+                    # Only process valid subnets
+                    for subnet in ipaddress.ip_network(
+                        f"{normalized_host}/{mask}", strict=False
+                    ).subnets(new_prefix=max_mask):
+                        if isinstance(subnet, ipaddress.IPv6Network):
+                            hosts.append((str(subnet.network_address), max_mask))
+                        else:
+                            logger.error("Unexpected subnet type for IPv6: %s", subnet)
+                except ValueError as e:
+                    logger.error("Failed to process IPv6 network: %s", e)
+                    return
             else:
-                hosts = [(host, mask)]
+                hosts = [(normalized_host, mask)]
 
         domain_name = self._prepare_domain_name(
             message.data.get("name"), message.data.get("url")
@@ -163,6 +211,8 @@ class NmapAgent(
             logger.error("Neither host or domain are set.")
 
     def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
+        is_ipv6 = ":" in host  # Simple check for IPv6 address
+
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
@@ -175,11 +225,25 @@ class NmapAgent(
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
         )
-        client = nmap_wrapper.NmapWrapper(options)
 
+        if is_ipv6 is True:
+            # Add IPv6-specific options
+            ipv6_options = self._get_ipv6_scan_options()
+            options.ping_timeout = ipv6_options["ping_timeout"]
+            options.min_rate = ipv6_options["min_rate"]
+            options.max_rate = ipv6_options["max_rate"]
+            options.max_retries = ipv6_options["max_retries"]
+            options.fragment_mtu = ipv6_options["fragment_mtu"]
+
+        client = nmap_wrapper.NmapWrapper(options)
         logger.info("scanning target %s/%s with options %s", host, mask, options)
-        scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
-        return scan_results, normal_results
+
+        try:
+            scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
+            return scan_results, normal_results
+        except subprocess.CalledProcessError as e:
+            logger.error("Nmap scan failed for IPv6 host %s: %s", host, e)
+            raise
 
     def _scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(

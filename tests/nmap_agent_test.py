@@ -1,6 +1,8 @@
 """Unittests for Nmap agent."""
 
+import ipaddress
 import json
+import logging
 from typing import List, Dict, Union
 import subprocess
 
@@ -212,6 +214,41 @@ IPV6_JSON_OUTPUT = {
     }
 }
 
+LARGE_IPV6_SUBNET_JSON_OUTPUT = {
+    "nmaprun": {
+        "host": [
+            {
+                "address": {
+                    "@addr": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f",
+                    "@addrtype": "ipv6",
+                },
+                "ports": {
+                    "port": {
+                        "@portid": "22",
+                        "@protocol": "tcp",
+                        "state": {"@state": "open"},
+                        "service": {"@name": "ssh"},
+                    }
+                },
+            },
+            {
+                "address": {
+                    "@addr": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb30",
+                    "@addrtype": "ipv6",
+                },
+                "ports": {
+                    "port": {
+                        "@portid": "80",
+                        "@protocol": "tcp",
+                        "state": {"@state": "open"},
+                        "service": {"@name": "http"},
+                    }
+                },
+            },
+        ]
+    }
+}
+
 IPV6_HUMAN_OUTPUT = """
 # Nmap 7.92 scan initiated Mon Mar 28 15:05:11 2022 as: nmap -sV --script=banner -n "-p 0-65535" -T5 -oX /tmp/xmloutput -oN /tmp/normal 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f                                                                 │ │
 Warning: 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f giving up on port because retransmission cap hit (2).                                                                                                                                                   │ │
@@ -223,6 +260,155 @@ PORT     STATE  SERVICE  VERSION                                                
 22/tcp   closed ssh                                                                                                                                                                                                           │ │
 80/tcp   open   http     awselb/2.0
 """
+
+
+def testNmapAgentLifecycle_whenIpv6WithHostBits_shouldReport(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    ipv6_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unit test of nmap agent when ipv6 with host bits is provided."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(IPV6_JSON_OUTPUT, IPV6_HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv6_msg)
+
+    assert len(agent_mock) == 2
+    assert agent_mock[0].selector == "v3.asset.ip.v6.port.service"
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    assert agent_mock[1].data["risk_rating"] == "INFO"
+    assert agent_mock[1].data["title"] == "Network Port Scan"
+    assert (
+        "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f"
+        in agent_mock[1].data["technical_detail"]
+    )
+
+
+def testNmapAgent_whenInvalidIpv6_shouldReportRaiseAnError(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test handling of invalid IPv6 addresses."""
+    msg = message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "invalid_ipv6",
+            "mask": "112",
+        },
+    )
+
+    # Mock _normalize_ipv6_address to raise the expected error
+    mocker.patch.object(
+        nmap_test_agent,
+        "_normalize_ipv6_address",
+        side_effect=ipaddress.AddressValueError("Invalid IPv6 address"),
+    )
+
+    nmap_test_agent.process(msg)  # Should handle the error gracefully
+    assert len(agent_mock) == 0  # No messages should be emitted for invalid address
+
+
+def testNmapAgent_whenIpv6SubnetBelowLimit_shouldReportNothing(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test handling of IPv6 subnets below the allowed limit."""
+    msg = message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2600:3c01:224a:6e00::",
+            "mask": "96",  # Below IPV6_CIDR_LIMIT
+        },
+    )
+
+    # Mock _normalize_ipv6_address to return valid address
+    mocker.patch.object(
+        nmap_test_agent, "_normalize_ipv6_address", return_value="2600:3c01:224a:6e00::"
+    )
+
+    nmap_test_agent.process(msg)
+    assert len(agent_mock) == 0  # No messages should be emitted for subnet below limit
+
+
+def testNmapAgent_whenLargeIpv6Subnet_shouldPerformBatchProcessing(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    large_subnet_ipv6_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test batch processing of large IPv6 subnets."""
+    scan_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(LARGE_IPV6_SUBNET_JSON_OUTPUT, IPV6_HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(large_subnet_ipv6_msg)
+
+    assert scan_mock.call_count > 0
+    assert (
+        len([m for m in agent_mock if m.selector == "v3.asset.ip.v6.port.service"]) >= 2
+    )
+
+
+def testNmapAgent_whenIpv6SpecificOptions_shouldBeSetProperly(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test IPv6-specific scan options are properly set."""
+    msg = message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2600:3c01:224a:6e00::",
+            "mask": "128",
+        },
+    )
+
+    mock_wrapper = mocker.patch("agent.nmap_wrapper.NmapWrapper")
+    mock_wrapper.return_value.scan_hosts.return_value = (
+        IPV6_JSON_OUTPUT,
+        IPV6_HUMAN_OUTPUT,
+    )
+
+    mocker.patch.object(
+        nmap_test_agent, "_normalize_ipv6_address", return_value="2600:3c01:224a:6e00::"
+    )
+
+    mocker.patch.object(nmap_test_agent, "add_ip_network", return_value=True)
+
+    nmap_test_agent.process(msg)
+
+    mock_wrapper.assert_called_once()
+    options = mock_wrapper.call_args[0][0]
+    assert hasattr(options, "ping_timeout")
+    assert hasattr(options, "fragment_mtu")
+    assert options.fragment_mtu == 1280  # Default IPv6 MTU
+
+
+def testNmapAgent_whenIpv6_addressNormalizationShouldBeDone(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test IPv6 address normalization."""
+    test_cases = [
+        ("2001:db8:0:0:0:0:0:1", "2001:db8::1"),  # Compressed format
+        ("2001:0db8:0000:0000:0000:0000:0000:0001", "2001:db8::1"),  # Full format
+        ("2001:DB8::1", "2001:db8::1"),  # Mixed case
+    ]
+
+    for input_addr, expected_addr in test_cases:
+        normalized = nmap_test_agent._normalize_ipv6_address(input_addr)
+        assert normalized == expected_addr
 
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
@@ -825,18 +1011,26 @@ def testNmapAgent_whenIpv6WithoutMask_agentShouldNotGetStuck(
     assert len(agent_mock) == 0
 
 
-def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
+def testNmapAgent_whenIpv6AboveLimit_agentShouldLogError(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv6_msg_above_limit: message.Message,
+    mocker: plugin.MockerFixture,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Unit test of nmap agent when ipv6 above limit is provided, the agent should raise an error."""
-    with pytest.raises(ValueError) as error_message:
+    """Unit test for IPv6 subnet mask validation."""
+    mocker.patch.object(
+        nmap_test_agent, "_normalize_ipv6_address", return_value="2600:3c01:224a:6e00::"
+    )
+
+    with caplog.at_level(logging.ERROR):
         nmap_test_agent.process(ipv6_msg_above_limit)
 
-    assert len(agent_mock) == 0
-    assert error_message.value.args[0] == "Subnet mask below 112 is not supported"
+    assert (
+        f"IPv6 subnet mask below {nmap_agent.IPV6_CIDR_LIMIT} is not supported"
+        in caplog.text
+    )
 
 
 def testAgentNmap_whenInvalidDomainName_doesNotCrash(

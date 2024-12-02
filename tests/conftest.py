@@ -291,14 +291,40 @@ def ipv6_msg_without_mask() -> message.Message:
 
 
 @pytest.fixture
-def ipv6_msg_above_limit() -> message.Message:
-    """Creates a dummy message of type v3.asset.ip.v6 for testing purposes."""
+def invalid_ipv6_msg() -> message.Message:
+    """Creates an invalid IPv6 message for testing error handling."""
     return message.Message.from_data(
         selector="v3.asset.ip.v6",
         data={
             "version": 6,
-            "host": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f",
-            "mask": "64",
+            "host": "invalid_ipv6",
+            "mask": "112",
+        },
+    )
+
+
+@pytest.fixture
+def large_subnet_ipv6_msg() -> message.Message:
+    """Creates a message with a large IPv6 subnet."""
+    return message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2600:3c01:224a:6e00::",
+            "mask": "112",
+        },
+    )
+
+
+@pytest.fixture
+def ipv6_msg_above_limit() -> message.Message:
+    """Creates a message with an IPv6 subnet above the allowed limit (below mask 112)."""
+    return message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2600:3c01:224a:6e00::",
+            "mask": "96",  # Below IPV6_CIDR_LIMIT of 112
         },
     )
 
