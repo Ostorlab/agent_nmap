@@ -150,18 +150,10 @@ class NmapAgent(
             # Validate the mask
             max_mask = int(self.args.get("max_network_mask_ipv6", "128"))
             if mask < max_mask:
-                try:
-                    # Only process valid subnets
-                    for subnet in ipaddress.ip_network(
-                        f"{normalized_host}/{mask}", strict=False
-                    ).subnets(new_prefix=max_mask):
-                        if isinstance(subnet, ipaddress.IPv6Network):
-                            hosts.append((str(subnet.network_address), max_mask))
-                        else:
-                            logger.error("Unexpected subnet type for IPv6: %s", subnet)
-                except ValueError as e:
-                    logger.error("Failed to process IPv6 network: %s", e)
-                    return
+                for subnet in ipaddress.ip_network(
+                    f"{normalized_host}/{mask}", strict=False
+                ).subnets(new_prefix=max_mask):
+                    hosts.append((str(subnet.network_address), max_mask))
             else:
                 hosts = [(normalized_host, mask)]
 
