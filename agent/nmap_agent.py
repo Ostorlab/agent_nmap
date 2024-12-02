@@ -134,11 +134,7 @@ class NmapAgent(
                 hosts = [(host, mask)]
         elif "v6" in message.selector:
             # Handle IPv6 address normalization
-            try:
-                normalized_host = self._normalize_ipv6_address(host)
-            except ipaddress.AddressValueError:
-                logger.error("Invalid IPv6 address: %s", host)
-                return
+            normalized_host = self._normalize_ipv6_address(host)
 
             mask = int(message.data.get("mask", DEFAULT_MASK_IPV6))
             if mask < IPV6_CIDR_LIMIT:

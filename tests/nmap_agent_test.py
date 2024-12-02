@@ -288,30 +288,17 @@ def testNmapAgentLifecycle_whenIpv6WithHostBits_shouldReport(
     )
 
 
-def testNmapAgent_whenInvalidIpv6_shouldReportRaiseAnError(
+def testNmapAgent_whenInvalidIpv6_shouldRaiseAnError(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    mocker: plugin.MockerFixture,
+    invalid_ipv6_msg: message.Message,
 ) -> None:
-    """Test handling of invalid IPv6 addresses."""
-    msg = message.Message.from_data(
-        selector="v3.asset.ip.v6",
-        data={
-            "version": 6,
-            "host": "invalid_ipv6",
-            "mask": "112",
-        },
-    )
+    """Test that invalid IPv6 raises an AddressValueError."""
+    with pytest.raises(ipaddress.AddressValueError, match="At least 3 parts expected"):
+        nmap_test_agent.process(invalid_ipv6_msg)
 
-    # Mock _normalize_ipv6_address to raise the expected error
-    mocker.patch.object(
-        nmap_test_agent,
-        "_normalize_ipv6_address",
-        side_effect=ipaddress.AddressValueError("Invalid IPv6 address"),
-    )
-
-    nmap_test_agent.process(msg)  # Should handle the error gracefully
-    assert len(agent_mock) == 0  # No messages should be emitted for invalid address
+    # Ensure no messages were emitted
+    assert len(agent_mock) == 0
 
 
 def testNmapAgent_whenIpv6SubnetBelowLimit_shouldReportNothing(
