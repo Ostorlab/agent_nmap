@@ -62,7 +62,6 @@ class NmapOptions:
     )
     no_ping: bool = True
     privileged: Optional[bool] = None
-    ipv6_enabled: bool = False
 
     def _set_os_detection_option(self) -> List[str]:
         """Appends the os detection option to the list of nmap options."""
@@ -156,8 +155,6 @@ class NmapOptions:
     def command_options(self) -> List[str]:
         """Computes the list of nmap options."""
         command_options = []
-        if self.ipv6_enabled is True:
-            command_options.append("-6")
         command_options.extend(self._set_os_detection_option())
         command_options.extend(self._set_version_detection_option())
         command_options.extend(self._set_dns_resolution_option())

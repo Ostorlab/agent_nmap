@@ -74,15 +74,6 @@ class NmapAgent(
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
         self._vpn_config: Optional[str] = self.args.get("vpn_config")
         self._dns_config: Optional[str] = self.args.get("dns_config")
-        self._ipv6_cidr_limit: int = int(
-            self.args.get("ipv6_cidr_limit", IPV6_CIDR_LIMIT)
-        )
-
-    def _validate_ipv6_settings(self) -> None:
-        """Validate IPv6-specific settings."""
-        max_mask = int(self.args.get("max_network_mask_ipv6", "128"))
-        if max_mask < IPV6_MIN_PREFIX or max_mask > 128:
-            raise ValueError(f"IPv6 prefix must be between {IPV6_MIN_PREFIX} and 128")
 
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
@@ -177,8 +168,6 @@ class NmapAgent(
             logger.error("Neither host or domain are set.")
 
     def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
-        is_ipv6 = ":" in host  # Simple check for IPv6 address
-
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
@@ -190,7 +179,6 @@ class NmapAgent(
             scripts=self.args.get("scripts"),
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
-            ipv6_enabled=is_ipv6,
         )
 
         client = nmap_wrapper.NmapWrapper(options)
