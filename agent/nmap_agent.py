@@ -44,11 +44,11 @@ DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 
 DEFAULT_MASK_IPV6 = 128
 # scan up to 65536 host
-IPV6_CIDR_LIMIT = 112
+CIDR_LIMIT = 112
 # More IPv6-specific constants
 IPV6_MIN_PREFIX = 8  # Minimum safe prefix length for IPv6
-IPV6_DEFAULT_PING_TIMEOUT = 1000  # ms
-IPV6_MAX_BATCH_SIZE = 100  # Maximum number of IPv6 addresses to scan in one batch
+# IPV6_DEFAULT_PING_TIMEOUT = 1000  # ms
+MAX_BATCH_SIZE = 100  # Maximum number of IPv6 addresses to scan in one batch
 
 BLACKLISTED_SERVICES = ["tcpwrapped"]
 
@@ -97,9 +97,6 @@ class NmapAgent(
     def _get_ipv6_scan_options(self) -> dict[str, Any]:
         """Get IPv6-specific scan options."""
         return {
-            "ping_timeout": self.args.get(
-                "ipv6_ping_timeout", IPV6_DEFAULT_PING_TIMEOUT
-            ),
             "min_rate": self.args.get("ipv6_min_rate", 100),
             "max_rate": self.args.get("ipv6_max_rate", 1000),
             "max_retries": self.args.get("ipv6_max_retries", 2),
@@ -137,10 +134,8 @@ class NmapAgent(
             normalized_host = self._normalize_ipv6_address(host)
 
             mask = int(message.data.get("mask", DEFAULT_MASK_IPV6))
-            if mask < IPV6_CIDR_LIMIT:
-                logger.error(
-                    "IPv6 subnet mask below %s is not supported", IPV6_CIDR_LIMIT
-                )
+            if mask < CIDR_LIMIT:
+                logger.error("IPv6 subnet mask below %s is not supported", CIDR_LIMIT)
                 return
 
             # Validate the mask
@@ -217,7 +212,6 @@ class NmapAgent(
         if is_ipv6 is True:
             # Add IPv6-specific options
             ipv6_options = self._get_ipv6_scan_options()
-            options.ping_timeout = ipv6_options["ping_timeout"]
             options.min_rate = ipv6_options["min_rate"]
             options.max_rate = ipv6_options["max_rate"]
             options.max_retries = ipv6_options["max_retries"]

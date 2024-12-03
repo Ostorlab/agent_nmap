@@ -1015,7 +1015,7 @@ def testNmapAgent_whenIpv6AboveLimit_agentShouldLogError(
         nmap_test_agent.process(ipv6_msg_above_limit)
 
     assert (
-        f"IPv6 subnet mask below {nmap_agent.IPV6_CIDR_LIMIT} is not supported"
+        f"IPv6 subnet mask below {nmap_agent.CIDR_LIMIT} is not supported"
         in caplog.text
     )
 
