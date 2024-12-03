@@ -43,12 +43,8 @@ WIREGUARD_CONFIG_FILE_PATH = "/etc/wireguard/wg0.conf"
 DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 
 DEFAULT_MASK_IPV6 = 128
-# scan up to 65536 host
 IPV6_CIDR_LIMIT = 112
-# More IPv6-specific constants
 IPV6_MIN_PREFIX = 8  # Minimum safe prefix length for IPv6
-# IPV6_DEFAULT_PING_TIMEOUT = 1000  # ms
-MAX_BATCH_SIZE = 100  # Maximum number of IPv6 addresses to scan in one batch
 
 BLACKLISTED_SERVICES = ["tcpwrapped"]
 
