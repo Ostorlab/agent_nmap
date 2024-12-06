@@ -43,8 +43,8 @@ WIREGUARD_CONFIG_FILE_PATH = "/etc/wireguard/wg0.conf"
 DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 
 DEFAULT_MASK_IPV6 = 128
-# scan up to 65536 host
 IPV6_CIDR_LIMIT = 112
+IPV6_MIN_PREFIX = 8  # Minimum safe prefix length for IPv6
 
 BLACKLISTED_SERVICES = ["tcpwrapped"]
 
@@ -104,18 +104,23 @@ class NmapAgent(
         elif "v6" in message.selector:
             mask = int(message.data.get("mask", DEFAULT_MASK_IPV6))
             if mask < IPV6_CIDR_LIMIT:
-                raise ValueError(
-                    f"Subnet mask below {IPV6_CIDR_LIMIT} is not supported"
+                logger.error(
+                    "IPv6 subnet mask below %s is not supported", IPV6_CIDR_LIMIT
                 )
+                return
+
+            # Normalize IPv6 address
+            ip = ipaddress.IPv6Address(host)
+            normalized_host = str(ip.exploded)
 
             max_mask = int(self.args.get("max_network_mask_ipv6", "128"))
             if mask < max_mask:
                 for subnet in ipaddress.ip_network(
-                    f"{host}/{mask}", strict=False
+                    f"{normalized_host}/{mask}", strict=False
                 ).subnets(new_prefix=max_mask):
                     hosts.append((str(subnet.network_address), max_mask))
             else:
-                hosts = [(host, mask)]
+                hosts = [(normalized_host, mask)]
 
         domain_name = self._prepare_domain_name(
             message.data.get("name"), message.data.get("url")
@@ -175,11 +180,16 @@ class NmapAgent(
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
         )
-        client = nmap_wrapper.NmapWrapper(options)
 
+        client = nmap_wrapper.NmapWrapper(options)
         logger.info("scanning target %s/%s with options %s", host, mask, options)
-        scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
-        return scan_results, normal_results
+
+        try:
+            scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
+            return scan_results, normal_results
+        except subprocess.CalledProcessError as e:
+            logger.error("Nmap scan failed for IPv6 host %s: %s", host, e)
+            raise
 
     def _scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
         options = nmap_options.NmapOptions(

@@ -1,9 +1,12 @@
 """Unittests for Nmap agent."""
 
+import ipaddress
 import json
-from typing import List, Dict, Union
+import logging
 import subprocess
+from typing import List, Dict, Union
 
+import pytest
 import requests_mock as rq_mock
 from ostorlab.agent.message import message
 from ostorlab.utils import defintions as utils_definitions
@@ -11,7 +14,6 @@ from pytest_mock import plugin
 
 from agent import nmap_agent
 from agent import nmap_options
-import pytest
 
 SCAN_RESULT_HOST_AS_LIST = {
     "nmaprun": {
@@ -212,6 +214,41 @@ IPV6_JSON_OUTPUT = {
     }
 }
 
+LARGE_IPV6_SUBNET_JSON_OUTPUT = {
+    "nmaprun": {
+        "host": [
+            {
+                "address": {
+                    "@addr": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f",
+                    "@addrtype": "ipv6",
+                },
+                "ports": {
+                    "port": {
+                        "@portid": "22",
+                        "@protocol": "tcp",
+                        "state": {"@state": "open"},
+                        "service": {"@name": "ssh"},
+                    }
+                },
+            },
+            {
+                "address": {
+                    "@addr": "2600:3c01:224a:6e00:f03c:91ff:fe18:bb30",
+                    "@addrtype": "ipv6",
+                },
+                "ports": {
+                    "port": {
+                        "@portid": "80",
+                        "@protocol": "tcp",
+                        "state": {"@state": "open"},
+                        "service": {"@name": "http"},
+                    }
+                },
+            },
+        ]
+    }
+}
+
 IPV6_HUMAN_OUTPUT = """
 # Nmap 7.92 scan initiated Mon Mar 28 15:05:11 2022 as: nmap -sV --script=banner -n "-p 0-65535" -T5 -oX /tmp/xmloutput -oN /tmp/normal 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f                                                                 │ │
 Warning: 2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f giving up on port because retransmission cap hit (2).                                                                                                                                                   │ │
@@ -225,10 +262,85 @@ PORT     STATE  SERVICE  VERSION                                                
 """
 
 
+def testNmapAgentLifecycle_whenIpv6WithHostBits_shouldReport(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    ipv6_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Unit test of nmap agent when ipv6 with host bits is provided."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(IPV6_JSON_OUTPUT, IPV6_HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv6_msg)
+
+    assert len(agent_mock) == 2
+    assert agent_mock[0].selector == "v3.asset.ip.v6.port.service"
+    assert agent_mock[1].selector == "v3.report.vulnerability"
+    assert agent_mock[1].data["risk_rating"] == "INFO"
+    assert agent_mock[1].data["title"] == "Network Port Scan"
+    assert (
+        "2600:3c01:224a:6e00:f03c:91ff:fe18:bb2f"
+        in agent_mock[1].data["technical_detail"]
+    )
+
+
+def testNmapAgent_whenInvalidIpv6_shouldRaiseAnError(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    invalid_ipv6_msg: message.Message,
+) -> None:
+    """Test that invalid IPv6 raises an AddressValueError."""
+    with pytest.raises(ipaddress.AddressValueError, match="At least 3 parts expected"):
+        nmap_test_agent.process(invalid_ipv6_msg)
+
+    # Ensure no messages were emitted
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_whenIpv6SubnetBelowLimit_shouldReportNothing(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+) -> None:
+    """Test handling of IPv6 subnets below the allowed limit."""
+    msg = message.Message.from_data(
+        selector="v3.asset.ip.v6",
+        data={
+            "version": 6,
+            "host": "2600:3c01:224a:6e00::",
+            "mask": "96",  # Below IPV6_CIDR_LIMIT
+        },
+    )
+
+    nmap_test_agent.process(msg)
+    assert len(agent_mock) == 0  # No messages should be emitted for subnet below limit
+
+
+def testNmapAgent_whenLargeIpv6Subnet_shouldPerformBatchProcessing(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    large_subnet_ipv6_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """Test batch processing of large IPv6 subnets."""
+    scan_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(LARGE_IPV6_SUBNET_JSON_OUTPUT, IPV6_HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(large_subnet_ipv6_msg)
+
+    assert scan_mock.call_count > 0
+    assert (
+        len([m for m in agent_mock if m.selector == "v3.asset.ip.v6.port.service"]) >= 2
+    )
+
+
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -258,7 +370,6 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -282,7 +393,6 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
 def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     link_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -319,7 +429,6 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
 def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -353,7 +462,6 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -377,7 +485,6 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -409,7 +516,6 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
     nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -444,8 +550,6 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
     nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
 ) -> None:
@@ -481,8 +585,6 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
     nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
     fake_output_range: None | Dict[str, str],
 ) -> None:
@@ -518,7 +620,6 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -548,7 +649,6 @@ def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
 def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg2: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -584,7 +684,6 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
 def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslyScanned_subnetIsNotScanned(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg_with_mask: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -613,7 +712,6 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
 def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output: None | Dict[str, str],
@@ -658,7 +756,6 @@ def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeSc
 def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output_product: None | Dict[str, str],
@@ -710,7 +807,6 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
 def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output_with_down_host: None | Dict[str, str],
@@ -731,7 +827,6 @@ def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
 def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     domain_is_down_msg: message.Message,
     mocker: plugin.MockerFixture,
     fake_output_with_down_host: None | Dict[str, str],
@@ -751,8 +846,6 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
 
 def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
     nmap_agent_with_vpn_config_arg: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -773,8 +866,6 @@ def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
 
 def testAgentNmap_whenNoHost_agentShouldNotCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     junk_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -790,7 +881,6 @@ def testAgentNmap_whenNoHost_agentShouldNotCrash(
 def testNmapAgentLifecycle_whenIpv6WithHostBits_agentShouldNotCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv6_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -825,18 +915,19 @@ def testNmapAgent_whenIpv6WithoutMask_agentShouldNotGetStuck(
     assert len(agent_mock) == 0
 
 
-def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
+def testNmapAgent_whenIpv6AboveLimit_agentShouldLogError(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     ipv6_msg_above_limit: message.Message,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Unit test of nmap agent when ipv6 above limit is provided, the agent should raise an error."""
-    with pytest.raises(ValueError) as error_message:
+    """Unit test for IPv6 subnet mask validation."""
+    with caplog.at_level(logging.ERROR):
         nmap_test_agent.process(ipv6_msg_above_limit)
 
-    assert len(agent_mock) == 0
-    assert error_message.value.args[0] == "Subnet mask below 112 is not supported"
+    assert (
+        f"IPv6 subnet mask below {nmap_agent.IPV6_CIDR_LIMIT} is not supported"
+        in caplog.text
+    )
 
 
 def testAgentNmap_whenInvalidDomainName_doesNotCrash(
