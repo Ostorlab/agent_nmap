@@ -118,7 +118,7 @@ SCAN_RESULT_HOST_AS_LIST = {
 SCAN_RESULT_NO_PRODUCT = {
     "nmaprun": {
         "@scanner": "nmap",
-        "@args": "nmap -sV -n -p 0-6111515135 -T3 -sS --script banner -sC -oX /tmp/xm -oN /tmp/normal photo-rw.som.cm",
+        "@args": "nmap -sV -n -p 0-6111515135 -T3 -sS --script banner -sC -oX /tmp/xm -oN /tmp/normal photo-rw.some.cm",
         "@start": "11423487",
         "@startstr": "Sun Aug 32 24:56:27 2424",
         "@version": "5.50",
@@ -985,7 +985,7 @@ def testAgent_whenOsClassIsList_fingerprintMessageShouldHaveOs(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agent handel osclass when it's a list."""
+    """Ensure the agent handle osclass when it's a list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
@@ -1057,7 +1057,7 @@ def testAgent_whenOsMatchIsEmptyList_fingerprintMessageShouldHaveOs(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agent handel osmatch when it's an empty list."""
+    """Ensure the agent handle osmatch when it's an empty list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
@@ -1102,7 +1102,7 @@ def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agent handel osmatch when it's a list."""
+    """Ensure the agent handle osmatch when it's a list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
@@ -1251,7 +1251,7 @@ def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
     agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
     mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the agent handel osmatch when it's a list."""
+    """Ensure the agent handle osmatch when it's a list."""
     del agent_persist_mock
     product_fake_output = {
         "nmaprun": {
