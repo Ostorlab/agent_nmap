@@ -6,7 +6,7 @@ import subprocess
 
 import requests_mock as rq_mock
 from ostorlab.agent.message import message
-from ostorlab.utils import defintions as utils_definitions
+from ostorlab.utils import definitions as utils_definitions
 from pytest_mock import plugin
 
 from agent import nmap_agent
