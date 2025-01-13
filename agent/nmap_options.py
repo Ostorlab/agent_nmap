@@ -82,7 +82,7 @@ class NmapOptions:
     def _set_decoys_options(self) -> List[str]:
         """ using decoys to minimize IPS detection, DISCLAIMER this might increase the likelihood of raising suspicion if service traffic is low"""
         command_options = []
-        if self.decoys != None:
+        if self.decoys is not None:
             command_options.append("-D")
             command_options.append("RND:{self.decoys}")
         return command_options
