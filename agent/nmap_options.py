@@ -79,7 +79,7 @@ class NmapOptions:
             command_options.append("-sV")
         return command_options
 
-    def _set_decoys_options(self) -> List[str]:
+    def _set_decoys_options(self) -> list[str]:
         """ using decoys to minimize IPS detection, DISCLAIMER this might increase the likelihood of raising suspicion if service traffic is low"""
         command_options = []
         if self.decoys is not None:
