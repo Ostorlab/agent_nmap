@@ -92,15 +92,15 @@ class NmapOptions:
         """Adds various techniques to nmap to bypass firewall evasions ref: https://nmap.org/book/man-bypass-firewalls-ids.html"""
         command_options = []
         if self.firewall_evasion is True:
-            ''' disabling arp pings, dns resolution, ping host discovery '''
+            # Disabling arp pings, DNS resolution, and ping host discovery.
             command_options.append("--disable-arp-ping")
             command_options.append("-Pn")
             command_options.append("-n")
-            ''' request fragmentation to bypass custom packet filters '''
+            # Request fragmentation to bypass custom packet filters.
             command_options.append("-f")
             command_options.append("--mtu")
             command_options.append("8")
-            ''' scans from http might be interpreted as false positives '''
+            # Scans from HTTP port might be interpreted as false positives
             command_options.append("--source-port")
             command_options.append("80")
             ''' reducing timing template to evade IDSs like snort '''
