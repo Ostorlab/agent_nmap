@@ -84,7 +84,7 @@ class NmapOptions:
         command_options = []
         if self.decoys is not None:
             command_options.append("-D")
-            command_options.append("RND:{self.decoys}")
+            command_options.append(f"RND:{self.decoys}")
         return command_options
 
 
