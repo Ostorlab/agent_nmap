@@ -48,6 +48,8 @@ class NmapOptions:
     tcp_syn_ping_ports: str | None = None
     top_ports: None | int = None
     fast_mode: bool = False
+    firewall_evasion: bool = False
+    decoys : None | int = None
     timing_template: TimingTemplate = TimingTemplate.T3
     script_default: bool = False
     scripts: List[str] | None = dataclasses.field(
@@ -75,6 +77,31 @@ class NmapOptions:
         command_options = []
         if self.version_detection is True:
             command_options.append("-sV")
+        return command_options
+
+    def _set_decoys_options(self) -> List[str]:
+        """ using decoys to minimize IPS detection, DISCLAIMER this might increase the likelihood of raising suspicion if service traffic is low"""
+        command_options = []
+        if self.decoys != None:
+            command_options.append(f"-R RND:{self.decoys}")
+        return command_options
+
+
+    def _set_firewall_evasion_flags(self) -> List[str]:
+        """Adds various techniques to nmap to bypass firewall evasions ref: https://nmap.org/book/man-bypass-firewalls-ids.html"""
+        command_options = []
+        if self.firewall_evasion is True:
+            ''' disabling arp pings, dns resolution, ping host discovery '''
+            command_options.append("--disable-arp-ping")
+            command_options.append("-Pn")
+            command_options.append("-n")
+            ''' request fragmentation to bypass custom packet filters '''
+            command_options.append("-f")
+            command_options.append("--mtu 8")
+            ''' scans from http might be interpreted as false positives '''
+            command_options.append("--source-port 80")
+            ''' reducing timing template to evade IDSs like snort '''
+            command_options.append("-T2")
         return command_options
 
     def _set_host_discovery_options(self) -> List[str]:
@@ -161,6 +188,8 @@ class NmapOptions:
         command_options.extend(self._set_ports_option())
         command_options.extend(self._set_timing_option())
         command_options.extend(self._set_port_scanning_techniques())
+        command_options.extend(self._set_firewall_evasion_flags())
+        command_options.extend(self._set_decoys_options())
         command_options.extend(self._set_host_discovery_options())
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())

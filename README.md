@@ -41,8 +41,9 @@ Supported agent flags:
 * `timing_template` (`-Tx`): Template of timing settings (T0, T1, ... T5)..
 * `script_default` (`-sC`): Script scan, equivalent to --script=default.
 * `scripts` (`--script`): List of scripts to run using Nmap.
-* `os` (`--os`): Enable OS detection
-
+* `os` (`--os`): Enable OS detection.
+* `decoys` (`-R RND:<number of decoys>`): Makes it seem like decoy hosts are also scanning the target network.
+* `firewall_evasion` : Makes the scan quieter and less noticeable, helping it slip past firewalls.
 
  ### Install directly from OXO agent store
 
