@@ -104,6 +104,13 @@ args:
     type: "string"
     description: "Template of timing settings (T0, T1, ... T5)."
     value: "T5"
+  - name: "firewall_evasion"
+    type: "boolean"
+    description: "Makes the scan quieter and less noticeable, helping it slip past firewalls."
+    value: false
+  - name: "decoys"
+    type: "number"
+    description: "Makes it seem like decoy hosts are also scanning the target network."
   - name: "script_default"
     type: "boolean"
     description: "Script scan, equivalent to --script=default"

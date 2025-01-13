@@ -83,7 +83,7 @@ class NmapOptions:
         """ using decoys to minimize IPS detection, DISCLAIMER this might increase the likelihood of raising suspicion if service traffic is low"""
         command_options = []
         if self.decoys != None:
-            command_options.append(f"-R RND:{self.decoys}")
+            command_options.append(f"-D RND:{self.decoys}")
         return command_options
 
 
@@ -97,9 +97,11 @@ class NmapOptions:
             command_options.append("-n")
             ''' request fragmentation to bypass custom packet filters '''
             command_options.append("-f")
-            command_options.append("--mtu 8")
+            command_options.append("--mtu")
+            command_options.append("8")
             ''' scans from http might be interpreted as false positives '''
-            command_options.append("--source-port 80")
+            command_options.append("--source-port")
+            command_options.append("80")
             ''' reducing timing template to evade IDSs like snort '''
             command_options.append("-T2")
         return command_options
@@ -127,7 +129,8 @@ class NmapOptions:
             command_options.append("-R")
             if self.dns_servers:
                 dns_servers = ",".join([str(dns) for dns in self.dns_servers])
-                command_options.append(f"--dns-servers {dns_servers}")
+                command_options.append("--dns-servers")
+                command_options.append(dns_servers)
         else:
             command_options.append("-n")
         return command_options

@@ -193,6 +193,8 @@ class NmapAgent(
             no_ping=self.args.get("no_ping", False),
             timing_template=nmap_options.TimingTemplate[self.args["timing_template"]],
             scripts=self.args.get("scripts"),
+            firewall_evasion=self.args.get("firewall_evasion", False),
+            decoys=self.args.get("decoys"),
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
             os_detection=self.args.get("os", False),
