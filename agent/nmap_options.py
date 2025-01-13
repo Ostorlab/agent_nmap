@@ -83,7 +83,8 @@ class NmapOptions:
         """ using decoys to minimize IPS detection, DISCLAIMER this might increase the likelihood of raising suspicion if service traffic is low"""
         command_options = []
         if self.decoys != None:
-            command_options.append(f"-D RND:{self.decoys}")
+            command_options.append("-D")
+            command_options.append("RND:{self.decoys}")
         return command_options
 
 
@@ -103,7 +104,7 @@ class NmapOptions:
             command_options.append("--source-port")
             command_options.append("80")
             ''' reducing timing template to evade IDSs like snort '''
-            command_options.append("-T2")
+            self.timing_template = TimingTemplate.T2
         return command_options
 
     def _set_host_discovery_options(self) -> List[str]:
@@ -137,7 +138,7 @@ class NmapOptions:
 
     def _set_ports_option(self) -> List[str]:
         """Appends the ports option to the list of nmap options."""
-        if self.fast_mode is True:
+        if self.fast_mode is True and self.firewall_evasion is False:
             return ["-F"]
         elif self.top_ports is not None:
             return ["--top-ports", str(self.top_ports)]
@@ -189,9 +190,9 @@ class NmapOptions:
         command_options.extend(self._set_version_detection_option())
         command_options.extend(self._set_dns_resolution_option())
         command_options.extend(self._set_ports_option())
+        command_options.extend(self._set_firewall_evasion_flags())
         command_options.extend(self._set_timing_option())
         command_options.extend(self._set_port_scanning_techniques())
-        command_options.extend(self._set_firewall_evasion_flags())
         command_options.extend(self._set_decoys_options())
         command_options.extend(self._set_host_discovery_options())
         command_options.extend(self._set_privileged())
