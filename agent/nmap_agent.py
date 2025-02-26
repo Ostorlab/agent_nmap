@@ -23,6 +23,7 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
+from agent import helpers
 from agent import generators
 from agent import nmap_options
 from agent import nmap_wrapper
@@ -259,25 +260,38 @@ class NmapAgent(
         if isinstance(domains_hostname, list):
             for domain_dict in domains_hostname:
                 domain = domain_dict.get("@name", "")
+                vuln_location = vuln_mixin.VulnerabilityLocation(
+                        metadata=self._prepare_metadata(ports),
+                        asset=domain_name_asset.DomainName(name=domain),
+                )
+                dna = helpers.compute_dna(
+                    vulnerability_title=kb.KB.NETWORK_PORT_SCAN.title,
+                    vuln_location=vuln_location,
+                    technical_detail=technical_detail
+                )
                 self.report_vulnerability(
                     entry=kb.KB.NETWORK_PORT_SCAN,
                     technical_detail=technical_detail,
                     risk_rating=vuln_mixin.RiskRating.INFO,
-                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                        metadata=self._prepare_metadata(ports),
-                        asset=domain_name_asset.DomainName(name=domain),
-                    ),
+                    vulnerability_location=vuln_location,
+                    dna=dna,
                 )
         elif isinstance(domains_hostname, dict):
             domain = domains_hostname.get("@name", "")
+            vuln_location = vuln_mixin.VulnerabilityLocation(
+                metadata=self._prepare_metadata(ports),
+                asset=domain_name_asset.DomainName(name=domain),
+            )
+            dna = helpers.compute_dna(
+                vulnerability_title=kb.KB.NETWORK_PORT_SCAN.title,
+                vuln_location=vuln_location,
+            )
             self.report_vulnerability(
                 entry=kb.KB.NETWORK_PORT_SCAN,
                 technical_detail=technical_detail,
                 risk_rating=vuln_mixin.RiskRating.INFO,
-                vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                    metadata=self._prepare_metadata(ports),
-                    asset=domain_name_asset.DomainName(name=domain),
-                ),
+                vulnerability_location=vuln_location,
+                dna=dna,
             )
 
     def _emit_network_scan_finding(
@@ -300,24 +314,36 @@ class NmapAgent(
                         domains, technical_detail, ports
                     )
                 elif address.get("@addrtype", "") == "ipv4":
+                    vuln_location = vuln_mixin.VulnerabilityLocation(
+                        metadata=self._prepare_metadata(ports),
+                        asset=ipv4_asset.IPv4(host=address.get("@addr", "")),
+                    )
+                    dna = helpers.compute_dna(
+                        vulnerability_title=kb.KB.NETWORK_PORT_SCAN.title,
+                        vuln_location=vuln_location,
+                    )
                     self.report_vulnerability(
                         entry=kb.KB.NETWORK_PORT_SCAN,
                         technical_detail=technical_detail,
                         risk_rating=vuln_mixin.RiskRating.INFO,
-                        vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                            metadata=self._prepare_metadata(ports),
-                            asset=ipv4_asset.IPv4(host=address.get("@addr", "")),
-                        ),
+                        vulnerability_location=vuln_location,
+                        dna=dna,
                     )
                 elif address.get("@addrtype", "") == "ipv6":
+                    vuln_location = vuln_mixin.VulnerabilityLocation(
+                        metadata=self._prepare_metadata(ports),
+                        asset=ipv6_asset.IPv6(host=address.get("@addr", "")),
+                    )
+                    dna = helpers.compute_dna(
+                        vulnerability_title=kb.KB.NETWORK_PORT_SCAN.title,
+                        vuln_location=vuln_location,
+                    )
                     self.report_vulnerability(
                         entry=kb.KB.NETWORK_PORT_SCAN,
                         technical_detail=technical_detail,
                         risk_rating=vuln_mixin.RiskRating.INFO,
-                        vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                            metadata=self._prepare_metadata(ports),
-                            asset=ipv6_asset.IPv6(host=address.get("@addr", "")),
-                        ),
+                        vulnerability_location=vuln_location,
+                        dna=dna,
                     )
 
     def _emit_services(
