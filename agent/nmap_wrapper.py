@@ -28,7 +28,7 @@ def parse_output(xml_output: str) -> dict[str, Any]:
     try:
         parsed_xml: dict[str, Any] = xmltodict.parse(xml_output, disable_entities=True)
         return parsed_xml
-    except xml.parsers.expat.ExpatError as parsing_error: # type: ignore
+    except xml.parsers.expat.ExpatError as parsing_error:  # type: ignore
         logger.error(
             "Error parsing XML output: %s - XML output: %s", parsing_error, xml_output
         )
