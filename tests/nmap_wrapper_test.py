@@ -131,7 +131,7 @@ def testNmapWrapperParseOutput_whenXmlIsInvalid_catchesAndReraisesError() -> Non
     invalid_xml = (pathlib.Path(__file__).parent / "malformed_output.xml").read_text()
     parsed_output = None
 
-    with pytest.raises(xml.parsers.expat.ExpatError):
+    with pytest.raises(xml.parsers.expat.ExpatError): # type: ignore
         parsed_output = nmap_wrapper.parse_output(invalid_xml)
 
     assert parsed_output is None
