@@ -6,6 +6,7 @@ import pytest
 
 from agent import helpers
 
+
 def testComputeDna_whenSameDomainDifferentPaths_returnsDifferentDna() -> None:
     """Ensure that when the same domain/asset with different metadata, ComputeDna returns different DNA."""
     vulnerability_title = "Vulnerability Title Unordered Dict"
@@ -46,8 +47,12 @@ def testComputeDna_whenSameDomainDifferentPaths_returnsDifferentDna() -> None:
         asset=asset,
     )
 
-    dna_1 = helpers.compute_dna(vulnerability_title, vuln_location_1, "technical_detail")
-    dna_2 = helpers.compute_dna(vulnerability_title, vuln_location_2, "technical_detail")
+    dna_1 = helpers.compute_dna(
+        vulnerability_title, vuln_location_1, "technical_detail"
+    )
+    dna_2 = helpers.compute_dna(
+        vulnerability_title, vuln_location_2, "technical_detail"
+    )
 
     assert dna_1 is not None
     assert dna_2 is not None
@@ -60,6 +65,7 @@ def testComputeDna_whenSameDomainDifferentPaths_returnsDifferentDna() -> None:
         dna_2
         == '{"location": {"domain_name": {"name": "www.google.com"}, "metadata": [{"type": "PORT", "value": "8081"}, {"type": "PORT", "value": "9080"}]}, "technical_detail": "technical_detail", "title": "Vulnerability Title Unordered Dict"}'
     )
+
 
 def testComputeDna_whenUnorderedDict_returnsConsistentDna() -> None:
     """Ensure that ComputeDna returns a consistent DNA when vuln_location dictionary keys are unordered."""
@@ -94,12 +100,17 @@ def testComputeDna_whenUnorderedDict_returnsConsistentDna() -> None:
 
     vuln_location_2.metadata = vuln_location_2.metadata[::-1]
 
-    dna_1 = helpers.compute_dna(vulnerability_title, vuln_location_1, "technical_detail")
-    dna_2 = helpers.compute_dna(vulnerability_title, vuln_location_2, "technical_detail")
+    dna_1 = helpers.compute_dna(
+        vulnerability_title, vuln_location_1, "technical_detail"
+    )
+    dna_2 = helpers.compute_dna(
+        vulnerability_title, vuln_location_2, "technical_detail"
+    )
 
     assert dna_1 is not None
     assert dna_2 is not None
     assert dna_1 == dna_2
+
 
 @pytest.mark.parametrize(
     "unordered_dict, expected",

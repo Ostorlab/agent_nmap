@@ -7,7 +7,7 @@ from ostorlab.agent.mixins import agent_report_vulnerability_mixin
 def compute_dna(
     vulnerability_title: str,
     vuln_location: agent_report_vulnerability_mixin.VulnerabilityLocation | None,
-    technical_detail: str
+    technical_detail: str,
 ) -> str:
     """Compute a deterministic, debuggable DNA representation for a vulnerability.
 
@@ -19,7 +19,10 @@ def compute_dna(
     Returns:
         A deterministic JSON representation of the vulnerability DNA.
     """
-    dna_data: dict[str, Any] = {"title": vulnerability_title, "technical_detail": technical_detail}
+    dna_data: dict[str, Any] = {
+        "title": vulnerability_title,
+        "technical_detail": technical_detail,
+    }
 
     if vuln_location is not None:
         location_dict: dict[str, Any] = vuln_location.to_dict()
