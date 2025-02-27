@@ -9,8 +9,8 @@ import pytest
 from agent import helpers
 
 
-def testComputeDna_whenSameDomainDifferentPaths_returnsDifferentDna() -> None:
-    """Ensure that when the same domain/asset with different metadata, ComputeDna returns different DNA."""
+def testComputeDna_withDifferentPort_returnsDifferentDna() -> None:
+    """Ensure that whit different ports, ComputeDna returns different DNA."""
     vulnerability_title = "Vulnerability Title Unordered Dict"
 
     metadata_1 = []
