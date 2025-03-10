@@ -533,7 +533,7 @@ class NmapAgent(
 
         except subprocess.CalledProcessError as e:
             raise RunCommandError(
-                f'An error occurred while running the command {" ".join(command)}'
+                f"An error occurred while running the command {' '.join(command)}"
             ) from e
         except subprocess.TimeoutExpired:
             logger.warning("Command timed out for command %s", " ".join(command))
