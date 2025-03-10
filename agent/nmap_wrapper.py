@@ -32,7 +32,7 @@ def parse_output(xml_output: str) -> dict[str, Any]:
         logger.error(
             "Error parsing XML output: %s - XML output: %s", parsing_error, xml_output
         )
-        raise
+        return {}
 
 
 class NmapWrapper:
