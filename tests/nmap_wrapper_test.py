@@ -1,9 +1,7 @@
 """Nmap wrapper unit tests"""
 
-import xml
 import pathlib
-
-import pytest
+from unittest import mock
 
 import agent.nmap_agent
 from agent import nmap_options
@@ -126,15 +124,18 @@ def testNmapWrapper_whenAllTopPortsUsed_returnCommand(
     ]
 
 
-def testNmapWrapperParseOutput_whenXmlIsInvalid_catchesAndReraisesError() -> None:
+def testNmapWrapperParseOutput_whenXmlIsInvalid_catchesAndReturnEmptyDict() -> None:
     """Tests parsing invalid XML output scan results. Should catch the error and re-raise it."""
     invalid_xml = (pathlib.Path(__file__).parent / "malformed_output.xml").read_text()
-    parsed_output = None
 
-    with pytest.raises(xml.parsers.expat.ExpatError):
+    with mock.patch("agent.nmap_wrapper.logger") as mock_logger:
         parsed_output = nmap_wrapper.parse_output(invalid_xml)
 
-    assert parsed_output is None
+        assert parsed_output == {}
+
+        mock_logger.error.assert_called_once_with(
+            "Error parsing XML output: %s - XML output: %s", mock.ANY, invalid_xml
+        )
 
 
 def testNmapWrapperParseOutput_whenXmlIsValid_returnsParsedXml() -> None:
