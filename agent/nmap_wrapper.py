@@ -3,7 +3,7 @@
 import ipaddress
 import logging
 import subprocess
-import xml
+from xml.parsers import expat
 from typing import Any, Dict, List, Tuple
 
 import xmltodict
@@ -28,7 +28,7 @@ def parse_output(xml_output: str) -> dict[str, Any]:
     try:
         parsed_xml: dict[str, Any] = xmltodict.parse(xml_output, disable_entities=True)
         return parsed_xml
-    except xml.parsers.expat.ExpatError as parsing_error:
+    except expat.ExpatError as parsing_error:
         logger.error(
             "Error parsing XML output: %s - XML output: %s", parsing_error, xml_output
         )
