@@ -62,6 +62,7 @@ class NmapOptions:
     )
     no_ping: bool = True
     privileged: Optional[bool] = None
+    host_timeout: Optional[int] = None
 
     def _set_os_detection_option(self) -> List[str]:
         """Appends the os detection option to the list of nmap options."""
@@ -150,6 +151,12 @@ class NmapOptions:
                 command += ["--script", script]
 
         return command
+    
+    def _set_host_timeout(self) -> List[str]:
+        if self.host_timeout is not None:
+            return ["--host-timeout", str(self.host_timeout)]
+        else:
+            return []
 
     @property
     def command_options(self) -> List[str]:
@@ -165,4 +172,5 @@ class NmapOptions:
         command_options.extend(self._set_privileged())
         command_options.extend(self._set_scripts())
         command_options.extend(self._set_script_default())
+        command_options.extend(self._set_host_timeout())
         return command_options
