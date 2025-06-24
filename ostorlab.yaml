@@ -1,6 +1,6 @@
 kind: Agent
 name: nmap
-version: 1.5.2
+version: 1.5.3
 image: images/logo.png
 description: |
   This repository is an implementation of [Ostorlab Agent](https://pypi.org/project/ostorlab/) for the [Nmap Scanner](https://github.com/projectdiscovery/nmap) by Project Discovery.
@@ -123,6 +123,10 @@ args:
   - name: "scope_domain_regex"
     type: "string"
     description: "Regular expression to define domain scanning scope."
+  - name: "host_timeout"
+    type: "number"
+    description: "Host timeout in seconds."
+    value: 900
   - name: "vpn_config"
     type: "string"
     description: "Vpn configuration."

@@ -74,6 +74,7 @@ class NmapAgent(
         self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
         self._vpn_config: Optional[str] = self.args.get("vpn_config")
         self._dns_config: Optional[str] = self.args.get("dns_config")
+        self._host_timeout: Optional[int] = self.args.get("host_timeout")
 
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
@@ -174,6 +175,7 @@ class NmapAgent(
             scripts=self.args.get("scripts"),
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
+            host_timeout=self._host_timeout,
         )
         client = nmap_wrapper.NmapWrapper(options)
 
@@ -194,6 +196,7 @@ class NmapAgent(
             script_default=self.args.get("script_default", False),
             version_detection=self.args.get("version_info", False),
             os_detection=self.args.get("os", False),
+            host_timeout=self._host_timeout,
         )
         client = nmap_wrapper.NmapWrapper(options)
         logger.info("scanning domain %s with options %s", domain_name, options)
