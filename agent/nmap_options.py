@@ -151,7 +151,7 @@ class NmapOptions:
                 command += ["--script", script]
 
         return command
-    
+
     def _set_host_timeout(self) -> List[str]:
         if self.host_timeout is not None:
             return ["--host-timeout", str(self.host_timeout)]
