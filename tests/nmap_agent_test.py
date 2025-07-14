@@ -693,14 +693,15 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
     assert any("F5 BIG" in m.data.get("library_name", "") for m in agent_mock) is True
     assert (
         any(
-            m.data.get("detail") == "Nmap Detected http-proxy on ostorlab.co"
+            m.data.get("detail")
+            == "Nmap Detected F5 BIG-IP load balancer http proxy on ostorlab.co"
             for m in agent_mock
         )
         is True
     )
     assert (
         any(
-            m.data.get("detail") == "Nmap Detected http on ostorlab.co"
+            m.data.get("detail") == "Nmap Detected Apache httpd on ostorlab.co"
             for m in agent_mock
         )
         is True
