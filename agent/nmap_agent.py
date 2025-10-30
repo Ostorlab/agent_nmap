@@ -1,7 +1,8 @@
 """Nmap agent : Responsible for running scans on IP assets with Nmap Security Scanner.
 
-The agent expects messages of type `v3.asset.ip.[v4,v6]`, and emits back messages of type
-`v3.asset.ip.v[4,6].port.service`, and `v3.report.vulnerability` with a technical report of the scan.
+The agent expects messages of type `v3.asset.ip.[v4,v6]`, `v3.asset.domain_name`, `v3.asset.link`,
+or `v3.asset.file.api_schema`, and emits back messages of type `v3.asset.ip.v[4,6].port.service`,
+and `v3.report.vulnerability` with a technical report of the scan.
 """
 
 import datetime
@@ -119,7 +120,8 @@ class NmapAgent(
                 hosts = [(host, mask)]
 
         domain_name = self._prepare_domain_name(
-            message.data.get("name"), message.data.get("url")
+            message.data.get("name"),
+            message.data.get("url") or message.data.get("endpoint_url"),
         )
 
         if len(hosts) > 0:

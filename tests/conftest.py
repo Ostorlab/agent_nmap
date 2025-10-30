@@ -143,6 +143,42 @@ def domain_msg() -> message.Message:
 
 
 @pytest.fixture
+def api_schema_msg() -> message.Message:
+    """Creates a dummy message of type v3.asset.file.api_schema for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.file.api_schema",
+        data={
+            "endpoint_url": "https://api.example.com/v1/users",
+            "schema_type": "openapi",
+        },
+    )
+
+
+@pytest.fixture
+def api_schema_msg_with_port() -> message.Message:
+    """Creates a dummy message of type v3.asset.file.api_schema with custom port for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.file.api_schema",
+        data={
+            "endpoint_url": "https://api.example.com:8443/v1/users",
+            "schema_type": "openapi",
+        },
+    )
+
+
+@pytest.fixture
+def api_schema_msg_http() -> message.Message:
+    """Creates a dummy message of type v3.asset.file.api_schema with http for testing purposes."""
+    return message.Message.from_data(
+        selector="v3.asset.file.api_schema",
+        data={
+            "endpoint_url": "http://api.example.com/v1/data",
+            "schema_type": "swagger",
+        },
+    )
+
+
+@pytest.fixture
 def domain_is_down_msg() -> message.Message:
     """Creates a dummy message of type v3.asset.domain_name for testing purposes."""
     return message.Message.from_data(
