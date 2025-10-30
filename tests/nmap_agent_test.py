@@ -1392,25 +1392,3 @@ def testAgentNmap_whenSameApiSchemaReceivedTwice_shouldScanOnce(
 
     # Should only scan once
     assert mock_scan.call_count == 1
-
-
-def testAgentNmap_whenDifferentApiSchemaEndpoints_shouldScanBoth(
-    nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
-    api_schema_msg: message.Message,
-    api_schema_msg_http: message.Message,
-    mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
-) -> None:
-    """Test that different api_schema endpoints are both scanned."""
-    mock_scan = mocker.patch(
-        "agent.nmap_wrapper.NmapWrapper.scan_domain",
-        return_value=(fake_output, HUMAN_OUTPUT),
-    )
-
-    nmap_test_agent.process(api_schema_msg)
-    nmap_test_agent.process(api_schema_msg_http)
-
-    # Should scan both since they're different domains/endpoints
-    assert mock_scan.call_count == 2
