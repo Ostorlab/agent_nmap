@@ -1348,3 +1348,47 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
         "service": "http",
     } in [msg.data for msg in agent_mock]
     assert len(agent_mock) == 16
+
+
+def testAgentNmap_whenApiSchemaMessage_shouldScanDomain(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    api_schema_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | Dict[str, str],
+) -> None:
+    """Test that the agent processes api_schema messages and scans the domain."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(api_schema_msg)
+
+    assert (
+        any("v3.asset.domain_name.service" in msg.selector for msg in agent_mock)
+        is True
+    )
+    assert any("v3.report.vulnerability" in msg.selector for msg in agent_mock) is True
+
+
+def testAgentNmap_whenSameApiSchemaReceivedTwice_shouldScanOnce(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: List[message.Message],
+    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    api_schema_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | Dict[str, str],
+) -> None:
+    """Test that duplicate api_schema messages are only processed once."""
+    mock_scan = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(api_schema_msg)
+    nmap_test_agent.process(api_schema_msg)
+
+    # Should only scan once
+    assert mock_scan.call_count == 1
