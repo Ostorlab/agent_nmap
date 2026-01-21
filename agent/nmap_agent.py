@@ -78,7 +78,9 @@ class NmapAgent(
         self._dns_config: Optional[str] = self.args.get("dns_config")
         self._host_timeout: Optional[int] = self.args.get("host_timeout")
 
-        self.should_start_mcp_server: bool = self.args.get("should_start_mcp_server", False)
+        self.should_start_mcp_server: bool = self.args.get(
+            "should_start_mcp_server", False
+        )
 
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
