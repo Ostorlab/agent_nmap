@@ -28,6 +28,7 @@ from agent import generators
 from agent import nmap_options
 from agent import nmap_wrapper
 from agent import process_scans
+from agent.mcp import runner as mcp_runner
 
 logging.basicConfig(
     format="%(message)s",
@@ -77,9 +78,15 @@ class NmapAgent(
         self._dns_config: Optional[str] = self.args.get("dns_config")
         self._host_timeout: Optional[int] = self.args.get("host_timeout")
 
+        self._mcp_mode: bool = self.args.get("mcp_mode", False)
+
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
             self._connect_to_vpn()
+
+        if self._mcp_mode is True:
+            logger.info("Running Nmap agent in MCP mode.")
+            mcp_runner.run()
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -89,6 +96,11 @@ class NmapAgent(
         Args:
             message: message containing the IP to scan, the mask & the version.
         """
+
+        if self._mcp_mode is True:
+            logger.warning("Oxo messages are ignored in MCP mode: %s", message.selector)
+            return
+
         logger.debug("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
