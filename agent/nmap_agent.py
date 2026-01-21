@@ -99,7 +99,7 @@ class NmapAgent(
 
         if self._mcp_mode is True:
             logger.warning("Oxo messages are ignored in MCP mode: %s", message.selector)
-            return
+            return None
 
         logger.debug("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
