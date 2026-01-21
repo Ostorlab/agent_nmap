@@ -135,7 +135,7 @@ args:
   - name: "dns_config"
     type: "string"
     description: "DNS configuration."
-  - name: "mcp_mode"
+  - name: "should_start_mcp_server"
     type: "boolean"
     description: "True if the agent should run as an MCP server."
     value: false

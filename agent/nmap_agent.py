@@ -78,13 +78,13 @@ class NmapAgent(
         self._dns_config: Optional[str] = self.args.get("dns_config")
         self._host_timeout: Optional[int] = self.args.get("host_timeout")
 
-        self._mcp_mode: bool = self.args.get("mcp_mode", False)
+        self.should_start_mcp_server: bool = self.args.get("should_start_mcp_server", False)
 
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
             self._connect_to_vpn()
 
-        if self._mcp_mode is True:
+        if self.should_start_mcp_server is True:
             logger.info("Running Nmap agent in MCP mode.")
             mcp_runner.run()
 
@@ -97,7 +97,7 @@ class NmapAgent(
             message: message containing the IP to scan, the mask & the version.
         """
 
-        if self._mcp_mode is True:
+        if self.should_start_mcp_server is True:
             logger.warning("Oxo messages are ignored in MCP mode: %s", message.selector)
             return
 
