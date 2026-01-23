@@ -123,7 +123,7 @@ def _parse_scan_results(scan_results: dict[str, Any]) -> ScanResult:
             services.append(service_result)
 
         os_data = host.get("os", {})
-        if os_data and os_data.get("osmatch") is not None:
+        if os_data.get("osmatch") is not None:
             os_match = os_data.get("osmatch")
             if isinstance(os_match, list) and len(os_match) > 0:
                 os_match_highest = os_match[0]
@@ -137,7 +137,7 @@ def _parse_scan_results(scan_results: dict[str, Any]) -> ScanResult:
                 if isinstance(os_class, list) and len(os_class) > 0:
                     os_class = os_class[0]
 
-                if os_class and os_class != []:
+                if os_class is not None and os_class != []:
                     fingerprint_result = mcp_types.FingerprintResult(
                         host=host_ip,
                         version=version_str,
@@ -169,7 +169,7 @@ def _parse_scan_results(scan_results: dict[str, Any]) -> ScanResult:
             protocol = service_data.get("protocol")
 
             product = service_data.get("product") or ""
-            if product:
+            if product != "":
                 fingerprint_result = mcp_types.FingerprintResult(
                     host=host_ip,
                     version=version_str,
@@ -185,7 +185,7 @@ def _parse_scan_results(scan_results: dict[str, Any]) -> ScanResult:
                 fingerprints.append(fingerprint_result)
 
             banner = service_data.get("banner") or ""
-            if banner:
+            if banner != "":
                 fingerprint_result = mcp_types.FingerprintResult(
                     host=host_ip,
                     version=version_str,
