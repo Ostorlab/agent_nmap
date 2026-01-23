@@ -60,7 +60,7 @@ def scan_ip(ip_address: str) -> ScanResult:
         scripts=["banner"],
         no_ping=True,
         host_timeout=300,
-        os_detection=True,
+        os_detection=False,
         port_scanning_techniques=[nmap_options.PortScanningTechnique.TCP_CONNECT],
     )
 
