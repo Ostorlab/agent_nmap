@@ -3,15 +3,14 @@
 import ipaddress
 import logging
 import subprocess
-from typing_extensions import Any, TypedDict
+from typing_extensions import TypedDict
 
 from agent import nmap_options
 from agent import nmap_wrapper
-from agent import generators
+from agent import result_parser
 from agent.mcp import mcp_types
 
 logger = logging.getLogger(__name__)
-BLACKLISTED_SERVICES = ["tcpwrapped"]
 
 
 class Error(Exception):
@@ -75,201 +74,40 @@ def scan_ip(ip_address: str) -> ScanResult:
     client = nmap_wrapper.NmapWrapper(options)
     try:
         scan_results, _ = client.scan_hosts(hosts=ip_address, mask=32)
-        return _parse_scan_results(scan_results)
+
+        parsed_services = result_parser.parse_services(scan_results)
+        parsed_fingerprints = result_parser.parse_fingerprints(scan_results)
+
+        services: list[mcp_types.ServiceResult] = [
+            mcp_types.ServiceResult(
+                host=svc.host,
+                port=svc.port,
+                protocol=svc.protocol,
+                state=svc.state,
+                service=svc.service,
+                banner=svc.banner,
+                version=svc.version,
+            )
+            for svc in parsed_services
+        ]
+
+        fingerprints: list[mcp_types.FingerprintResult] = [
+            mcp_types.FingerprintResult(
+                host=fp.host,
+                version=fp.version,
+                library_type=fp.library_type,
+                service=fp.service,
+                port=fp.port,
+                protocol=fp.protocol,
+                library_name=fp.library_name,
+                library_version=fp.library_version,
+                detail=fp.detail,
+                mask=fp.mask,
+            )
+            for fp in parsed_fingerprints
+        ]
+
+        return {"services": services, "fingerprints": fingerprints}
     except subprocess.CalledProcessError as e:
         logger.error("Nmap command failed to scan host %s", ip_address)
         raise CalledToolError from e
-
-
-def _extract_services_from_host(
-    host: dict[str, Any],
-    scan_results: dict[str, Any],
-    services: list[mcp_types.ServiceResult],
-) -> None:
-    """Extract services from a host and append to services list.
-
-    Args:
-        host: The host dictionary from nmap results.
-        scan_results: The full nmap scan results dictionary.
-        services: List to append ServiceResult objects to.
-    """
-    host_ip = host.get("address", {}).get("@addr", "unknown")
-    ip_version = host.get("address", {}).get("@addrtype", "ipv4")
-    version_str = "4" if ip_version == "ipv4" else "6"
-
-    for service_data in generators.get_services(scan_results):
-        if service_data.get("host") != host_ip:
-            continue
-
-        service_name = service_data.get("service") or ""
-        if service_name in BLACKLISTED_SERVICES:
-            continue
-
-        port_val = service_data.get("port")
-        port_int = int(port_val) if port_val is not None else 0
-
-        service_result = mcp_types.ServiceResult(
-            host=host_ip,
-            port=port_int,
-            protocol=service_data.get("protocol") or "",
-            state=service_data.get("state") or "",
-            service=service_name,
-            banner=service_data.get("banner") or "",
-            version=version_str,
-        )
-        services.append(service_result)
-
-
-def _extract_os_fingerprint_from_host(
-    host: dict[str, Any],
-    version_str: str,
-    mask: str,
-    fingerprints: list[mcp_types.FingerprintResult],
-) -> None:
-    """Extract OS fingerprint from a host and append to fingerprints list.
-
-    Args:
-        host: The host dictionary from nmap results.
-        version_str: IP version string ("4" or "6").
-        mask: Network mask string.
-        fingerprints: List to append FingerprintResult objects to.
-    """
-    host_ip = host.get("address", {}).get("@addr", "unknown")
-    os_data = host.get("os", {})
-
-    if os_data.get("osmatch") is None:
-        return
-
-    os_match = os_data.get("osmatch")
-    if isinstance(os_match, list) and len(os_match) > 0:
-        os_match_highest = os_match[0]
-    elif isinstance(os_match, dict):
-        os_match_highest = os_match
-    else:
-        return
-
-    os_class = os_match_highest.get("osclass", {})
-    if isinstance(os_class, list) and len(os_class) > 0:
-        os_class = os_class[0]
-
-    if os_class is None or os_class == []:
-        return
-
-    fingerprint_result = mcp_types.FingerprintResult(
-        host=host_ip,
-        version=version_str,
-        library_type="OS",
-        service=None,
-        port=None,
-        protocol=None,
-        library_name=os_class.get("@osfamily") or "",
-        library_version=os_class.get("@osgen") or "",
-        detail=os_match_highest.get("@name") or "",
-        mask=mask,
-    )
-    fingerprints.append(fingerprint_result)
-
-
-def _extract_backend_fingerprints_from_host(
-    host: dict[str, Any],
-    scan_results: dict[str, Any],
-    version_str: str,
-    mask: str,
-    fingerprints: list[mcp_types.FingerprintResult],
-) -> None:
-    """Extract backend component fingerprints from a host and append to fingerprints list.
-
-    Args:
-        host: The host dictionary from nmap results.
-        scan_results: The full nmap scan results dictionary.
-        version_str: IP version string ("4" or "6").
-        mask: Network mask string.
-        fingerprints: List to append FingerprintResult objects to.
-    """
-    host_ip = host.get("address", {}).get("@addr", "unknown")
-
-    for service_data in generators.get_services(scan_results):
-        if service_data.get("host") != host_ip:
-            continue
-
-        service_name = service_data.get("service") or ""
-        if service_name in BLACKLISTED_SERVICES:
-            continue
-
-        port_val = service_data.get("port")
-        port_int = int(port_val) if port_val is not None else 0
-
-        if port_int is None:
-            continue
-
-        protocol = service_data.get("protocol")
-
-        product = service_data.get("product") or ""
-        if product != "":
-            fingerprint_result = mcp_types.FingerprintResult(
-                host=host_ip,
-                version=version_str,
-                library_type="BACKEND_COMPONENT",
-                service=service_name,
-                port=port_int,
-                protocol=protocol,
-                library_name=product,
-                library_version=service_data.get("product_version"),
-                detail=product,
-                mask=mask,
-            )
-            fingerprints.append(fingerprint_result)
-
-        banner = service_data.get("banner") or ""
-        if banner != "":
-            fingerprint_result = mcp_types.FingerprintResult(
-                host=host_ip,
-                version=version_str,
-                library_type="BACKEND_COMPONENT",
-                service=service_name,
-                port=port_int,
-                protocol=protocol,
-                library_name=banner,
-                library_version=None,
-                detail=banner,
-                mask=mask,
-            )
-            fingerprints.append(fingerprint_result)
-
-
-def _parse_scan_results(scan_results: dict[str, Any]) -> ScanResult:
-    """Parse scan results and extract services and fingerprints.
-
-    Args:
-        scan_results: The nmap scan results dictionary.
-
-    Returns:
-        A dictionary with two keys:
-        - services: List of ServiceResult objects
-        - fingerprints: List of FingerprintResult objects
-    """
-    services: list[mcp_types.ServiceResult] = []
-    fingerprints: list[mcp_types.FingerprintResult] = []
-
-    if "nmaprun" not in scan_results:
-        return {"services": [], "fingerprints": []}
-
-    hosts = scan_results["nmaprun"].get("host", [])
-    if isinstance(hosts, dict):
-        hosts = [hosts]
-
-    for host in hosts:
-        ip_version = host.get("address", {}).get("@addrtype", "ipv4")
-        version_str = "4" if ip_version == "ipv4" else "6"
-        mask = "32" if ip_version == "ipv4" else "128"
-
-        _extract_services_from_host(host, scan_results, services)
-        _extract_os_fingerprint_from_host(host, version_str, mask, fingerprints)
-        _extract_backend_fingerprints_from_host(
-            host, scan_results, version_str, mask, fingerprints
-        )
-
-    return {
-        "services": services,
-        "fingerprints": fingerprints,
-    }
