@@ -24,7 +24,7 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
-from agent import parsing_utils
+from agent import result_parser
 from agent import nmap_options
 from agent import nmap_wrapper
 from agent import process_scans
@@ -342,13 +342,13 @@ class NmapAgent(
     ) -> None:
         if domain_name is not None:
             logger.info("Services targeting domain `%s`.", domain_name)
-            for data in parsing_utils.get_domain_name_services(
+            for data in result_parser.get_domain_name_services(
                 scan_results, domain_name
             ):
                 logger.info("Domain Service Identified %s.", data)
                 self.emit("v3.asset.domain_name.service", dict(data))
 
-        port_services = parsing_utils.get_port_services(scan_results)
+        port_services = result_parser.get_port_services(scan_results)
         for service in port_services:
             addr_version = service.get("addr_version")
             address = service.get("address")
@@ -379,7 +379,7 @@ class NmapAgent(
         if domain_name is not None:
             for (
                 fingerprint
-            ) in parsing_utils.get_domain_name_service_library_fingerprints(
+            ) in result_parser.get_domain_name_service_library_fingerprints(
                 scan_results, domain_name
             ):
                 self.emit(
@@ -388,7 +388,7 @@ class NmapAgent(
                 )
 
     def _emit_service_library_fingerprints(self, scan_results: dict[str, Any]) -> None:
-        for data in parsing_utils.get_service_libraries(scan_results):
+        for data in result_parser.get_service_libraries(scan_results):
             version = data.get("addr_version")
             address = data.get("host")
             if version == "ipv4":
@@ -404,7 +404,7 @@ class NmapAgent(
             self.emit(selector, data_dict)
 
     def _emit_os_fingerprints(self, scan_results: dict[str, Any]) -> None:
-        os_fingerprints = parsing_utils.get_os_fingerprints(scan_results)
+        os_fingerprints = result_parser.get_os_fingerprints(scan_results)
         for fingerprint in os_fingerprints:
             version = fingerprint.get("version")
             address = fingerprint.get("host")

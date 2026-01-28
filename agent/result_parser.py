@@ -1,300 +1,264 @@
-"""Utility module for parsing Nmap scan results.
-
-This module provides common parsing logic for extracting services and fingerprints
-from Nmap scan results. It serves as a single source of truth for result parsing
-used by both the agent and MCP tools.
-"""
-
-import dataclasses
-import logging
 from typing import Any
+from typing_extensions import TypedDict
 
 from agent import generators
 
-logger = logging.getLogger(__name__)
+
+class DomainNameService(TypedDict):
+    name: str
+    port: int | str | None
+    schema: str | None
+    state: str | None
+
+
+class PortService(TypedDict):
+    host: str | None
+    version: str | None
+    port: int | str | None
+    protocol: str | None
+    state: str | None
+    service: str | None
+    banner: str | None
+    address: str | None
+    addr_version: str | None
+
+
+class OSFingerprint(TypedDict):
+    host: str | None
+    version: str | None
+    library_type: str
+    library_name: str | None
+    library_version: str | None
+    detail: str | None
+
+
+class ServiceLibraryFingerprint(TypedDict):
+    host: str | None
+    mask: str
+    version: str | None
+    library_type: str
+    library_version: str | None
+    service: str | None
+    port: int | str | None
+    protocol: str | None
+    library_name: str
+    detail: str
+    addr_version: str | None
+
+
+class DomainNameServiceLibraryFingerprint(TypedDict):
+    name: str
+    port: int | str | None
+    schema: str | None
+    library_name: str
+    library_version: str | None
+    library_type: str
+    detail: str
+
 
 BLACKLISTED_SERVICES = ["tcpwrapped"]
 
 
-@dataclasses.dataclass
-class ParsedService:
-    """Parsed service information from a port scan.
-
-    Attributes:
-        host: The IP address of the host.
-        version: The IP version ("4" or "6").
-        port: The port number.
-        protocol: The protocol (tcp, udp).
-        state: The port state (open, closed, filtered).
-        service: The service name.
-        product: The product name.
-        product_version: The product version.
-        banner: The banner information.
-    """
-
-    host: str
-    version: str
-    port: int
-    protocol: str
-    state: str
-    service: str
-    product: str
-    product_version: str
-    banner: str | None
+def get_domain_name_services(
+    scan_results: dict[str, Any], domain_name: str
+) -> list[DomainNameService]:
+    domain_name_services = []
+    if scan_results is not None and scan_results.get("nmaprun") is not None:
+        for data in generators.get_services(scan_results):
+            if data.get("service") in BLACKLISTED_SERVICES:
+                continue
+            domain_name_service: DomainNameService = {
+                "name": domain_name,
+                "port": data.get("port"),
+                "schema": data.get("service"),
+                "state": data.get("state"),
+            }
+            domain_name_services.append(domain_name_service)
+    return domain_name_services
 
 
-@dataclasses.dataclass
-class ParsedFingerprint:
-    """Parsed fingerprint information (OS or backend component).
+def get_port_services(scan_results: dict[str, Any]) -> list[PortService]:
+    port_services = []
+    if scan_results is not None and scan_results.get("nmaprun") is not None:
+        up_hosts = scan_results["nmaprun"].get("host", [])
+        if isinstance(up_hosts, dict):
+            up_hosts = [up_hosts]
 
-    Attributes:
-        host: The IP address of the host.
-        version: The IP version ("4" or "6").
-        library_type: The type of library ("OS" or "BACKEND_COMPONENT").
-        library_name: The OS family or product name.
-        library_version: The OS generation or product version.
-        detail: Detailed information about the OS or product.
-        mask: Network mask (default "32" for IPv4, "128" for IPv6).
-        service: The service name if applicable.
-        port: The port number if applicable.
-        protocol: The protocol if applicable.
-    """
-
-    host: str
-    version: str
-    library_type: str
-    library_name: str
-    library_version: str | None
-    detail: str
-    mask: str = "32"
-    service: str | None = None
-    port: int | None = None
-    protocol: str | None = None
-
-
-def _normalize_hosts(
-    hosts: dict[str, Any] | list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    """Normalize hosts data structure to always return a list.
-
-    Nmap returns a list of hosts, but when there's only one host, it returns
-    it as a dict instead of a list. This helper normalizes that.
-
-    Args:
-        hosts: Hosts data from nmap scan results (dict or list).
-
-    Returns:
-        list of host dictionaries.
-    """
-    if isinstance(hosts, dict):
-        return [hosts]
-    return hosts
+        for host in up_hosts:
+            version = host.get("address", {}).get("@addrtype")
+            address = host.get("address", {}).get("@addr")
+            for data in generators.get_services(scan_results):
+                if data.get("service") in BLACKLISTED_SERVICES:
+                    continue
+                service: PortService = {
+                    "host": data.get("host"),
+                    "version": data.get("version"),
+                    "port": data.get("port"),
+                    "protocol": data.get("protocol"),
+                    "state": data.get("state"),
+                    "service": data.get("service"),
+                    "banner": data.get("banner"),
+                    "address": address,
+                    "addr_version": version,
+                }
+                port_services.append(service)
+    return port_services
 
 
-def parse_services(scan_results: dict[str, Any]) -> list[ParsedService]:
-    """Parse services from nmap scan results.
+def get_os_fingerprints(scan_results: dict[str, Any]) -> list[OSFingerprint]:
+    os_fingerprints = []
+    if (
+        scan_results is not None
+        and scan_results.get("nmaprun") is not None
+        and scan_results["nmaprun"].get("host") is not None
+    ):
+        up_hosts = scan_results["nmaprun"].get("host", [])
+        if isinstance(up_hosts, dict):
+            up_hosts = [up_hosts]
 
-    Extracts all discovered services from scan results, filtering out
-    blacklisted services.
+        for host in up_hosts:
+            if (
+                host.get("os", {}) is not None
+                and host.get("os", {}).get("osmatch") is not None
+            ):
+                os_match = host.get("os").get("osmatch")
+                if isinstance(os_match, list):
+                    if len(os_match) > 0:
+                        os_match_highest = os_match[0]
+                        if isinstance(os_match_highest, dict):
+                            pass
+                        elif (
+                            isinstance(os_match_highest, list)
+                            and len(os_match_highest) > 0
+                        ):
+                            os_match_highest = os_match_highest[0]
+                        else:
+                            continue
+                    else:
+                        continue
+                elif isinstance(os_match, dict):
+                    os_match_highest = os_match
+                else:
+                    continue
 
-    Args:
-        scan_results: The nmap scan results dictionary from nmap_wrapper.
+                os_class = os_match_highest.get("osclass", {})
 
-    Returns:
-        list of ParsedService objects containing service information.
-    """
-    services: list[ParsedService] = []
+                if isinstance(os_class, list) and len(os_class) > 0:
+                    os_class = os_class[0]
+                elif os_class == []:
+                    continue
 
-    if "nmaprun" not in scan_results:
-        return services
-
-    for service_data in generators.get_services(scan_results):
-        service_name = service_data.get("service") or ""
-
-        if service_name in BLACKLISTED_SERVICES:
-            continue
-
-        port_val = service_data.get("port")
-        port_int = int(port_val) if port_val is not None else 0
-
-        banner = service_data.get("banner")
-
-        service = ParsedService(
-            host=service_data.get("host") or "unknown",
-            version=str(service_data.get("version", "4")),
-            port=port_int,
-            protocol=service_data.get("protocol") or "",
-            state=service_data.get("state") or "",
-            service=service_name,
-            product=service_data.get("product") or "",
-            product_version=service_data.get("product_version") or "",
-            banner=banner,
-        )
-        services.append(service)
-
-    return services
-
-
-def parse_fingerprints(scan_results: dict[str, Any]) -> list[ParsedFingerprint]:
-    """Parse fingerprints (OS and backend components) from nmap scan results.
-
-    Extracts OS information and backend component fingerprints from scan results.
-
-    Args:
-        scan_results: The nmap scan results dictionary from nmap_wrapper.
-
-    Returns:
-        list of ParsedFingerprint objects containing fingerprint information.
-    """
-    fingerprints: list[ParsedFingerprint] = []
-
-    if "nmaprun" not in scan_results:
-        return fingerprints
-
-    hosts_data = scan_results["nmaprun"].get("host", [])
-    hosts = _normalize_hosts(hosts_data)
-
-    for host in hosts:
-        ip_version = host.get("address", {}).get("@addrtype", "ipv4")
-        version_str = "4" if ip_version == "ipv4" else "6"
-        mask = "32" if ip_version == "ipv4" else "128"
-        host_ip = host.get("address", {}).get("@addr", "unknown")
-
-        os_fingerprints = _parse_os_fingerprints(host, host_ip, version_str, mask)
-        fingerprints.extend(os_fingerprints)
-
-        backend_fingerprints = _parse_backend_fingerprints(
-            host, scan_results, host_ip, version_str, mask
-        )
-        fingerprints.extend(backend_fingerprints)
-
-    return fingerprints
+                fingerprint: OSFingerprint = {
+                    "host": host.get("address", {}).get("@addr"),
+                    "version": host.get("address", {}).get("@addrtype"),
+                    "library_type": "OS",
+                    "library_name": os_class.get("@osfamily"),
+                    "library_version": os_class.get("@osgen"),
+                    "detail": os_match_highest.get("@name"),
+                }
+                os_fingerprints.append(fingerprint)
+    return os_fingerprints
 
 
-def _parse_os_fingerprints(
-    host: dict[str, Any], host_ip: str, version_str: str, mask: str
-) -> list[ParsedFingerprint]:
-    """Parse OS fingerprints from a host.
-
-    Args:
-        host: The host dictionary from nmap results.
-        host_ip: The host IP address.
-        version_str: The IP version string ("4" or "6").
-        mask: The network mask.
-
-    Returns:
-        list of ParsedFingerprint objects for OS information.
-    """
-    fingerprints: list[ParsedFingerprint] = []
-
-    os_data = host.get("os", {})
-    if os_data is None or os_data.get("osmatch") is None:
-        return fingerprints
-
-    os_match = os_data.get("osmatch")
-    if isinstance(os_match, list) and len(os_match) > 0:
-        os_match_highest = os_match[0]
-        # Handle case where osmatch is nested list like [[{...}]]
-        if isinstance(os_match_highest, list) and len(os_match_highest) > 0:
-            os_match_highest = os_match_highest[0]
-        elif not isinstance(os_match_highest, dict):
-            return fingerprints
-    elif isinstance(os_match, dict):
-        os_match_highest = os_match
-    else:
-        return fingerprints
-
-    os_class = os_match_highest.get("osclass", {})
-    os_class_item: dict[str, Any] | None = None
-
-    if isinstance(os_class, list) and len(os_class) > 0:
-        os_class_item = os_class[0]
-    elif isinstance(os_class, dict):
-        os_class_item = os_class
-
-    if os_class_item is None:
-        return fingerprints
-
-    fingerprint = ParsedFingerprint(
-        host=host_ip,
-        version=version_str,
-        library_type="OS",
-        library_name=os_class_item.get("@osfamily") or "",
-        library_version=os_class_item.get("@osgen") or "",
-        detail=os_match_highest.get("@name") or "",
-        mask=mask,
-    )
-    fingerprints.append(fingerprint)
-
-    return fingerprints
-
-
-def _parse_backend_fingerprints(
-    host: dict[str, Any],
+def get_service_libraries(
     scan_results: dict[str, Any],
-    host_ip: str,
-    version_str: str,
-    mask: str,
-) -> list[ParsedFingerprint]:
-    """Parse backend component fingerprints from a host.
+) -> list[ServiceLibraryFingerprint]:
+    libraries = []
+    if (
+        scan_results is not None
+        and scan_results.get("nmaprun") is not None
+        and scan_results["nmaprun"].get("host") is not None
+    ):
+        up_hosts = scan_results["nmaprun"].get("host", [])
+        if isinstance(up_hosts, dict):
+            up_hosts = [up_hosts]
 
-    Args:
-        host: The host dictionary from nmap results.
-        scan_results: The full nmap scan results dictionary.
-        host_ip: The host IP address.
-        version_str: The IP version string ("4" or "6").
-        mask: The network mask.
+        for host in up_hosts:
+            version = host.get("address", {}).get("@addrtype")
+            default_mask: str
+            if version == "ipv4":
+                default_mask = "32"
+            elif version == "ipv6":
+                default_mask = "128"
+            else:
+                raise ValueError(f"Incorrect ip version {version}")
 
-    Returns:
-        list of ParsedFingerprint objects for backend components.
-    """
-    fingerprints: list[ParsedFingerprint] = []
+            for data in generators.get_services(scan_results):
+                if data.get("service") in BLACKLISTED_SERVICES:
+                    continue
+                data_product = data.get("product")
+                data_banner = data.get("banner")
+                if data_product is not None and data_product != "":
+                    fingerprint: ServiceLibraryFingerprint = {
+                        "host": data.get("host"),
+                        "mask": data.get("mask") or default_mask,
+                        "version": data.get("version"),
+                        "library_type": "BACKEND_COMPONENT",
+                        "service": data.get("service"),
+                        "port": data.get("port"),
+                        "protocol": data.get("protocol"),
+                        "library_name": data_product,
+                        "library_version": data.get("product_version"),
+                        "detail": data_product,
+                        "addr_version": version,
+                    }
+                    libraries.append(fingerprint)
+                if data_banner is not None and data_banner != "":
+                    fingerprint = {
+                        "host": data.get("host"),
+                        "mask": data.get("mask") or default_mask,
+                        "version": data.get("version"),
+                        "library_type": "BACKEND_COMPONENT",
+                        "service": data.get("service"),
+                        "port": data.get("port"),
+                        "protocol": data.get("protocol"),
+                        "library_name": data_banner,
+                        "detail": data_banner,
+                        "addr_version": version,
+                        "library_version": None,
+                    }
+                    libraries.append(fingerprint)
+    return libraries
 
-    for service_data in generators.get_services(scan_results):
-        if service_data.get("host") != host_ip:
-            continue
 
-        service_name = service_data.get("service") or ""
-        if service_name in BLACKLISTED_SERVICES:
-            continue
+def get_domain_name_service_library_fingerprints(
+    scan_results: dict[str, Any], domain_name: str
+) -> list[DomainNameServiceLibraryFingerprint]:
+    fingerprints = []
+    if (
+        scan_results is not None
+        and scan_results.get("nmaprun") is not None
+        and scan_results["nmaprun"].get("host") is not None
+    ):
+        up_hosts = scan_results["nmaprun"].get("host", [])
+        if isinstance(up_hosts, dict):
+            up_hosts = [up_hosts]
 
-        port_val = service_data.get("port")
-        port_int = int(port_val) if port_val is not None else None
-        if port_int is None:
-            continue
-
-        protocol = service_data.get("protocol")
-
-        product = service_data.get("product") or ""
-        if product != "":
-            fingerprint = ParsedFingerprint(
-                host=host_ip,
-                version=version_str,
-                library_type="BACKEND_COMPONENT",
-                service=service_name,
-                port=port_int,
-                protocol=protocol,
-                library_name=product,
-                library_version=service_data.get("product_version"),
-                detail=product,
-                mask=mask,
-            )
-            fingerprints.append(fingerprint)
-
-        banner = service_data.get("banner") or ""
-        if banner != "":
-            fingerprint = ParsedFingerprint(
-                host=host_ip,
-                version=version_str,
-                library_type="BACKEND_COMPONENT",
-                service=service_name,
-                port=port_int,
-                protocol=protocol,
-                library_name=banner,
-                library_version=None,
-                detail=banner,
-                mask=mask,
-            )
-            fingerprints.append(fingerprint)
-
+        for data in generators.get_services(scan_results):
+            if data.get("service") in BLACKLISTED_SERVICES:
+                continue
+            data_product = data.get("product")
+            data_banner = data.get("banner")
+            if data_product is not None and data_product != "":
+                fp: DomainNameServiceLibraryFingerprint = {
+                    "name": domain_name,
+                    "port": data.get("port"),
+                    "schema": data.get("service"),
+                    "library_name": data_product,
+                    "library_version": data.get("product_version"),
+                    "library_type": "BACKEND_COMPONENT",
+                    "detail": f"Nmap Detected {data_product} on {domain_name}",
+                }
+                fingerprints.append(fp)
+            if data_banner is not None and data_banner != "":
+                fp = {
+                    "name": domain_name,
+                    "port": data.get("port"),
+                    "schema": data.get("service"),
+                    "library_name": data_banner,
+                    "library_version": None,
+                    "library_type": "BACKEND_COMPONENT",
+                    "detail": f"Nmap Detected {data_banner} on {domain_name}",
+                }
+                fingerprints.append(fp)
     return fingerprints

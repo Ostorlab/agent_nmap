@@ -75,37 +75,63 @@ def scan_ip(ip_address: str) -> ScanResult:
     try:
         scan_results, _ = client.scan_hosts(hosts=ip_address, mask=32)
 
-        parsed_services = result_parser.parse_services(scan_results)
-        parsed_fingerprints = result_parser.parse_fingerprints(scan_results)
+        port_services = result_parser.get_port_services(scan_results)
+        service_libraries = result_parser.get_service_libraries(scan_results)
+        os_fingerprints = result_parser.get_os_fingerprints(scan_results)
 
-        services: list[mcp_types.ServiceResult] = [
-            mcp_types.ServiceResult(
-                host=svc.host,
-                port=svc.port,
-                protocol=svc.protocol,
-                state=svc.state,
-                service=svc.service,
-                banner=svc.banner,
-                version=svc.version,
+        services: list[mcp_types.ServiceResult] = []
+        for svc in port_services:
+            port_val = svc.get("port")
+            port_int = 0
+            if port_val is not None:
+                port_int = int(str(port_val))
+            services.append(
+                mcp_types.ServiceResult(
+                    host=svc.get("host") or "unknown",
+                    port=port_int,
+                    protocol=svc.get("protocol") or "",
+                    state=svc.get("state") or "",
+                    service=svc.get("service") or "",
+                    banner=svc.get("banner") or "",
+                    version=svc.get("version") or "4",
+                )
             )
-            for svc in parsed_services
-        ]
 
-        fingerprints: list[mcp_types.FingerprintResult] = [
-            mcp_types.FingerprintResult(
-                host=fp.host,
-                version=fp.version,
-                library_type=fp.library_type,
-                service=fp.service,
-                port=fp.port,
-                protocol=fp.protocol,
-                library_name=fp.library_name,
-                library_version=fp.library_version,
-                detail=fp.detail,
-                mask=fp.mask,
+        fingerprints: list[mcp_types.FingerprintResult] = []
+        for svc_fp in service_libraries:
+            port_val = svc_fp.get("port")
+            fp_port_int: int | None = None
+            if port_val is not None:
+                fp_port_int = int(str(port_val))
+            fingerprints.append(
+                mcp_types.FingerprintResult(
+                    host=svc_fp.get("host") or "unknown",
+                    version=svc_fp.get("version") or "4",
+                    library_type=svc_fp.get("library_type") or "BACKEND_COMPONENT",
+                    service=svc_fp.get("service"),
+                    port=fp_port_int,
+                    protocol=svc_fp.get("protocol"),
+                    library_name=svc_fp.get("library_name") or "",
+                    library_version=svc_fp.get("library_version"),
+                    detail=svc_fp.get("detail") or "",
+                    mask=svc_fp.get("mask") or "32",
+                )
             )
-            for fp in parsed_fingerprints
-        ]
+        for os_fp in os_fingerprints:
+            fingerprints.append(
+                mcp_types.FingerprintResult(
+                    host=os_fp.get("host") or "unknown",
+                    version=os_fp.get("version") or "4",
+                    library_type=os_fp.get("library_type") or "OS",
+                    service=None,
+                    port=None,
+                    protocol=None,
+                    library_name=os_fp.get("library_name") or "",
+                    library_version=os_fp.get("library_version"),
+                    detail=os_fp.get("detail") or "",
+                    mask="32",
+                )
+            )
 
         return {"services": services, "fingerprints": fingerprints}
     except subprocess.CalledProcessError as e:
