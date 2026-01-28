@@ -81,14 +81,11 @@ def scan_ip(ip_address: str) -> ScanResult:
 
         services: list[mcp_types.ServiceResult] = []
         for svc in port_services:
-            port_val = svc.get("port")
-            port_int = 0
-            if port_val is not None:
-                port_int = int(str(port_val))
+            port = svc.get("port") or 0
             services.append(
                 mcp_types.ServiceResult(
                     host=svc.get("host") or "unknown",
-                    port=port_int,
+                    port=int(port),
                     protocol=svc.get("protocol") or "",
                     state=svc.get("state") or "",
                     service=svc.get("service") or "",
@@ -99,17 +96,14 @@ def scan_ip(ip_address: str) -> ScanResult:
 
         fingerprints: list[mcp_types.FingerprintResult] = []
         for svc_fp in service_libraries:
-            port_val = svc_fp.get("port")
-            fp_port_int: int | None = None
-            if port_val is not None:
-                fp_port_int = int(str(port_val))
+            port = svc_fp.get("port") or 0
             fingerprints.append(
                 mcp_types.FingerprintResult(
                     host=svc_fp.get("host") or "unknown",
                     version=svc_fp.get("version") or "4",
                     library_type=svc_fp.get("library_type") or "BACKEND_COMPONENT",
                     service=svc_fp.get("service"),
-                    port=fp_port_int,
+                    port=int(port),
                     protocol=svc_fp.get("protocol"),
                     library_name=svc_fp.get("library_name") or "",
                     library_version=svc_fp.get("library_version"),
@@ -137,3 +131,7 @@ def scan_ip(ip_address: str) -> ScanResult:
     except subprocess.CalledProcessError as e:
         logger.error("Nmap command failed to scan host %s", ip_address)
         raise CalledToolError from e
+
+
+if __name__ == "__main__":
+    scan_ip("127.0.0.1")

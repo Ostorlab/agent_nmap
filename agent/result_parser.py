@@ -14,7 +14,7 @@ class DomainNameService(TypedDict):
 class PortService(TypedDict):
     host: str | None
     version: str | None
-    port: int | str | None
+    port: int
     protocol: str | None
     state: str | None
     service: str | None
@@ -39,7 +39,7 @@ class ServiceLibraryFingerprint(TypedDict):
     library_type: str
     library_version: str | None
     service: str | None
-    port: int | str | None
+    port: int
     protocol: str | None
     library_name: str
     detail: str
@@ -48,7 +48,7 @@ class ServiceLibraryFingerprint(TypedDict):
 
 class DomainNameServiceLibraryFingerprint(TypedDict):
     name: str
-    port: int | str | None
+    port: int
     schema: str | None
     library_name: str
     library_version: str | None
@@ -93,7 +93,7 @@ def get_port_services(scan_results: dict[str, Any]) -> list[PortService]:
                 service: PortService = {
                     "host": data.get("host"),
                     "version": data.get("version"),
-                    "port": data.get("port"),
+                    "port": int(data.get("port") or 0),
                     "protocol": data.get("protocol"),
                     "state": data.get("state"),
                     "service": data.get("service"),
@@ -195,7 +195,7 @@ def get_service_libraries(
                         "version": data.get("version"),
                         "library_type": "BACKEND_COMPONENT",
                         "service": data.get("service"),
-                        "port": data.get("port"),
+                        "port": int(data.get("port") or 0),
                         "protocol": data.get("protocol"),
                         "library_name": data_product,
                         "library_version": data.get("product_version"),
@@ -210,7 +210,7 @@ def get_service_libraries(
                         "version": data.get("version"),
                         "library_type": "BACKEND_COMPONENT",
                         "service": data.get("service"),
-                        "port": data.get("port"),
+                        "port": int(data.get("port") or 0),
                         "protocol": data.get("protocol"),
                         "library_name": data_banner,
                         "detail": data_banner,
@@ -242,7 +242,7 @@ def get_domain_name_service_library_fingerprints(
             if data_product is not None and data_product != "":
                 fp: DomainNameServiceLibraryFingerprint = {
                     "name": domain_name,
-                    "port": data.get("port"),
+                    "port": int(data.get("port") or 0),
                     "schema": data.get("service"),
                     "library_name": data_product,
                     "library_version": data.get("product_version"),
@@ -253,7 +253,7 @@ def get_domain_name_service_library_fingerprints(
             if data_banner is not None and data_banner != "":
                 fp = {
                     "name": domain_name,
-                    "port": data.get("port"),
+                    "port": int(data.get("port") or 0),
                     "schema": data.get("service"),
                     "library_name": data_banner,
                     "library_version": None,
