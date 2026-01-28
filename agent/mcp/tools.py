@@ -147,13 +147,7 @@ def scan_domain(domain_name: str) -> ScanResult:
         A dictionary with two keys:
         - services: List of ServiceResult objects
         - fingerprints: List of FingerprintResult objects
-
-    Raises:
-        ValueError: If the domain name format is invalid.
     """
-    if not domain_name or not isinstance(domain_name, str):
-        raise ValueError(f"Invalid domain name format: {domain_name}")
-
     options = nmap_options.NmapOptions(
         dns_resolution=False,
         ports="0-65535",
