@@ -188,7 +188,7 @@ def _parse_os_fingerprints(
     fingerprints: list[ParsedFingerprint] = []
 
     os_data = host.get("os", {})
-    if os_data.get("osmatch") is None:
+    if os_data is None or os_data.get("osmatch") is None:
         return fingerprints
 
     os_match = os_data.get("osmatch")

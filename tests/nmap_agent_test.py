@@ -1335,7 +1335,7 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
 
     nmap_test_agent.process(domain_msg)
 
-    network_scan_finding = agent_mock[6].data
+    network_scan_finding = agent_mock[5].data
     assert "title" in network_scan_finding
     assert "technical_detail" in network_scan_finding
     assert "14.242.111.45" in network_scan_finding["technical_detail"]
