@@ -67,7 +67,6 @@ def scan_ip(ip_address: str) -> ScanResult:
         scripts=["banner"],
         no_ping=True,
         host_timeout=300,
-        os_detection=False,
         port_scanning_techniques=[nmap_options.PortScanningTechnique.TCP_CONNECT],
     )
 
@@ -133,5 +132,91 @@ def scan_ip(ip_address: str) -> ScanResult:
         raise CalledToolError from e
 
 
+def scan_domain(domain_name: str) -> ScanResult:
+    """
+    Scan a given domain name and return discovered services and fingerprints.
+
+    This tool performs a comprehensive port scan and extracts:
+    - Service details: port, protocol, state, service name, banner
+    - Fingerprint details: Backend component information
+
+    Args:
+        domain_name: The domain name to scan (e.g., "example.com").
+
+    Returns:
+        A dictionary with two keys:
+        - services: List of ServiceResult objects
+        - fingerprints: List of FingerprintResult objects
+
+    Raises:
+        ValueError: If the domain name format is invalid.
+    """
+    if not domain_name or not isinstance(domain_name, str):
+        raise ValueError(f"Invalid domain name format: {domain_name}")
+
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="0-65535",
+        timing_template=nmap_options.TimingTemplate.T3,
+        version_detection=True,
+        script_default=True,
+        scripts=["banner"],
+        no_ping=True,
+        host_timeout=300,
+        port_scanning_techniques=[nmap_options.PortScanningTechnique.TCP_CONNECT],
+    )
+
+    client = nmap_wrapper.NmapWrapper(options)
+    try:
+        scan_results, _ = client.scan_domain(domain_name=domain_name)
+
+        domain_services = result_parser.get_domain_name_services(
+            scan_results, domain_name
+        )
+        domain_fingerprints = (
+            result_parser.get_domain_name_service_library_fingerprints(
+                scan_results, domain_name
+            )
+        )
+
+        services: list[mcp_types.ServiceResult] = []
+        for svc in domain_services:
+            port = svc.get("port") or 0
+            services.append(
+                mcp_types.ServiceResult(
+                    host=domain_name,
+                    port=int(port),
+                    protocol=svc.get("schema") or "",
+                    state=svc.get("state") or "",
+                    service=svc.get("schema") or "",
+                    banner="",
+                    version="4",
+                )
+            )
+
+        fingerprints: list[mcp_types.FingerprintResult] = []
+        for fp in domain_fingerprints:
+            port = fp.get("port") or 0
+            fingerprints.append(
+                mcp_types.FingerprintResult(
+                    host=domain_name,
+                    version="4",
+                    library_type=fp.get("library_type") or "BACKEND_COMPONENT",
+                    service=fp.get("schema"),
+                    port=int(port),
+                    protocol=None,
+                    library_name=fp.get("library_name") or "",
+                    library_version=fp.get("library_version"),
+                    detail=fp.get("detail") or "",
+                    mask="32",
+                )
+            )
+
+        return {"services": services, "fingerprints": fingerprints}
+    except subprocess.CalledProcessError as e:
+        logger.error("Nmap command failed to scan domain %s", domain_name)
+        raise CalledToolError from e
+
+
 if __name__ == "__main__":
-    scan_ip("127.0.0.1")
+    scan_domain("localhost")
