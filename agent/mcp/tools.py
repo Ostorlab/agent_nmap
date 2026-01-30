@@ -1,5 +1,6 @@
 """MCP tools for port scanning."""
 
+import ipaddress
 import logging
 import subprocess
 from typing import Any
@@ -26,7 +27,8 @@ class ScanTarget(TypedDict):
     """Input for scanning a target.
 
     Attributes:
-        target: The IP address or domain name to scan.
+        target: The IP address (with optional /mask) or domain name to scan.
+                Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com"
         target_type: The type of target ("ip" or "domain").
     """
 
@@ -56,7 +58,8 @@ def scan(scan_params: ScanTarget) -> ScanResult:
 
     Args:
         scan_params: Dictionary with keys:
-            - target: The IP address or domain name to scan (e.g., "192.168.1.1" or "example.com")
+            - target: The IP address (with optional /mask) or domain name to scan.
+                    Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com"
             - target_type: The type of target ("ip" or "domain")
 
     Returns:
@@ -123,9 +126,6 @@ def scan(scan_params: ScanTarget) -> ScanResult:
 
 
 def _do_scan(target: str, target_type: str) -> dict[str, Any]:
-    scan_target = target
-    scan_type = target_type
-
     options = nmap_options.NmapOptions(
         dns_resolution=False,
         ports="0-65535",
@@ -137,20 +137,33 @@ def _do_scan(target: str, target_type: str) -> dict[str, Any]:
         host_timeout=300,
         port_scanning_techniques=[nmap_options.PortScanningTechnique.TCP_CONNECT],
     )
-
     client = nmap_wrapper.NmapWrapper(options)
-    try:
-        if scan_type == "ip":
-            scan_results, _ = client.scan_hosts(hosts=scan_target, mask=32)
-        else:
-            scan_results, _ = client.scan_domain(domain_name=scan_target)
 
+    try:
+        if target_type == "ip":
+            return _scan_ip(client, target)
+        else:
+            scan_results, _ = client.scan_domain(domain_name=target)
+            return scan_results
     except subprocess.CalledProcessError as e:
         logger.error("Nmap command failed to scan target %s", target)
         raise CalledToolError from e
 
+
+def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
+    network = ipaddress.ip_network(target)
+    if "/" in target:
+        host = str(network.network_address)
+        mask = network.prefixlen
+    else:
+        mask = 128 if network.version == 6 else 32
+        host = target
+
+    scan_results, _ = client.scan_hosts(hosts=host, mask=mask)
     return scan_results
 
 
 if __name__ == "__main__":
     scan({"target": "localhost", "target_type": "domain"})
+    scan({"target": "192.168.1.0/24", "target_type": "ip"})
+    scan({"target": "2001:db8::1", "target_type": "ip"})
