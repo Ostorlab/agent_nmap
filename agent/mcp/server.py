@@ -17,7 +17,7 @@ mcp: fastmcp.FastMCP = fastmcp.FastMCP(
     name=MCP_SERVER_NAME,
     host=MCP_SERVER_HOST,
     port=MCP_SERVER_PORT,
-    tools=[mcp_tools.scan_ip, mcp_tools.scan_domain],
+    tools=[mcp_tools.scan],
 )
 
 
