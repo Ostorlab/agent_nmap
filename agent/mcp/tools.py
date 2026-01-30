@@ -163,8 +163,3 @@ def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
     scan_results, _ = client.scan_hosts(hosts=host, mask=mask)
     return scan_results
 
-
-if __name__ == "__main__":
-    scan({"target": "localhost", "target_type": "domain"})
-    scan({"target": "192.168.1.0/24", "target_type": "ip"})
-    scan({"target": "2001:db8::1", "target_type": "ip"})
