@@ -52,4 +52,4 @@ class FingerprintResult:
     library_name: str
     library_version: str | None
     detail: str
-    mask: str = "32"
+    mask: int = 32

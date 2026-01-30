@@ -103,7 +103,7 @@ def scan(scan_params: ScanTarget) -> ScanResult:
                 library_name=svc_fp.get("library_name") or "",
                 library_version=svc_fp.get("library_version"),
                 detail=svc_fp.get("detail") or "",
-                mask=svc_fp.get("mask") or "32",
+                mask=int(svc_fp.get("mask", 32)),
             )
         )
     for os_fp in os_fingerprints:
@@ -118,7 +118,7 @@ def scan(scan_params: ScanTarget) -> ScanResult:
                 library_name=os_fp.get("library_name") or "",
                 library_version=os_fp.get("library_version"),
                 detail=os_fp.get("detail") or "",
-                mask="32",
+                mask=32,
             )
         )
 
@@ -162,4 +162,3 @@ def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
 
     scan_results, _ = client.scan_hosts(hosts=host, mask=mask)
     return scan_results
-
