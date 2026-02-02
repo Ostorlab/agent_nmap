@@ -28,15 +28,14 @@ class ScanTarget(TypedDict):
 
     Attributes:
         target: The IP address (with optional /mask) or domain name to scan.
-                Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com"
-        target_type: The type of target ("ip" or "domain").
+                Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com".
+                The type is automatically inferred from the target format.
     """
 
     target: str
-    target_type: str
 
 
-def scan(scan_params: ScanTarget) -> list[mcp_types.ServiceResult]:
+def scan(target: ScanTarget) -> list[mcp_types.ServiceResult]:
     """
     Scan a target and return discovered services with fingerprints.
 
@@ -45,17 +44,16 @@ def scan(scan_params: ScanTarget) -> list[mcp_types.ServiceResult]:
     - Fingerprint details: OS information and backend component information
 
     Args:
-        scan_params: Dictionary with keys:
+        target: Dictionary with keys:
             - target: The IP address (with optional /mask) or domain name to scan.
                     Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com"
-            - target_type: The type of target ("ip" or "domain")
 
     Returns:
         A list of ServiceResult objects, each containing service details
         and associated fingerprint information.
     """
-
-    scan_results = _do_scan(scan_params["target"], scan_params["target_type"])
+    target
+    scan_results = _do_scan(target.get("target", ""))
 
     port_services = result_parser.get_port_services(scan_results)
     service_libraries = result_parser.get_service_libraries(scan_results)
@@ -111,7 +109,10 @@ def scan(scan_params: ScanTarget) -> list[mcp_types.ServiceResult]:
     return services
 
 
-def _do_scan(target: str, target_type: str) -> dict[str, Any]:
+def _do_scan(target: str) -> dict[str, Any]:
+    if target == "":
+        raise ValueError(f"Invalid target: `{target}`")
+
     options = nmap_options.NmapOptions(
         dns_resolution=False,
         ports="0-65535",
@@ -126,7 +127,7 @@ def _do_scan(target: str, target_type: str) -> dict[str, Any]:
     client = nmap_wrapper.NmapWrapper(options)
 
     try:
-        if target_type == "ip":
+        if _is_ip_or_cidr(target):
             return _scan_ip(client, target)
         else:
             scan_results, _ = client.scan_domain(domain_name=target)
@@ -148,3 +149,15 @@ def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
 
     scan_results, _ = client.scan_hosts(hosts=host, mask=mask)
     return scan_results
+
+
+def _is_ip_or_cidr(target: str) -> bool:
+    """Check if target is an IP address or CIDR network."""
+    try:
+        if "/" in target:
+            ipaddress.ip_network(target, strict=False)
+        else:
+            ipaddress.ip_address(target)
+        return True
+    except ValueError:
+        return False
