@@ -31,9 +31,7 @@ def scan(target: str) -> list[mcp_types.ServiceResult]:
     - Fingerprint details: OS information and backend component information
 
     Args:
-        target: Dictionary with keys:
-            - target: The IP address (with optional /mask) or domain name to scan.
-                    Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com"
+        target: A string representing the scan target, can be an IP address or a domain name.
 
     Returns:
         A list of ServiceResult objects, each containing service details
