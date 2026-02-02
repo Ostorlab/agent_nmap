@@ -1093,7 +1093,7 @@ def testAgent_whenOsMatchIsEmptyList_fingerprintMessageShouldHaveOs(
 
     nmap_test_agent.process(ipv4_msg)
 
-    assert len(agent_mock) == 2
+    assert len(agent_mock) == 3
 
 
 def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
@@ -1149,7 +1149,7 @@ def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
 
     nmap_test_agent.process(ipv4_msg)
 
-    assert len(agent_mock) == 2
+    assert len(agent_mock) == 3
 
 
 def testAgentNmap_withOSFingerprintCrash1_noException(
@@ -1347,7 +1347,7 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
         "state": "open",
         "service": "http",
     } in [msg.data for msg in agent_mock]
-    assert len(agent_mock) == 16
+    assert len(agent_mock) == 14
 
 
 def testAgentNmap_whenApiSchemaMessage_shouldScanDomain(

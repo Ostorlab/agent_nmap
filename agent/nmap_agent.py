@@ -24,10 +24,11 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
-from agent import generators
+from agent import result_parser
 from agent import nmap_options
 from agent import nmap_wrapper
 from agent import process_scans
+from agent.mcp import runner as mcp_runner
 
 logging.basicConfig(
     format="%(message)s",
@@ -46,8 +47,6 @@ DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 DEFAULT_MASK_IPV6 = 128
 # scan up to 65536 host
 IPV6_CIDR_LIMIT = 112
-
-BLACKLISTED_SERVICES = ["tcpwrapped"]
 
 
 class Error(Exception):
@@ -77,9 +76,17 @@ class NmapAgent(
         self._dns_config: Optional[str] = self.args.get("dns_config")
         self._host_timeout: Optional[int] = self.args.get("host_timeout")
 
+        self.should_start_mcp_server: bool = self.args.get(
+            "should_start_mcp_server", False
+        )
+
     def start(self) -> None:
         if self._vpn_config is not None and self._dns_config is not None:
             self._connect_to_vpn()
+
+        if self.should_start_mcp_server is True:
+            logger.info("Running Nmap agent in MCP mode.")
+            mcp_runner.run()
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -89,6 +96,11 @@ class NmapAgent(
         Args:
             message: message containing the IP to scan, the mask & the version.
         """
+
+        if self.should_start_mcp_server is True:
+            logger.warning("Oxo messages are ignored in MCP mode: %s", message.selector)
+            return None
+
         logger.debug("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
         hosts: List[Tuple[str, int]] = []
@@ -328,182 +340,86 @@ class NmapAgent(
     def _emit_services(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        if scan_results is not None and scan_results.get("nmaprun") is not None:
-            if domain_name is not None:
-                logger.info("Services targeting domain `%s`.", domain_name)
-                for data in generators.get_services(scan_results):
-                    if data.get("service") in BLACKLISTED_SERVICES:
-                        continue
-                    domain_name_service = {
-                        "name": domain_name,
-                        "port": data.get("port"),
-                        "schema": data.get("service"),
-                        "state": data.get("state"),
-                    }
-                    logger.info("Domain Service Identified %s.", domain_name_service)
-                    self.emit("v3.asset.domain_name.service", domain_name_service)
+        if domain_name is not None:
+            logger.info("Services targeting domain `%s`.", domain_name)
+            for data in result_parser.get_domain_name_services(
+                scan_results, domain_name
+            ):
+                logger.info("Domain Service Identified %s.", data)
+                self.emit("v3.asset.domain_name.service", dict(data))
 
-            up_hosts = scan_results["nmaprun"].get("host", [])
-            if isinstance(up_hosts, dict):
-                up_hosts = [up_hosts]
+        port_services = result_parser.get_port_services(scan_results)
+        for service in port_services:
+            addr_version = service.get("addr_version")
+            address = service.get("address")
+            if addr_version == "ipv4":
+                selector = "v3.asset.ip.v4.port.service"
+                self.set_add(b"agent_nmap_asset", f"{address}/32")
+            elif addr_version == "ipv6":
+                selector = "v3.asset.ip.v6.port.service"
+                self.set_add(b"agent_nmap_asset", f"{address}/64")
+            else:
+                raise ValueError(f"Incorrect ip version {addr_version}")
 
-            for host in up_hosts:
-                version = host.get("address", {}).get("@addrtype")
-                address = host.get("address", {}).get("@addr")
-                if version == "ipv4":
-                    selector = "v3.asset.ip.v4.port.service"
-                    self.set_add(b"agent_nmap_asset", f"{address}/32")
-                elif version == "ipv6":
-                    selector = "v3.asset.ip.v6.port.service"
-                    self.set_add(b"agent_nmap_asset", f"{address}/64")
-                else:
-                    raise ValueError(f"Incorrect ip version {version}")
-
-                for data in generators.get_services(scan_results):
-                    if data.get("service") in BLACKLISTED_SERVICES:
-                        continue
-                    logger.debug("Sending results to `%s`", selector)
-                    ip_service = {
-                        "host": data.get("host"),
-                        "version": data.get("version"),
-                        "port": data.get("port"),
-                        "protocol": data.get("protocol"),
-                        "state": data.get("state"),
-                        "service": data.get("service"),
-                        "banner": data.get("banner"),
-                    }
-                    self.emit(selector, ip_service)
+            service_dict = dict(service)
+            service_dict.pop("address")
+            service_dict.pop("addr_version")
+            self.emit(selector, service_dict)
 
     def _emit_fingerprints(
         self, scan_results: Dict[str, Any], domain_name: Optional[str]
     ) -> None:
-        logger.info("Fingerprints targeting domain `%s`.", domain_name)
-        if (
-            scan_results is not None
-            and scan_results.get("nmaprun") is not None
-            and scan_results["nmaprun"].get("host") is not None
-        ):
-            up_hosts = scan_results["nmaprun"].get("host", [])
-            if isinstance(up_hosts, dict):
-                up_hosts = [up_hosts]
+        self._emit_os_fingerprints(scan_results)
+        self._emit_service_library_fingerprints(scan_results)
+        self._emit_domain_name_service_library_fingerprints(domain_name, scan_results)
 
-            for host in up_hosts:
-                version = host.get("address", {}).get("@addrtype")
-                address = host.get("address", {}).get("@addr")
-                if version == "ipv4":
-                    selector = "v3.fingerprint.ip.v4.service.library"
-                    default_mask = 32
-                    self.set_add(b"agent_nmap_asset", f"{address}/32")
-                elif version == "ipv6":
-                    selector = "v3.fingerprint.ip.v6.service.library"
-                    default_mask = 128
-                    self.set_add(b"agent_nmap_asset", f"{address}/64")
-                else:
-                    raise ValueError(f"Incorrect ip version {version}")
+    def _emit_domain_name_service_library_fingerprints(
+        self, domain_name: str | None, scan_results: dict[str, Any]
+    ) -> None:
+        if domain_name is not None:
+            for (
+                fingerprint
+            ) in result_parser.get_domain_name_service_library_fingerprints(
+                scan_results, domain_name
+            ):
+                self.emit(
+                    selector="v3.fingerprint.domain_name.service.library",
+                    data=dict(fingerprint),
+                )
 
-                if (
-                    host.get("os", {}) is not None
-                    and host.get("os", {}).get("osmatch") is not None
-                ):
-                    os_match = host.get("os").get("osmatch")
-                    if isinstance(os_match, list):
-                        if len(os_match) > 0:
-                            os_match_highest = os_match[0]
-                            if isinstance(os_match_highest, dict):
-                                pass
-                            elif (
-                                isinstance(os_match_highest, list)
-                                and len(os_match_highest) > 0
-                            ):
-                                os_match_highest = os_match_highest[0]
-                            else:
-                                continue
-                        else:
-                            continue
-                    elif isinstance(os_match, dict):
-                        os_match_highest = os_match
-                    else:
-                        continue
+    def _emit_service_library_fingerprints(self, scan_results: dict[str, Any]) -> None:
+        for data in result_parser.get_service_libraries(scan_results):
+            version = data.get("addr_version")
+            address = data.get("host")
+            if version == "ipv4":
+                selector = "v3.fingerprint.ip.v4.service.library"
+                self.set_add(b"agent_nmap_asset", f"{address}/32")
+            elif version == "ipv6":
+                selector = "v3.fingerprint.ip.v6.service.library"
+                self.set_add(b"agent_nmap_asset", f"{address}/64")
+            else:
+                raise ValueError(f"Incorrect ip version {version}")
+            data_dict = dict(data)
+            data_dict.pop("addr_version")
+            self.emit(selector, data_dict)
 
-                    os_class = os_match_highest.get("osclass", {})
+    def _emit_os_fingerprints(self, scan_results: dict[str, Any]) -> None:
+        os_fingerprints = result_parser.get_os_fingerprints(scan_results)
+        for fingerprint in os_fingerprints:
+            version = fingerprint.get("version")
+            address = fingerprint.get("host")
+            if version == "ipv4":
+                selector = "v3.fingerprint.ip.v4.service.library"
+                self.set_add(b"agent_nmap_asset", f"{address}/32")
+            elif version == "ipv6":
+                selector = "v3.fingerprint.ip.v6.service.library"
+                self.set_add(b"agent_nmap_asset", f"{address}/64")
+            else:
+                raise ValueError(f"Incorrect ip version {version}")
 
-                    if isinstance(os_class, list) and len(os_class) > 0:
-                        os_class = os_class[0]
-                    elif os_class == []:
-                        continue
-
-                    fingerprint_data = {
-                        "host": host.get("address", {}).get("@addr"),
-                        "library_type": "OS",
-                        "library_name": os_class.get("@osfamily"),
-                        "library_version": os_class.get("@osgen"),
-                        "detail": os_match_highest.get("@name"),
-                    }
-                    self.emit(selector, fingerprint_data)
-
-                for data in generators.get_services(scan_results):
-                    if data.get("service") in BLACKLISTED_SERVICES:
-                        continue
-                    data_product = data.get("product")
-                    data_banner = data.get("banner")
-                    if data_product is not None and data_product != "":
-                        logger.debug("sending results to selector %s", selector)
-                        fingerprint_data = {
-                            "host": data.get("host"),
-                            "mask": data.get("mask", str(default_mask)),
-                            "version": data.get("version"),
-                            "library_type": "BACKEND_COMPONENT",
-                            "service": data.get("service"),
-                            "port": data.get("port"),
-                            "protocol": data.get("protocol"),
-                            "library_name": data_product,
-                            "library_version": data.get("product_version"),
-                            "detail": data_product,
-                        }
-                        self.emit(selector, fingerprint_data)
-                    if data_banner is not None and data_banner != "":
-                        logger.debug("sending results to selector %s", selector)
-                        fingerprint_data = {
-                            "host": data.get("host"),
-                            "mask": data.get("mask", str(default_mask)),
-                            "version": data.get("version"),
-                            "library_type": "BACKEND_COMPONENT",
-                            "service": data.get("service"),
-                            "port": data.get("port"),
-                            "protocol": data.get("protocol"),
-                            "library_name": data_banner,
-                            "detail": data_banner,
-                        }
-                        self.emit(selector, fingerprint_data)
-                    if domain_name is not None:
-                        if data_product is not None and data_product != "":
-                            msg_data = {
-                                "name": domain_name,
-                                "port": data.get("port"),
-                                "schema": data.get("service"),
-                                "library_name": data_product,
-                                "library_version": data.get("product_version"),
-                                "library_type": "BACKEND_COMPONENT",
-                                "detail": f"Nmap Detected {data_product} on {domain_name}",
-                            }
-                            self.emit(
-                                selector="v3.fingerprint.domain_name.service.library",
-                                data=msg_data,
-                            )
-                        if data_banner is not None and data_banner != "":
-                            msg_data = {
-                                "name": domain_name,
-                                "port": data.get("port"),
-                                "schema": data.get("service"),
-                                "library_name": data_banner,
-                                "library_version": None,
-                                "library_type": "BACKEND_COMPONENT",
-                                "detail": f"Nmap Detected {data_banner} on {domain_name}",
-                            }
-                            self.emit(
-                                selector="v3.fingerprint.domain_name.service.library",
-                                data=msg_data,
-                            )
+            fingerprint_dict = dict(fingerprint)
+            fingerprint_dict.pop("version")
+            self.emit(selector, fingerprint_dict)
 
     def _connect_to_vpn(self) -> None:
         """Connect to VPN."""

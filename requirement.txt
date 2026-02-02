@@ -2,3 +2,4 @@ ostorlab[agent]
 xmltodict
 pytablewriter
 rich
+fastmcp
