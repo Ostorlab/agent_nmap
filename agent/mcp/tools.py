@@ -52,7 +52,6 @@ def scan(target: ScanTarget) -> list[mcp_types.ServiceResult]:
         A list of ServiceResult objects, each containing service details
         and associated fingerprint information.
     """
-    target
     scan_results = _do_scan(target.get("target", ""))
 
     port_services = result_parser.get_port_services(scan_results)
