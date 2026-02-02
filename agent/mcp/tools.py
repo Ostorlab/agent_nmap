@@ -5,7 +5,6 @@ import logging
 import subprocess
 from typing import Any
 
-from typing_extensions import TypedDict
 
 from agent import nmap_options
 from agent import nmap_wrapper
@@ -23,19 +22,7 @@ class CalledToolError(Error):
     """Generic exception raised when a tool call fails."""
 
 
-class ScanTarget(TypedDict):
-    """Input for scanning a target.
-
-    Attributes:
-        target: The IP address (with optional /mask) or domain name to scan.
-                Examples: "192.168.1.1", "192.168.1.0/24", "2001:db8::1", "example.com".
-                The type is automatically inferred from the target format.
-    """
-
-    target: str
-
-
-def scan(target: ScanTarget) -> list[mcp_types.ServiceResult]:
+def scan(target: str) -> list[mcp_types.ServiceResult]:
     """
     Scan a target and return discovered services with fingerprints.
 
@@ -52,7 +39,7 @@ def scan(target: ScanTarget) -> list[mcp_types.ServiceResult]:
         A list of ServiceResult objects, each containing service details
         and associated fingerprint information.
     """
-    scan_results = _do_scan(target.get("target", ""))
+    scan_results = _do_scan(target)
 
     port_services = result_parser.get_port_services(scan_results)
     service_libraries = result_parser.get_service_libraries(scan_results)
