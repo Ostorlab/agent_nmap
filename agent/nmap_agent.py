@@ -383,8 +383,7 @@ class NmapAgent(
                 scan_results, domain_name
             ):
                 data = dict(fingerprint)
-                if "domain_name" not in fingerprint:
-                    data["domain_name"] = domain_name
+                data["domain_name"] = domain_name
                 self.emit(
                     selector="v3.fingerprint.domain_name.service.library",
                     data=data,
