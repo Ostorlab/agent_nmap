@@ -382,9 +382,12 @@ class NmapAgent(
             ) in result_parser.get_domain_name_service_library_fingerprints(
                 scan_results, domain_name
             ):
+                data = dict(fingerprint)
+                if "domain_name" not in fingerprint:
+                    data["domain_name"] = domain_name
                 self.emit(
                     selector="v3.fingerprint.domain_name.service.library",
-                    data=dict(fingerprint),
+                    data=data,
                 )
 
     def _emit_service_library_fingerprints(self, scan_results: dict[str, Any]) -> None:
