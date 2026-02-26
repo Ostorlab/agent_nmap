@@ -15,8 +15,6 @@ MCP_SERVER_PORT = 50051
 
 mcp: fastmcp.FastMCP = fastmcp.FastMCP(
     name=MCP_SERVER_NAME,
-    host=MCP_SERVER_HOST,
-    port=MCP_SERVER_PORT,
     tools=[mcp_tools.scan],
 )
 
@@ -24,7 +22,11 @@ mcp: fastmcp.FastMCP = fastmcp.FastMCP(
 def run() -> None:
     """Start the MCP server with the streamable-http transport."""
     logger.info("Starting MCP server with transport: streamable-http")
-    mcp.run(transport="streamable-http")
+    mcp.run(
+        transport="streamable-http",
+        host=MCP_SERVER_HOST,
+        port=MCP_SERVER_PORT,
+    )
 
 
 def main() -> None:
