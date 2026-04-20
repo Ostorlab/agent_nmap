@@ -11,7 +11,7 @@ def run() -> None:
     logger.info("Starting MCP server.")
     subprocess.Popen(
         [
-            "python3.11",
+            "python3.14",
             RUN_SERVER_PATH,
         ]
     )
