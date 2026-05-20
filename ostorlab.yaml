@@ -139,4 +139,7 @@ args:
     type: "boolean"
     description: "True if the agent should run as an MCP server."
     value: false
-
+  - name: "is_compiled"
+    description: "True if the agent is compiled, false if it is running from source code."
+    type: "boolean"
+    value: false

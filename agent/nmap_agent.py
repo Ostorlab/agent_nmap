@@ -75,6 +75,7 @@ class NmapAgent(
         self._vpn_config: Optional[str] = self.args.get("vpn_config")
         self._dns_config: Optional[str] = self.args.get("dns_config")
         self._host_timeout: Optional[int] = self.args.get("host_timeout")
+        self._is_compiled: bool = self.args.get("is_compiled", False)
 
         self.should_start_mcp_server: bool = self.args.get(
             "should_start_mcp_server", False
@@ -86,7 +87,7 @@ class NmapAgent(
 
         if self.should_start_mcp_server is True:
             logger.info("Running Nmap agent in MCP mode.")
-            mcp_runner.run()
+            mcp_runner.run(is_compiled=self._is_compiled)
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
