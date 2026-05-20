@@ -1,5 +1,6 @@
 .dockerignore
 Dockerfile
+Dockerfile.compiled
 requirements.txt
 .github
 tests

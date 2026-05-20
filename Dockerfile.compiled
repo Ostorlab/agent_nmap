@@ -1,0 +1,132 @@
+FROM python:3.14-bookworm AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CC=clang
+
+# Install build dependencies including clang for fast Nuitka builds
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    wget \
+    automake \
+    clang \
+    lld \
+    patchelf \
+    wireguard \
+    iproute2 \
+    openresolv \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python -m pip install --upgrade pip
+
+# Install Python dependencies + Nuitka
+COPY requirement.txt /requirement.txt
+RUN pip install -r /requirement.txt nuitka
+RUN rm /requirement.txt
+
+# Compile nmap from source
+ARG NMAP_VERSION=7.95
+WORKDIR /tmp
+RUN wget https://nmap.org/dist/nmap-${NMAP_VERSION}.tar.bz2 \
+    && tar jxvf nmap-${NMAP_VERSION}.tar.bz2 \
+    && cd /tmp/nmap-${NMAP_VERSION} \
+    && ./configure --without-zenmap \
+    && make -j$(nproc) \
+    && make install \
+    && cd / \
+    && rm -rf /tmp/nmap-${NMAP_VERSION}
+
+# Copy agent source
+WORKDIR /app
+COPY agent /app/agent
+COPY ostorlab.compiled.yaml /app/ostorlab.yaml
+
+# Shared Nuitka helper
+RUN cat > /nuitka_build.sh <<'NUITKA_SCRIPT'
+#!/bin/bash
+set -e
+exec python -m nuitka --standalone \
+    --clang \
+    --lto=no \
+    --jobs=$(nproc) \
+    --enable-plugin=anti-bloat \
+    --include-package=agent \
+    --include-package=ostorlab \
+    --include-package=rich \
+    --include-package=xmltodict \
+    --include-package=pytablewriter \
+    --include-package=fastmcp \
+    --include-package=uvicorn \
+    --include-package=websockets \
+    --include-package=requests \
+    --include-package=pyaxmlparser \
+    --include-package=google.protobuf \
+    --include-package=ostorlab.agent.message.proto \
+    --include-distribution-metadata=aiormq \
+    --include-distribution-metadata=aio-pika \
+    --include-distribution-metadata=opentelemetry-api \
+    --include-distribution-metadata=mcp \
+    --include-distribution-metadata=fastmcp \
+    --include-distribution-metadata=click \
+    --include-distribution-metadata=Flask \
+    --include-distribution-metadata=Werkzeug \
+    --include-distribution-metadata=websockets \
+    --include-distribution-metadata=MarkupSafe \
+    --include-distribution-metadata=itsdangerous \
+    --include-distribution-metadata=cyclopts \
+    --include-distribution-metadata=Authlib \
+    --include-distribution-metadata=dnspython \
+    --include-data-dir=$(python -c "import ostorlab.agent.schema; print(ostorlab.agent.schema.__path__[0])")=ostorlab/agent/schema \
+    --include-data-dir=$(python -c "import ostorlab.agent.kb; print(ostorlab.agent.kb.__path__[0])")=ostorlab/agent/kb \
+    "$@"
+NUITKA_SCRIPT
+RUN chmod +x /nuitka_build.sh
+
+# Compile main agent binary
+RUN /nuitka_build.sh \
+    --include-data-files=/app/ostorlab.yaml=ostorlab.yaml \
+    --output-dir=/app/build \
+    /app/agent/nmap_agent.py
+
+# Compile MCP server binary
+RUN /nuitka_build.sh \
+    --output-dir=/app/build \
+    /app/agent/mcp/server.py
+
+# Copy protobuf .py files required by ostorlab serializer (os.walk looks for .py on disk)
+RUN mkdir -p /app/build/nmap_agent.dist/ostorlab/agent/message \
+    && mkdir -p /app/build/server.dist/ostorlab/agent/message \
+    && cp -r $(python -c "import ostorlab.agent.message; print(ostorlab.agent.message.__path__[0])")/proto \
+       /app/build/nmap_agent.dist/ostorlab/agent/message/proto \
+    && cp -r $(python -c "import ostorlab.agent.message; print(ostorlab.agent.message.__path__[0])")/proto \
+       /app/build/server.dist/ostorlab/agent/message/proto
+
+
+FROM debian:bookworm-slim
+
+# Runtime dependencies:
+# - wireguard-tools, iproute2, openresolv: required by wg-quick / VPN logic
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpcap0.8 \
+    wireguard-tools \
+    iproute2 \
+    python3 \
+    python3-pip \
+    openresolv \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
+RUN pip3 install ostorlab --break-system-packages
+
+# Copy compiled nmap binary + data
+COPY --from=builder /usr/local/bin/nmap /usr/local/bin/nmap
+COPY --from=builder /usr/local/share/nmap /usr/local/share/nmap
+
+# Copy compiled binaries
+COPY --from=builder /app/build/nmap_agent.dist /app/nmap_agent
+COPY --from=builder /app/build/server.dist /app/mcp_server
+
+WORKDIR /app
+ENV PATH="/app/nmap_agent:/app/mcp_server:${PATH}"
+
+RUN ln -s /app/nmap_agent/ostorlab.yaml /tmp/ostorlab.yaml
+
+CMD ["/app/nmap_agent/nmap_agent.bin"]
