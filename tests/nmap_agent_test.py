@@ -1,17 +1,15 @@
 """Unittests for Nmap agent."""
 
 import json
-from typing import List, Dict, Union
 import subprocess
 
+import pytest
 import requests_mock as rq_mock
 from ostorlab.agent.message import message
 from ostorlab.utils import definitions as utils_definitions
 from pytest_mock import plugin
 
-from agent import nmap_agent
-from agent import nmap_options
-import pytest
+from agent import nmap_agent, nmap_options
 
 SCAN_RESULT_HOST_AS_LIST = {
     "nmaprun": {
@@ -227,8 +225,8 @@ PORT     STATE  SERVICE  VERSION                                                
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -257,8 +255,8 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackMessagesAndVulnerabili
 
 def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -281,8 +279,8 @@ def testAgentLifecycle_whenScanRunsWithoutErrors_emitsBackVulnerabilityMsg(
 
 def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAndVulnerability(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     link_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -318,11 +316,11 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
 
 def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -352,11 +350,11 @@ def testAgentEmitBanner_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
 def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -376,11 +374,11 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
 
 def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type domain name service.
@@ -408,11 +406,11 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
 def testAgentNmap_whenUrlsScriptsGivent_RunScan(
     nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
@@ -444,10 +442,10 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
     nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
@@ -481,10 +479,10 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
 def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
     nmap_test_agent_with_scripts_arg: nmap_agent.NmapAgent,
     requests_mock: rq_mock.mocker.Mocker,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
-    fake_output_range: None | Dict[str, str],
+    fake_output_range: None | dict[str, str],
 ) -> None:
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
@@ -517,11 +515,11 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
 
 def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Test when nmap banner agent reports service, fingerprint is sent."""
     mocker.patch(
@@ -547,11 +545,11 @@ def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
 
 def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg2: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -583,8 +581,8 @@ def testAgentNmapOptions_withMaxNetworkMask_scansEachSubnet(
 
 def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslyScanned_subnetIsNotScanned(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg_with_mask: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -612,11 +610,11 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
 
 def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Unittest for testing the reporting of vulnerabilities in case multiple hostnames from scan result."""
     mocker.patch(
@@ -633,11 +631,11 @@ def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
 
 
 def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeScanned(
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     nmap_agent_with_scope_arg: nmap_agent.NmapAgent,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Ensure the domain scope argument is enforced, and urls in the scope should be scanned."""
     del agent_persist_mock
@@ -657,11 +655,11 @@ def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeSc
 
 def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output_product: None | Dict[str, str],
+    fake_output_product: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -710,11 +708,11 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
 
 def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output_with_down_host: None | Dict[str, str],
+    fake_output_with_down_host: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -731,11 +729,11 @@ def testNmapAgent_whenHostIsNotUp_shouldNotRaisAnError(
 
 def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_is_down_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output_with_down_host: None | Dict[str, str],
+    fake_output_with_down_host: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -752,8 +750,8 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
 
 def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
     nmap_agent_with_vpn_config_arg: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -774,8 +772,8 @@ def testAgentLifecycle_whenScanRunsWithVpn_shouldConnectToVPN(
 
 def testAgentNmap_whenNoHost_agentShouldNotCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     junk_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -790,8 +788,8 @@ def testAgentNmap_whenNoHost_agentShouldNotCrash(
 
 def testNmapAgentLifecycle_whenIpv6WithHostBits_agentShouldNotCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv6_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -816,8 +814,8 @@ def testNmapAgentLifecycle_whenIpv6WithHostBits_agentShouldNotCrash(
 
 def testNmapAgent_whenIpv6WithoutMask_agentShouldNotGetStuck(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv6_msg_without_mask: message.Message,
 ) -> None:
     """Unit test of nmap agent when ipv6 without mask is provided, the agent should not get stuck."""
@@ -828,8 +826,8 @@ def testNmapAgent_whenIpv6WithoutMask_agentShouldNotGetStuck(
 
 def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv6_msg_above_limit: message.Message,
 ) -> None:
     """Unit test of nmap agent when ipv6 above limit is provided, the agent should raise an error."""
@@ -842,7 +840,7 @@ def testNmapAgent_whenIpv6AboveLimit_agentShouldRaiseError(
 
 def testAgentNmap_whenInvalidDomainName_doesNotCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     invalid_domain_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -859,9 +857,9 @@ def testAgentNmap_whenInvalidDomainName_doesNotCrash(
 
 def testAgent_whenServiceWithProductAndVersion_fingerprintMessageShouldHaveLibraryNameAndVersion(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     ipv4_msg: message.Message,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
 ) -> None:
     """Ensure the agents emits the detected library name with its version."""
@@ -913,9 +911,9 @@ def testAgent_whenServiceWithProductAndVersion_fingerprintMessageShouldHaveLibra
 
 def testAgent_whenHostHaveOs_fingerprintMessageShouldHaveOs(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     ipv4_msg: message.Message,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
 ) -> None:
     """Ensure the agent fingerprint OS."""
@@ -981,9 +979,9 @@ def testAgent_whenHostHaveOs_fingerprintMessageShouldHaveOs(
 
 def testAgent_whenOsClassIsList_fingerprintMessageShouldHaveOs(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     ipv4_msg: message.Message,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
 ) -> None:
     """Ensure the agent handle osclass when it's a list."""
@@ -1053,9 +1051,9 @@ def testAgent_whenOsClassIsList_fingerprintMessageShouldHaveOs(
 
 def testAgent_whenOsMatchIsEmptyList_fingerprintMessageShouldHaveOs(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     ipv4_msg: message.Message,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
 ) -> None:
     """Ensure the agent handle osmatch when it's an empty list."""
@@ -1098,9 +1096,9 @@ def testAgent_whenOsMatchIsEmptyList_fingerprintMessageShouldHaveOs(
 
 def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     ipv4_msg: message.Message,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
 ) -> None:
     """Ensure the agent handle osmatch when it's a list."""
@@ -1154,11 +1152,11 @@ def testAgent_whenOsMatchIsList_fingerprintMessageShouldHaveOs(
 
 def testAgentNmap_withOSFingerprintCrash1_noException(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg2: message.Message,
     mocker: plugin.MockerFixture,
-    fake_crash_1_output: None | Dict[str, str],
+    fake_crash_1_output: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -1183,11 +1181,11 @@ def testAgentNmap_withOSFingerprintCrash1_noException(
 
 def testAgentNmap_withOSFingerprintCrash2_noException(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg2: message.Message,
     mocker: plugin.MockerFixture,
-    fake_crash_2_output: None | Dict[str, str],
+    fake_crash_2_output: None | dict[str, str],
 ) -> None:
     """Unittest for the full life cycle of the agent : case where the  nmap scan runs without errors,
     the agents emits back messages of type service with banner.
@@ -1212,8 +1210,8 @@ def testAgentNmap_withOSFingerprintCrash2_noException(
 
 def testAgentLifecycle_whenTCPWrappedService_emitsNoService(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     ipv4_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -1247,9 +1245,9 @@ def testAgentLifecycle_whenTCPWrappedService_emitsNoService(
 
 def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
+    agent_mock: list[message.Message],
     domain_msg: message.Message,
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     mocker: plugin.MockerFixture,
 ) -> None:
     """Ensure the agent handle osmatch when it's a list."""
@@ -1300,11 +1298,11 @@ def testAgentLifecycle_whenDomainTCPWrappedService_emitsNoService(
 
 def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprint(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output_product: None | Dict[str, str],
+    fake_output_product: None | dict[str, str],
 ) -> None:
     """In case service in the scan results does not have a product field,
     emit nothing instead of emitting blank entry.
@@ -1321,8 +1319,8 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprint(
 
 def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
 ) -> None:
@@ -1352,11 +1350,11 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
 
 def testAgentNmap_whenApiSchemaMessage_shouldScanDomain(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     api_schema_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Test that the agent processes api_schema messages and scans the domain."""
     mocker.patch(
@@ -1375,11 +1373,11 @@ def testAgentNmap_whenApiSchemaMessage_shouldScanDomain(
 
 def testAgentNmap_whenSameApiSchemaReceivedTwice_shouldScanOnce(
     nmap_test_agent: nmap_agent.NmapAgent,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
     api_schema_msg: message.Message,
     mocker: plugin.MockerFixture,
-    fake_output: None | Dict[str, str],
+    fake_output: None | dict[str, str],
 ) -> None:
     """Test that duplicate api_schema messages are only processed once."""
     mock_scan = mocker.patch(

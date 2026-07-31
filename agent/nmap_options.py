@@ -4,7 +4,6 @@ import dataclasses
 import enum
 import logging
 import tempfile
-from typing import List, Optional
 
 import requests
 
@@ -43,42 +42,42 @@ class NmapOptions:
     """Storing the options of a Nmap scan."""
 
     dns_resolution: bool = True
-    dns_servers: List[str] | None = None
+    dns_servers: list[str] | None = None
     ports: str | None = None
     tcp_syn_ping_ports: str | None = None
     top_ports: None | int = None
     fast_mode: bool = False
     timing_template: TimingTemplate = TimingTemplate.T3
     script_default: bool = False
-    scripts: List[str] | None = dataclasses.field(
+    scripts: list[str] | None = dataclasses.field(
         default_factory=lambda: ["default", "banner"]
     )
     version_detection: bool = True
     os_detection: bool = True
-    port_scanning_techniques: List[PortScanningTechnique] = dataclasses.field(
+    port_scanning_techniques: list[PortScanningTechnique] = dataclasses.field(
         default_factory=lambda: [
             PortScanningTechnique.TCP_SYN,
         ]
     )
     no_ping: bool = True
-    privileged: Optional[bool] = None
-    host_timeout: Optional[int] = None
+    privileged: bool | None = None
+    host_timeout: int | None = None
 
-    def _set_os_detection_option(self) -> List[str]:
+    def _set_os_detection_option(self) -> list[str]:
         """Appends the os detection option to the list of nmap options."""
         command_options = []
         if self.os_detection is True:
             command_options.append("-O")
         return command_options
 
-    def _set_version_detection_option(self) -> List[str]:
+    def _set_version_detection_option(self) -> list[str]:
         """Appends the version detection option to the list of nmap options."""
         command_options = []
         if self.version_detection is True:
             command_options.append("-sV")
         return command_options
 
-    def _set_host_discovery_options(self) -> List[str]:
+    def _set_host_discovery_options(self) -> list[str]:
         options = []
         if self.no_ping is True:
             options.append("-Pn")
@@ -86,7 +85,7 @@ class NmapOptions:
             options.append(f"-PS{self.tcp_syn_ping_ports}")
         return options
 
-    def _set_privileged(self) -> List[str]:
+    def _set_privileged(self) -> list[str]:
         if self.privileged is True:
             return ["--privileged"]
         elif self.privileged is False:
@@ -94,7 +93,7 @@ class NmapOptions:
         else:
             return []
 
-    def _set_dns_resolution_option(self) -> List[str]:
+    def _set_dns_resolution_option(self) -> list[str]:
         """Appends the dns resolution option to the list of nmap options."""
         command_options = []
         if self.dns_resolution is True:
@@ -106,7 +105,7 @@ class NmapOptions:
             command_options.append("-n")
         return command_options
 
-    def _set_ports_option(self) -> List[str]:
+    def _set_ports_option(self) -> list[str]:
         """Appends the ports option to the list of nmap options."""
         if self.fast_mode is True:
             return ["-F"]
@@ -117,27 +116,27 @@ class NmapOptions:
         else:
             return []
 
-    def _set_timing_option(self) -> List[str]:
+    def _set_timing_option(self) -> list[str]:
         """Appends the timing template option to the list of nmap options."""
         return [self.timing_template.value]
 
-    def _set_port_scanning_techniques(self) -> List[str]:
+    def _set_port_scanning_techniques(self) -> list[str]:
         """Appends the port scanning technique to the list of nmap options."""
         return [tech.value for tech in self.port_scanning_techniques]
 
-    def _set_script_default(self) -> List[str]:
+    def _set_script_default(self) -> list[str]:
         if self.script_default is True:
             return ["-sC"]
         else:
             return []
 
-    def _set_scripts(self) -> List[str]:
+    def _set_scripts(self) -> list[str]:
         if self.scripts is not None and len(self.scripts) > 0:
             return self._run_scripts_command(self.scripts)
         else:
             return []
 
-    def _run_scripts_command(self, scripts: List[str]) -> List[str]:
+    def _run_scripts_command(self, scripts: list[str]) -> list[str]:
         """Run nmap scan on the provided scripts"""
 
         command = []
@@ -152,14 +151,14 @@ class NmapOptions:
 
         return command
 
-    def _set_host_timeout(self) -> List[str]:
+    def _set_host_timeout(self) -> list[str]:
         if self.host_timeout is not None:
             return ["--host-timeout", str(self.host_timeout)]
         else:
             return []
 
     @property
-    def command_options(self) -> List[str]:
+    def command_options(self) -> list[str]:
         """Computes the list of nmap options."""
         command_options = []
         command_options.extend(self._set_os_detection_option())

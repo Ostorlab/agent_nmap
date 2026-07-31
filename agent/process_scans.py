@@ -1,13 +1,11 @@
 """Processing scans returned by the nmap agent."""
 
-from typing import Dict, List
-
 from agent import markdown
 
 
 def get_technical_details(
-    scans: Dict[
-        str, Dict[str, List[Dict[str, Dict[str, str]]] | Dict[str, Dict[str, str]]]
+    scans: dict[
+        str, dict[str, list[dict[str, dict[str, str]]] | dict[str, dict[str, str]]]
     ],
 ) -> str:
     """Returns a markdown table of the technical report of the scan.

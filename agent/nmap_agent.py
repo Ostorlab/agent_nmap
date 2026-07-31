@@ -10,10 +10,11 @@ import ipaddress
 import logging
 import re
 import subprocess
-from typing import Dict, Any, Tuple, Optional, List, cast
+from typing import Any, cast
 from urllib import parse
 
-from ostorlab.agent import agent, definitions as agent_definitions
+from ostorlab.agent import agent
+from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent.kb import kb
 from ostorlab.agent.message import message as msg
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
@@ -24,10 +25,7 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
-from agent import result_parser
-from agent import nmap_options
-from agent import nmap_wrapper
-from agent import process_scans
+from agent import nmap_options, nmap_wrapper, process_scans, result_parser
 from agent.mcp import runner as mcp_runner
 
 logging.basicConfig(
@@ -71,10 +69,10 @@ class NmapAgent(
         agent.Agent.__init__(self, agent_definition, agent_settings)
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
-        self._scope_domain_regex: Optional[str] = self.args.get("scope_domain_regex")
-        self._vpn_config: Optional[str] = self.args.get("vpn_config")
-        self._dns_config: Optional[str] = self.args.get("dns_config")
-        self._host_timeout: Optional[int] = self.args.get("host_timeout")
+        self._scope_domain_regex: str | None = self.args.get("scope_domain_regex")
+        self._vpn_config: str | None = self.args.get("vpn_config")
+        self._dns_config: str | None = self.args.get("dns_config")
+        self._host_timeout: int | None = self.args.get("host_timeout")
 
         self.should_start_mcp_server: bool = self.args.get(
             "should_start_mcp_server", False
@@ -99,11 +97,11 @@ class NmapAgent(
 
         if self.should_start_mcp_server is True:
             logger.warning("Oxo messages are ignored in MCP mode: %s", message.selector)
-            return None
+            return
 
         logger.debug("processing message of selector : %s", message.selector)
         host = message.data.get("host", "")
-        hosts: List[Tuple[str, int]] = []
+        hosts: list[tuple[str, int]] = []
 
         if "v4" in message.selector:
             mask = int(message.data.get("mask", "32"))
@@ -177,7 +175,7 @@ class NmapAgent(
         else:
             logger.error("Neither host or domain are set.")
 
-    def _scan_host(self, host: str, mask: int) -> Tuple[Dict[str, Any], str]:
+    def _scan_host(self, host: str, mask: int) -> tuple[dict[str, Any], str]:
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
@@ -197,7 +195,7 @@ class NmapAgent(
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
-    def _scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
+    def _scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str]:
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
@@ -233,8 +231,8 @@ class NmapAgent(
             return True
 
     def _prepare_domain_name(
-        self, domain_name: Optional[str], url: Optional[str]
-    ) -> Optional[str]:
+        self, domain_name: str | None, url: str | None
+    ) -> str | None:
         """Prepare domain name based on type, if a url is provided, return its domain."""
         if domain_name is not None:
             return domain_name
@@ -244,10 +242,10 @@ class NmapAgent(
             return None
 
     def _prepare_metadata(
-        self, ports: Dict[str, Any] | List[Dict[str, Any]]
-    ) -> List[vuln_mixin.VulnerabilityLocationMetadata]:
+        self, ports: dict[str, Any] | list[dict[str, Any]]
+    ) -> list[vuln_mixin.VulnerabilityLocationMetadata]:
         ret = []
-        if isinstance(ports, List):
+        if isinstance(ports, list):
             for port_dict in ports:
                 port = port_dict.get("@portid", "")
                 ret.append(
@@ -255,7 +253,7 @@ class NmapAgent(
                         metadata_type=vuln_mixin.MetadataType.PORT, value=port
                     )
                 )
-        elif isinstance(ports, Dict):
+        elif isinstance(ports, dict):
             port = ports.get("@portid", "")
             ret.append(
                 vuln_mixin.VulnerabilityLocationMetadata(
@@ -298,7 +296,7 @@ class NmapAgent(
             )
 
     def _emit_network_scan_finding(
-        self, scan_results: Dict[str, Any], normal_results: str
+        self, scan_results: dict[str, Any], normal_results: str
     ) -> None:
         scan_result_technical_detail = process_scans.get_technical_details(scan_results)
         if normal_results is not None:
@@ -338,7 +336,7 @@ class NmapAgent(
                     )
 
     def _emit_services(
-        self, scan_results: Dict[str, Any], domain_name: Optional[str]
+        self, scan_results: dict[str, Any], domain_name: str | None
     ) -> None:
         if domain_name is not None:
             logger.info("Services targeting domain `%s`.", domain_name)
@@ -367,7 +365,7 @@ class NmapAgent(
             self.emit(selector, service_dict)
 
     def _emit_fingerprints(
-        self, scan_results: Dict[str, Any], domain_name: Optional[str]
+        self, scan_results: dict[str, Any], domain_name: str | None
     ) -> None:
         self._emit_os_fingerprints(scan_results)
         self._emit_service_library_fingerprints(scan_results)
@@ -438,7 +436,7 @@ class NmapAgent(
         except RunCommandError as e:
             logger.warning("%s", e)
 
-    def _exec_command(self, command: List[str]) -> None:
+    def _exec_command(self, command: list[str]) -> None:
         """Execute a command."""
         try:
             logger.info("%s", " ".join(command))
