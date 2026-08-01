@@ -1,8 +1,8 @@
 """Generators of the messages' data that will be sent after the scan is complete."""
 
 import logging
-
-from typing import Dict, Iterator, List, Optional, Any
+from collections.abc import Iterator
+from typing import Any
 
 IP_VERSIONS = {"ipv4": 4, "ipv6": 6}
 
@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_services(
-    scan_result: Dict[str, Dict[str, List[Dict[str, Any]] | Dict[str, Dict[str, Any]]]],
-) -> Iterator[Dict[str, Optional[str]]]:
+    scan_result: dict[str, dict[str, list[dict[str, Any]] | dict[str, dict[str, Any]]]],
+) -> Iterator[dict[str, str | None]]:
     """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
 
     Args:
@@ -31,10 +31,7 @@ def get_services(
             data["host"] = host.get("address", {}).get("@addr")
             ip_version = host.get("address", {}).get("@addrtype")
 
-            if ip_version in IP_VERSIONS:
-                data["version"] = IP_VERSIONS[ip_version]
-            else:
-                data["version"] = 4
+            data["version"] = IP_VERSIONS.get(ip_version, 4)
 
             ports = host.get("ports", {}).get("port", [])
             # nmap returns a list of ports, however in the case of only one, it returns it as a dict.
@@ -56,8 +53,8 @@ def get_services(
 
 # get banner from script
 def get_script_by_name(
-    name: str, port: Dict[str, Dict[str, str] | List[Dict[str, str]]]
-) -> Optional[str]:
+    name: str, port: dict[str, dict[str, str] | list[dict[str, str]]]
+) -> str | None:
     """Get the banner from the port.
 
     Args:

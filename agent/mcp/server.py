@@ -6,7 +6,6 @@ import fastmcp
 
 from agent.mcp import tools as mcp_tools
 
-
 logger = logging.getLogger(__name__)
 
 MCP_SERVER_NAME = "nmap"

@@ -3,8 +3,8 @@
 import ipaddress
 import logging
 import subprocess
+from typing import Any
 from xml.parsers import expat
-from typing import Any, Dict, List, Tuple
 
 import xmltodict
 
@@ -46,7 +46,7 @@ class NmapWrapper:
         """
         self._options = options
 
-    def construct_command_host(self, host: str, mask: int) -> List[str]:
+    def construct_command_host(self, host: str, mask: int) -> list[str]:
         """
         Construct the Nmap command to be run.
 
@@ -71,7 +71,7 @@ class NmapWrapper:
         command.append(f"{host}/{mask}")
         return command
 
-    def _construct_command_domain(self, domain_name: str) -> List[str]:
+    def _construct_command_domain(self, domain_name: str) -> list[str]:
         """
         Construct the Nmap command to be run.
 
@@ -92,7 +92,7 @@ class NmapWrapper:
         ]
         return command
 
-    def scan_hosts(self, hosts: str, mask: int) -> Tuple[Dict[str, Any], str]:
+    def scan_hosts(self, hosts: str, mask: int) -> tuple[dict[str, Any], str]:
         """Run the scan with nmap.
 
         Args:
@@ -115,7 +115,7 @@ class NmapWrapper:
 
         return scan_results, normal_results
 
-    def scan_domain(self, domain_name: str) -> Tuple[Dict[str, Any], str]:
+    def scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str]:
         """Run the scan with nmap.
 
         Args:

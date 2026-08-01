@@ -4,8 +4,7 @@ import pathlib
 from unittest import mock
 
 import agent.nmap_agent
-from agent import nmap_options
-from agent import nmap_wrapper
+from agent import nmap_options, nmap_wrapper
 
 
 def testNmapWrapper_whenFastMode_returnCommand(

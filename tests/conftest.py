@@ -1,15 +1,15 @@
 """Pytest fixture for the nmap agent."""
 
+import json
 import os
 import pathlib
-import json
-from typing import Any, Dict, Union, List
+from typing import Any
 
 import pytest
 import xmltodict
 from ostorlab.agent import definitions as agent_definitions
-from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.agent.message import message
+from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.utils import definitions as utils_definitions
 
 from agent import nmap_agent
@@ -164,8 +164,8 @@ def domain_is_down_msg() -> message.Message:
 
 @pytest.fixture(scope="function", name="nmap_test_agent")
 def fixture_agent(
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
@@ -186,8 +186,8 @@ def fixture_agent(
 
 @pytest.fixture(scope="function")
 def nmap_test_agent_with_scripts_arg(
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
@@ -219,8 +219,8 @@ def nmap_test_agent_with_scripts_arg(
 
 @pytest.fixture(scope="function")
 def nmap_agent_with_scope_arg(
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Nmap Agent fixture with  domain scope argument for testing purposes."""
     del agent_persist_mock
@@ -242,8 +242,8 @@ def nmap_agent_with_scope_arg(
 
 @pytest.fixture(scope="function")
 def nmap_agent_with_vpn_config_arg(
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Nmap Agent fixture with  domain scope argument for testing purposes."""
     del agent_persist_mock
@@ -317,8 +317,8 @@ def ipv6_msg_above_limit() -> message.Message:
 
 @pytest.fixture(scope="function")
 def nmap_agent_fast_mode(
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
@@ -346,8 +346,8 @@ def nmap_agent_fast_mode(
 @pytest.fixture(scope="function")
 def nmap_agent_top_ports(
     request: Any,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
@@ -380,8 +380,8 @@ def nmap_agent_top_ports(
 @pytest.fixture(scope="function")
 def nmap_agent_all_ports(
     request: Any,
-    agent_mock: List[message.Message],
-    agent_persist_mock: Dict[Union[str, bytes], Union[str, bytes]],
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
 ) -> nmap_agent.NmapAgent:
     """Fixture of the Nmap Agent to be used for testing purposes."""
     del agent_persist_mock
