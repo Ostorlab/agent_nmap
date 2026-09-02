@@ -18,7 +18,7 @@ FROM base AS builder
 
 WORKDIR /tmp
 
-ARG NMAP_VERSION=7.95
+ARG NMAP_VERSION=7.94
 
 RUN apt-get update && apt-get install -y \
     wget \
