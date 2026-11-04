@@ -233,22 +233,31 @@ class NmapAgent(
         else:
             return True
 
-    def _is_url_in_scope(self, url: str | None) -> bool:
+    def _is_url_in_scope(self, url: str) -> bool:
         """Check if the URL a target represents is in the scan scope with a regular expression."""
         if self._scope_urls_regex is None or self._scope_urls_regex == "":
             return True
-        if url is None or re.match(self._scope_urls_regex, url) is None:
+        try:
+            url_in_scope = re.match(self._scope_urls_regex, url)
+        except re.error:
+            logger.warning(
+                "Invalid scope URLs regex %s, skipping URL %s.",
+                self._scope_urls_regex,
+                url,
+            )
+            return False
+        if url_in_scope is None:
             logger.warning(
                 "URL %s is not in scanning scope %s", url, self._scope_urls_regex
             )
             return False
         return True
 
-    def _prepare_target_url(self, message: msg.Message) -> str | None:
+    def _prepare_target_url(self, message: msg.Message) -> str:
         """Build the URL a domain name, link or API schema message represents."""
         if (domain_name := message.data.get("name")) is not None:
             return f"https://{domain_name}"
-        return message.data.get("url") or message.data.get("endpoint_url")
+        return str(message.data.get("url") or message.data.get("endpoint_url") or "")
 
     def _prepare_domain_name(
         self, domain_name: str | None, url: str | None

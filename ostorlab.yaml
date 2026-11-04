@@ -127,7 +127,7 @@ args:
     description: "Regular expression to define domain scanning scope."
   - name: "scope_urls_regex"
     type: "string"
-    description: "Regular expression of the URLs the agent is allowed to reach."
+    description: "Regular expression of the URLs the agent is allowed to reach, matched with re.match against the start of the URL (domains are checked as the URL the agent builds for them, e.g. https://<domain>). Anchor the end of the host to exclude look-alike hosts such as <domain>.evil.com. Empty means no filtering."
   - name: "host_timeout"
     type: "number"
     description: "Host timeout in seconds."

@@ -265,6 +265,45 @@ def nmap_agent_with_scope_urls_arg(
         return nmap_agent.NmapAgent(agent_definition, agent_settings)
 
 
+def _build_nmap_agent_with_scope_urls_regex(
+    scope_urls_regex: str,
+) -> nmap_agent.NmapAgent:
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        agent_definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        agent_settings = runtime_definitions.AgentSettings(
+            key="nmap",
+            redis_url="redis://redis",
+            args=[
+                utils_definitions.Arg(
+                    name="scope_urls_regex",
+                    type="string",
+                    value=json.dumps(scope_urls_regex).encode(),
+                ),
+            ],
+        )
+        return nmap_agent.NmapAgent(agent_definition, agent_settings)
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_with_empty_scope_urls_arg(
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+) -> nmap_agent.NmapAgent:
+    """Nmap Agent fixture with an empty URLs scope argument."""
+    del agent_persist_mock
+    return _build_nmap_agent_with_scope_urls_regex("")
+
+
+@pytest.fixture(scope="function")
+def nmap_agent_with_invalid_scope_urls_arg(
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+) -> nmap_agent.NmapAgent:
+    """Nmap Agent fixture with an invalid URLs scope regular expression."""
+    del agent_persist_mock
+    return _build_nmap_agent_with_scope_urls_regex("(")
+
+
 @pytest.fixture(scope="function")
 def nmap_agent_with_vpn_config_arg(
     agent_mock: list[message.Message],

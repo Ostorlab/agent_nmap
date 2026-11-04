@@ -1533,3 +1533,41 @@ def testNmapAgent_withUrlsScopeArgAndIpMessage_ipIsScanned(
     nmap_agent_with_scope_urls_arg.process(ipv4_msg)
 
     assert scan_hosts_mock.call_count == 1
+
+
+def testNmapAgent_withEmptyUrlsScopeArg_domainIsScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_empty_scope_urls_arg: nmap_agent.NmapAgent,
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure an empty URLs scope does not filter domain names."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_empty_scope_urls_arg.process(domain_msg)
+
+    assert scan_domain_mock.call_count == 1
+    assert scan_domain_mock.call_args.kwargs["domain_name"] == "ostorlab.co"
+
+
+def testNmapAgent_withInvalidUrlsScopeArg_domainIsNotScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_invalid_scope_urls_arg: nmap_agent.NmapAgent,
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure an invalid URLs scope regex skips the target without crashing."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_invalid_scope_urls_arg.process(domain_msg)
+
+    assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
