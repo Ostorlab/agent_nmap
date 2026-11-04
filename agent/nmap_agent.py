@@ -70,6 +70,7 @@ class NmapAgent(
         vuln_mixin.AgentReportVulnMixin.__init__(self)
         persist_mixin.AgentPersistMixin.__init__(self, agent_settings)
         self._scope_domain_regex: str | None = self.args.get("scope_domain_regex")
+        self._scope_urls_regex: str | None = self.args.get("scope_urls_regex")
         self._vpn_config: str | None = self.args.get("vpn_config")
         self._dns_config: str | None = self.args.get("dns_config")
         self._host_timeout: int | None = self.args.get("host_timeout")
@@ -156,6 +157,8 @@ class NmapAgent(
                 self._emit_network_scan_finding(scan_results, normal_results)
                 self._emit_fingerprints(scan_results, domain_name)
         elif domain_name is not None:
+            if self._is_url_in_scope(self._prepare_target_url(message)) is False:
+                return
             logger.info("Scanning domain `%s`.", domain_name)
             if not self.set_add(b"agent_nmap_asset", domain_name):
                 logger.debug("target %s was processed before, exiting", domain_name)
@@ -229,6 +232,32 @@ class NmapAgent(
             return False
         else:
             return True
+
+    def _is_url_in_scope(self, url: str) -> bool:
+        """Check if the URL a target represents is in the scan scope with a regular expression."""
+        if self._scope_urls_regex is None or self._scope_urls_regex == "":
+            return True
+        try:
+            url_in_scope = re.match(self._scope_urls_regex, url)
+        except re.error:
+            logger.warning(
+                "Invalid scope URLs regex %s, skipping URL %s.",
+                self._scope_urls_regex,
+                url,
+            )
+            return False
+        if url_in_scope is None:
+            logger.warning(
+                "URL %s is not in scanning scope %s", url, self._scope_urls_regex
+            )
+            return False
+        return True
+
+    def _prepare_target_url(self, message: msg.Message) -> str:
+        """Build the URL a domain name, link or API schema message represents."""
+        if (domain_name := message.data.get("name")) is not None:
+            return f"https://{domain_name}"
+        return str(message.data.get("url") or message.data.get("endpoint_url") or "")
 
     def _prepare_domain_name(
         self, domain_name: str | None, url: str | None
