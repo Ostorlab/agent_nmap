@@ -241,6 +241,31 @@ def nmap_agent_with_scope_arg(
 
 
 @pytest.fixture(scope="function")
+def nmap_agent_with_scope_urls_arg(
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+) -> nmap_agent.NmapAgent:
+    """Nmap Agent fixture with URLs scope argument for testing purposes."""
+    del agent_persist_mock
+    with (pathlib.Path(__file__).parent.parent / "ostorlab.yaml").open() as yaml_o:
+        agent_definition = agent_definitions.AgentDefinition.from_yaml(yaml_o)
+        agent_settings = runtime_definitions.AgentSettings(
+            key="nmap",
+            redis_url="redis://redis",
+            args=[
+                utils_definitions.Arg(
+                    name="scope_urls_regex",
+                    type="string",
+                    value=json.dumps(
+                        r"https?://([a-z0-9-]+\.)*ostorlab\.co(/.*)?$"
+                    ).encode(),
+                ),
+            ],
+        )
+        return nmap_agent.NmapAgent(agent_definition, agent_settings)
+
+
+@pytest.fixture(scope="function")
 def nmap_agent_with_vpn_config_arg(
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],

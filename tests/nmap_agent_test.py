@@ -1390,3 +1390,146 @@ def testAgentNmap_whenSameApiSchemaReceivedTwice_shouldScanOnce(
 
     # Should only scan once
     assert mock_scan.call_count == 1
+
+
+def testNmapAgent_withUrlsScopeArgAndDomainInScope_domainIsScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure a domain name matching the URLs scope is scanned."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_scope_urls_arg.process(domain_msg)
+
+    assert scan_domain_mock.call_count == 1
+    assert scan_domain_mock.call_args.kwargs["domain_name"] == "ostorlab.co"
+
+
+def testNmapAgent_withUrlsScopeArgAndDomainNotInScope_domainIsNotScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure a domain name outside the URLs scope is not scanned."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.domain_name", data={"name": "google.com"}
+    )
+
+    nmap_agent_with_scope_urls_arg.process(msg)
+
+    assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_withUrlsScopeArgAndLinkInScope_linkDomainIsScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    link_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure a link matching the URLs scope is scanned."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_scope_urls_arg.process(link_msg)
+
+    assert scan_domain_mock.call_count == 1
+    assert scan_domain_mock.call_args.kwargs["domain_name"] == "test.ostorlab.co"
+
+
+def testNmapAgent_withUrlsScopeArgAndLinkNotInScope_linkDomainIsNotScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure a link outside the URLs scope is not scanned."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.link",
+        data={"url": "https://www.google.com", "method": "GET"},
+    )
+
+    nmap_agent_with_scope_urls_arg.process(msg)
+
+    assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_withUrlsScopeArgAndApiSchemaNotInScope_endpointIsNotScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    api_schema_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure an API schema whose endpoint is outside the URLs scope is not scanned."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_scope_urls_arg.process(api_schema_msg)
+
+    assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_withUrlsScopeArgAndApiSchemaInScope_endpointIsScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure an API schema whose endpoint matches the URLs scope is scanned."""
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+    msg = message.Message.from_data(
+        selector="v3.asset.file.api_schema",
+        data={
+            "endpoint_url": "https://api.ostorlab.co/v1/users",
+            "schema_type": "openapi",
+        },
+    )
+
+    nmap_agent_with_scope_urls_arg.process(msg)
+
+    assert scan_domain_mock.call_count == 1
+    assert scan_domain_mock.call_args.kwargs["domain_name"] == "api.ostorlab.co"
+
+
+def testNmapAgent_withUrlsScopeArgAndIpMessage_ipIsScanned(
+    agent_mock: list[message.Message],
+    nmap_agent_with_scope_urls_arg: nmap_agent.NmapAgent,
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+) -> None:
+    """Ensure the URLs scope does not apply to IP messages."""
+    scan_hosts_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_agent_with_scope_urls_arg.process(ipv4_msg)
+
+    assert scan_hosts_mock.call_count == 1
