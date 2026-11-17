@@ -10,7 +10,7 @@ from ostorlab.agent.message import message
 from ostorlab.utils import definitions as utils_definitions
 from pytest_mock import plugin
 
-from agent import nmap_agent, nmap_options
+from agent import generators, nmap_agent, nmap_options
 
 SCAN_RESULT_HOST_AS_LIST = {
     "nmaprun": {
@@ -1656,3 +1656,19 @@ def testAgentLifecycle_whenScanHasMultipleHosts_emitsEachFingerprintOnceForItsHo
         if fp["library_type"] == "OS"
     ]
     assert os_fingerprints == [("10.0.0.2", "Linux")]
+
+
+def testGetHostServices_whenMaterialized_yieldsDistinctDictPerPort(
+    fake_output_multi_host: dict[str, Any],
+) -> None:
+    """Ensure materializing the generator keeps one independent dict per port, not N references
+    to a single dict holding the last port's data."""
+    host = fake_output_multi_host["nmaprun"]["host"][0]
+
+    services: list[dict[str, Any]] = list(generators.get_host_services(host))
+
+    assert [(s["host"], s["port"], s["service"]) for s in services] == [
+        ("10.0.0.1", 22, "ssh"),
+        ("10.0.0.1", 80, "http"),
+    ]
+    assert services[0] is not services[1]

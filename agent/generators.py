@@ -41,11 +41,9 @@ def get_host_services(host: dict[str, Any]) -> Iterator[dict[str, str | None]]:
     Yields:
         dictionary of the services of that host only."""
 
-    data = {}
-    data["host"] = host.get("address", {}).get("@addr")
+    address = host.get("address", {}).get("@addr")
     ip_version = host.get("address", {}).get("@addrtype")
-
-    data["version"] = IP_VERSIONS.get(ip_version, 4)
+    version = IP_VERSIONS.get(ip_version, 4)
 
     ports = host.get("ports", {}).get("port", [])
     # nmap returns a list of ports, however in the case of only one, it returns it as a dict.
@@ -53,6 +51,8 @@ def get_host_services(host: dict[str, Any]) -> Iterator[dict[str, str | None]]:
     if isinstance(ports, dict):
         ports = [ports]
     for port in ports:
+        # A fresh dict per port so yielded items do not alias each other.
+        data: dict[str, Any] = {"host": address, "version": version}
         data["port"] = int(port.get("@portid"))
         data["protocol"] = port.get("@protocol")
         data["state"] = port.get("state", {}).get("@state", "closed")
