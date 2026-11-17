@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def get_services(
     scan_result: dict[str, dict[str, list[dict[str, Any]] | dict[str, dict[str, Any]]]],
-) -> Iterator[dict[str, str | None]]:
+) -> Iterator[dict[str, Any]]:
     """Generator of data for messages of type v3.asset.ip.v[4,6].port.service
 
     Args:
@@ -32,7 +32,7 @@ def get_services(
         logger.error(e)
 
 
-def get_host_services(host: dict[str, Any]) -> Iterator[dict[str, str | None]]:
+def get_host_services(host: dict[str, Any]) -> Iterator[dict[str, Any]]:
     """Generator of the services of a single host entry of the nmap scan result.
 
     Args:

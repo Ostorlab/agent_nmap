@@ -1665,7 +1665,7 @@ def testGetHostServices_whenMaterialized_yieldsDistinctDictPerPort(
     to a single dict holding the last port's data."""
     host = fake_output_multi_host["nmaprun"]["host"][0]
 
-    services: list[dict[str, Any]] = list(generators.get_host_services(host))
+    services = list(generators.get_host_services(host))
 
     assert [(s["host"], s["port"], s["service"]) for s in services] == [
         ("10.0.0.1", 22, "ssh"),
