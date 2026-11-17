@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+from typing import Any
 
 import pytest
 import requests_mock as rq_mock
@@ -1333,7 +1334,8 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
 
     nmap_test_agent.process(domain_msg)
 
-    network_scan_finding = agent_mock[6].data
+    # 2 domain services + 2 port services precede the per-host network scan findings.
+    network_scan_finding = agent_mock[4].data
     assert "title" in network_scan_finding
     assert "technical_detail" in network_scan_finding
     assert "14.242.111.45" in network_scan_finding["technical_detail"]
@@ -1345,7 +1347,9 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
         "state": "open",
         "service": "http",
     } in [msg.data for msg in agent_mock]
-    assert len(agent_mock) == 14
+    # 2 domain services, 2 port services, 2 network scan findings, 2 ip service library
+    # fingerprints and 2 domain service library fingerprints: each service is emitted once.
+    assert len(agent_mock) == 10
 
 
 def testAgentNmap_whenApiSchemaMessage_shouldScanDomain(
@@ -1571,3 +1575,84 @@ def testNmapAgent_withInvalidUrlsScopeArg_domainIsNotScanned(
 
     assert scan_domain_mock.call_count == 0
     assert len(agent_mock) == 0
+
+
+def testAgentLifecycle_whenScanHasMultipleHosts_emitsEachServiceOnceForItsHost(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_multi_host: dict[str, Any],
+) -> None:
+    """Ensure a scan result with several up hosts emits each (host, port) service exactly once,
+    attributed to the host that exposes it, and one network scan finding per host."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_output_multi_host, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv4_msg)
+
+    services = [
+        (m.data["host"], m.data["port"])
+        for m in agent_mock
+        if m.selector == "v3.asset.ip.v4.port.service"
+    ]
+    assert sorted(services) == [
+        ("10.0.0.1", 22),
+        ("10.0.0.1", 80),
+        ("10.0.0.2", 443),
+        ("10.0.0.3", 21),
+    ]
+    findings_hosts = [
+        m.data["vulnerability_location"]["ipv4"]["host"]
+        for m in agent_mock
+        if m.selector == "v3.report.vulnerability"
+    ]
+    assert sorted(findings_hosts) == ["10.0.0.1", "10.0.0.2", "10.0.0.3"]
+    # 4 services, 3 network scan findings, 1 OS fingerprint and 6 service library fingerprints.
+    assert len(agent_mock) == 14
+
+
+def testAgentLifecycle_whenScanHasMultipleHosts_emitsEachFingerprintOnceForItsHost(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    ipv4_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_multi_host: dict[str, Any],
+) -> None:
+    """Ensure a scan result with several up hosts emits each service library fingerprint exactly
+    once, attributed to the host that exposes it, and the OS fingerprint only for its host."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_output_multi_host, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(ipv4_msg)
+
+    fingerprints = [
+        m.data
+        for m in agent_mock
+        if m.selector == "v3.fingerprint.ip.v4.service.library"
+    ]
+    service_libraries = [
+        (fp["host"], fp["port"], fp["library_name"])
+        for fp in fingerprints
+        if fp["library_type"] == "BACKEND_COMPONENT"
+    ]
+    assert sorted(service_libraries) == [
+        ("10.0.0.1", 22, "OpenSSH"),
+        ("10.0.0.1", 80, "Host 1 Banner"),
+        ("10.0.0.1", 80, "nginx"),
+        ("10.0.0.2", 443, "Apache httpd"),
+        ("10.0.0.3", 21, "220 (vsFTPd 3.0.5)"),
+        ("10.0.0.3", 21, "vsftpd"),
+    ]
+    os_fingerprints = [
+        (fp["host"], fp["library_name"])
+        for fp in fingerprints
+        if fp["library_type"] == "OS"
+    ]
+    assert os_fingerprints == [("10.0.0.2", "Linux")]

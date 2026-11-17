@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<!-- Synthetic multi-host nmap output: 3 up hosts, each with a different set of ports. -->
+<nmaprun scanner="nmap" args="nmap -sV -n -p 0-65535 -T3 -sS --script banner -oX /tmp/xmloutput -oN /tmp/normal 10.0.0.0/26" start="1700000000" startstr="Tue Nov 14 22:13:20 2023" version="7.94" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="65536" services="0-65535"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1700000000" endtime="1700000100"><status state="up" reason="syn-ack" reason_ttl="63"/>
+<address addr="10.0.0.1" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports>
+    <port protocol="tcp" portid="22"><state state="open" reason="syn-ack" reason_ttl="63"/>
+        <service name="ssh" product="OpenSSH" version="8.9p1" method="probed" conf="10"/>
+    </port>
+    <port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="63"/>
+        <service name="http" product="nginx" version="1.24.0" method="probed" conf="10"/>
+        <script id="banner" output="Host 1 Banner"/>
+    </port>
+</ports>
+</host>
+<host starttime="1700000000" endtime="1700000100"><status state="up" reason="syn-ack" reason_ttl="63"/>
+<address addr="10.0.0.2" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports>
+    <port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="63"/>
+        <service name="https" product="Apache httpd" version="2.4.57" method="probed" conf="10"/>
+    </port>
+</ports>
+<os>
+    <osmatch name="Linux 5.0 - 5.14" accuracy="100" line="1">
+        <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="100"/>
+    </osmatch>
+</os>
+</host>
+<host starttime="1700000000" endtime="1700000100"><status state="up" reason="syn-ack" reason_ttl="63"/>
+<address addr="10.0.0.3" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports>
+    <port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="63"/>
+        <service name="ftp" product="vsftpd" version="3.0.5" method="probed" conf="10"/>
+        <script id="banner" output="220 (vsFTPd 3.0.5)"/>
+    </port>
+    <port protocol="tcp" portid="8080"><state state="open" reason="syn-ack" reason_ttl="63"/>
+        <service name="tcpwrapped" method="probed" conf="8"/>
+    </port>
+</ports>
+</host>
+<runstats><finished time="1700000100" timestr="Tue Nov 14 22:15:00 2023" elapsed="100.00" summary="Nmap done at Tue Nov 14 22:15:00 2023; 64 IP addresses (3 hosts up) scanned in 100.00 seconds" exit="success"/><hosts up="3" down="61" total="64"/>
+</runstats>
+</nmaprun>

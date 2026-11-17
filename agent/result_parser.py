@@ -88,7 +88,7 @@ def get_port_services(scan_results: dict[str, Any]) -> list[PortService]:
         for host in up_hosts:
             version = host.get("address", {}).get("@addrtype")
             address = host.get("address", {}).get("@addr")
-            for data in generators.get_services(scan_results):
+            for data in generators.get_host_services(host):
                 if data.get("service") in BLACKLISTED_SERVICES:
                     continue
                 service: PortService = {
@@ -184,7 +184,7 @@ def get_service_libraries(
             else:
                 raise ValueError(f"Incorrect ip version {version}")
 
-            for data in generators.get_services(scan_results):
+            for data in generators.get_host_services(host):
                 if data.get("service") in BLACKLISTED_SERVICES:
                     continue
                 data_product = data.get("product")
