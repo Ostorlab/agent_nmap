@@ -89,6 +89,16 @@ def fake_output_range() -> Any:
 
 
 @pytest.fixture
+def fake_output_multi_host() -> Any:
+    with open(
+        os.path.join(os.path.dirname(__file__), "fake_output_multi_host.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
+@pytest.fixture
 def fake_output_product() -> Any:
     with open(
         os.path.join(os.path.dirname(__file__), "nmap_product_output.xml"),
