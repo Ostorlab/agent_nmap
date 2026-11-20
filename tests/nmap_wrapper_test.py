@@ -1,14 +1,14 @@
 """Nmap wrapper unit tests"""
 
 import pathlib
-import subprocess
-from collections.abc import Callable
 from unittest import mock
 
 import pytest
+from pytest_mock import plugin
 
 import agent.nmap_agent
-from agent import nmap_options, nmap_wrapper
+from agent import nmap_options
+from agent import nmap_wrapper
 
 
 def testNmapWrapper_whenFastMode_returnCommand(
@@ -235,109 +235,119 @@ def testNmapWrapper_whenTcpSynPingPortsIsUsed_returnCommand(
     ]
 
 
-def testNmapWrapperScanDomain_always_scansEveryIpv4AndIpv6AddressOfTheName(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-    ipv4_domain_scan_xml: str,
-    ipv6_domain_scan_xml: str,
+def testNmapWrapper_whenDiscoveringOpenPorts_runsPortOnlyScanOnIpAndReturnsOpenPorts(
+    mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure the domain name is scanned once per IP version, on all of its addresses."""
-    run_mock = nmap_runs([ipv4_domain_scan_xml, ipv6_domain_scan_xml])
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
-
-    client.scan_domain("example.com")
-
-    ipv4_command, ipv6_command = [call.args[0] for call in run_mock.call_args_list]
-    assert "--resolve-all" in ipv4_command
-    assert "-6" not in ipv4_command
-    assert ipv4_command[-1] == "example.com"
-    assert "--resolve-all" in ipv6_command
-    assert ipv6_command[-2:] == ["-6", "example.com"]
-
-
-def testNmapWrapperScanDomain_whenBothIpVersionsHaveHosts_returnsTheHostsOfBoth(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-    ipv4_domain_scan_xml: str,
-    ipv6_domain_scan_xml: str,
-) -> None:
-    """Ensure the results of the IPv4 and IPv6 runs are merged."""
-    nmap_runs([ipv4_domain_scan_xml, ipv6_domain_scan_xml])
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
-
-    scan_results, normal_results = client.scan_domain("example.com")
-
-    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
-    assert addresses == ["192.0.2.10", "2001:db8::10"]
-    assert normal_results.count("Nmap scan report for example.com") == 2
-
-
-def testNmapWrapperScanDomain_whenIpv6RunFails_returnsTheIpv4Results(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-    ipv4_domain_scan_xml: str,
-) -> None:
-    """Ensure a failed IPv6 run keeps the results of the IPv4 run."""
-    nmap_runs([ipv4_domain_scan_xml, subprocess.CalledProcessError(1, "nmap")])
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
-
-    scan_results, _ = client.scan_domain("example.com")
-
-    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
-    assert addresses == ["192.0.2.10"]
-
-
-def testNmapWrapperScanDomain_whenIpv4RunFails_returnsTheIpv6Results(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-    ipv6_domain_scan_xml: str,
-) -> None:
-    """Ensure a failed IPv4 run keeps the results of the IPv6 run."""
-    nmap_runs([subprocess.CalledProcessError(1, "nmap"), ipv6_domain_scan_xml])
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
-
-    scan_results, _ = client.scan_domain("example.com")
-
-    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
-    assert addresses == ["2001:db8::10"]
-
-
-def testNmapWrapperScanDomain_whenEveryRunFails_raises(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-) -> None:
-    """Ensure the error is raised when nmap fails for both IP versions."""
-    nmap_runs(
-        [
-            subprocess.CalledProcessError(1, "nmap"),
-            subprocess.CalledProcessError(1, "nmap"),
-        ]
+    xml_output = (
+        '<nmaprun><host><address addr="35.219.200.16" addrtype="ipv4"/><ports>'
+        '<port protocol="tcp" portid="443"><state state="open"/></port>'
+        '<port protocol="tcp" portid="80"><state state="open"/></port>'
+        '<port protocol="tcp" portid="22"><state state="filtered"/></port>'
+        "</ports></host></nmaprun>"
     )
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+    run_mock = mocker.patch("subprocess.run")
+    mocker.patch("builtins.open", mocker.mock_open(read_data=xml_output))
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="0-65535",
+        timing_template=nmap_options.TimingTemplate.T5,
+        scripts=None,
+        script_default=False,
+        version_detection=False,
+        os_detection=False,
+        no_ping=False,
+        host_timeout=900,
+    )
+    client = nmap_wrapper.NmapWrapper(options)
 
-    with pytest.raises(subprocess.CalledProcessError):
-        client.scan_domain("example.com")
+    open_ports = client.discover_open_ports("35.219.200.16")
+
+    assert open_ports == ["80", "443"]
+    assert run_mock.call_args.args[0] == [
+        "nmap",
+        "-n",
+        "-p",
+        "0-65535",
+        "-T5",
+        "-sS",
+        "--host-timeout",
+        "900",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "35.219.200.16/32",
+    ]
 
 
-def testNmapWrapperScanDomain_whenNoRunFindsAHost_returnsNoHost(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-    no_host_domain_scan_xml: str,
+def testNmapWrapper_whenScanningDomainOverIpv6_addsIpv6FlagBeforeDomain(
+    mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure a name that resolves to no address gives a result without hosts."""
-    nmap_runs([no_host_domain_scan_xml, no_host_domain_scan_xml])
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+    run_mock = mocker.patch("subprocess.run")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="<nmaprun></nmaprun>"))
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="443",
+        timing_template=nmap_options.TimingTemplate.T5,
+        scripts=None,
+        script_default=False,
+        version_detection=True,
+        os_detection=False,
+        no_ping=True,
+    )
+    client = nmap_wrapper.NmapWrapper(options)
 
-    scan_results, _ = client.scan_domain("example.com")
+    client.scan_domain(domain_name="ipv6.ostorlab.co", is_ipv6=True)
 
-    assert scan_results["nmaprun"]["@scanner"] == "nmap"
-    assert scan_results["nmaprun"].get("host") is None
+    assert run_mock.call_args.args[0] == [
+        "nmap",
+        "-sV",
+        "-n",
+        "-p",
+        "443",
+        "-T5",
+        "-sS",
+        "-Pn",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "-6",
+        "ipv6.ostorlab.co",
+    ]
 
 
-def testNmapWrapperScanDomain_whenResolverTranslatesToNat64_leavesOutTheNat64Hosts(
-    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
-    ipv4_domain_scan_xml: str,
-    nat64_domain_scan_xml: str,
+def testNmapWrapper_whenScanningDomainOverIpv4_doesNotAddIpv6Flag(
+    mocker: plugin.MockerFixture,
 ) -> None:
-    """Ensure IPv4 addresses a DNS64 resolver translated are not reported as IPv6 hosts."""
-    nmap_runs([ipv4_domain_scan_xml, nat64_domain_scan_xml])
-    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+    run_mock = mocker.patch("subprocess.run")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="<nmaprun></nmaprun>"))
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="443",
+        timing_template=nmap_options.TimingTemplate.T5,
+        scripts=None,
+        script_default=False,
+        version_detection=True,
+        os_detection=False,
+        no_ping=True,
+    )
+    client = nmap_wrapper.NmapWrapper(options)
 
-    scan_results, _ = client.scan_domain("example.com")
+    client.scan_domain(domain_name="ostorlab.co")
 
-    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
-    assert addresses == ["192.0.2.10"]
+    assert "-6" not in run_mock.call_args.args[0]
+    assert run_mock.call_args.args[0][-1] == "ostorlab.co"
+
+
+def testNmapWrapper_whenDiscoveryOutputCannotBeParsed_raisesOutputParsingError(
+    mocker: plugin.MockerFixture,
+) -> None:
+    mocker.patch("subprocess.run")
+    mocker.patch(
+        "builtins.open", mocker.mock_open(read_data="<nmaprun><host><ports><port")
+    )
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(ports="0-65535"))
+
+    with pytest.raises(nmap_wrapper.OutputParsingError):
+        client.discover_open_ports("35.219.200.16")

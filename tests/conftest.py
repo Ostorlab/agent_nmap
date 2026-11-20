@@ -3,8 +3,7 @@
 import json
 import os
 import pathlib
-import subprocess
-from collections.abc import Callable
+import socket
 from typing import Any
 from unittest import mock
 
@@ -124,78 +123,57 @@ def fake_output_domain_addresses() -> Any:
 
 
 @pytest.fixture
-def ipv4_domain_scan_xml() -> str:
-    """Nmap XML output of the IPv4 run of a domain name scan."""
-    return (
-        '<nmaprun><host><address addr="192.0.2.10" addrtype="ipv4"/>'
-        '<ports><port protocol="tcp" portid="80"><state state="open"/>'
-        '<service name="http"/></port></ports></host></nmaprun>'
+def scan_of_each_domain_address(
+    mocker: plugin.MockerFixture,
+    tmp_path: pathlib.Path,
+    fake_output_domain_addresses: dict[str, Any],
+) -> mock.MagicMock:
+    """Resolves the domain name to the addresses of the fake output, and makes the nmap scan of each
+    address return its own host. Returns the mock of the nmap domain scan."""
+    hosts = fake_output_domain_addresses["nmaprun"]["host"]
+    addresses = [host["address"] for host in hosts]
+    mocker.patch("agent.domain_scan.HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch(
+        "socket.getaddrinfo",
+        side_effect=[
+            [
+                (socket.AF_INET, socket.SOCK_STREAM, 6, "", (a["@addr"], 0))
+                for a in addresses
+                if a["@addrtype"] == "ipv4"
+            ],
+            [
+                (socket.AF_INET6, socket.SOCK_STREAM, 6, "", (a["@addr"], 0, 0, 0))
+                for a in addresses
+                if a["@addrtype"] == "ipv6"
+            ],
+        ],
     )
-
-
-@pytest.fixture
-def ipv6_domain_scan_xml() -> str:
-    """Nmap XML output of the IPv6 run of a domain name scan."""
-    return (
-        '<nmaprun><host><address addr="2001:db8::10" addrtype="ipv6"/>'
-        '<ports><port protocol="tcp" portid="80"><state state="open"/>'
-        '<service name="http"/></port></ports></host></nmaprun>'
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
+        return_value=["80", "443"],
     )
-
-
-@pytest.fixture
-def nat64_domain_scan_xml() -> str:
-    """Nmap XML output of an IPv6 run whose resolver translated the IPv4 address into a NAT64 prefix."""
-    return (
-        '<nmaprun><host><address addr="64:ff9b::c000:20a" addrtype="ipv6"/>'
-        '<ports><port protocol="tcp" portid="80"><state state="open"/>'
-        '<service name="http"/></port></ports></host></nmaprun>'
+    scan_domain_mock: mock.MagicMock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        side_effect=[
+            ({"nmaprun": {"host": host}}, f"Nmap scan report for {address['@addr']}")
+            for host, address in zip(hosts, addresses)
+        ],
     )
+    return scan_domain_mock
 
 
 @pytest.fixture
 def no_host_domain_scan_xml() -> str:
     """Nmap XML output of a domain name scan run that found no host up."""
     return (
-        '<nmaprun scanner="nmap" args="nmap -sV -n -F --resolve-all example.com" '
+        '<nmaprun scanner="nmap" args="nmap -sV -n -p 443 -Pn example.com" '
         'version="7.94" xmloutputversion="1.05">'
-        '<scaninfo type="syn" protocol="tcp" numservices="100" services="7,9,13"/>'
+        '<scaninfo type="syn" protocol="tcp" numservices="1" services="443"/>'
         '<verbose level="0"/><debugging level="0"/>'
         '<runstats><finished elapsed="0.05" exit="success" '
         'summary="0 IP addresses (0 hosts up) scanned in 0.05 seconds"/>'
         '<hosts up="0" down="0" total="0"/></runstats></nmaprun>'
     )
-
-
-@pytest.fixture
-def nmap_runs(
-    tmp_path: pathlib.Path, mocker: plugin.MockerFixture
-) -> Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock]:
-    """Makes each nmap run write the next XML output, or raise the next error, in temporary output files."""
-    xml_path = tmp_path / "xmloutput"
-    normal_path = tmp_path / "normal"
-    mocker.patch("agent.nmap_wrapper.XML_OUTPUT_PATH", str(xml_path))
-    mocker.patch("agent.nmap_wrapper.NORMAL_OUTPUT_PATH", str(normal_path))
-
-    def configure(
-        outputs: list[str | subprocess.CalledProcessError],
-    ) -> mock.MagicMock:
-        remaining = list(outputs)
-
-        def run(command: list[str], check: bool) -> None:
-            del check
-            output = remaining.pop(0)
-            if isinstance(output, subprocess.CalledProcessError):
-                raise output
-            xml_path.write_text(output, encoding="utf-8")
-            normal_path.write_text(f"Nmap scan report for {command[-1]}", "utf-8")
-
-        run_mock: mock.MagicMock = mocker.patch(
-            "agent.nmap_wrapper.subprocess.run", side_effect=run
-        )
-        return run_mock
-
-    return configure
 
 
 @pytest.fixture

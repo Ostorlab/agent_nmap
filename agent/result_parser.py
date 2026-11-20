@@ -109,6 +109,24 @@ def get_port_services(scan_results: dict[str, Any]) -> list[PortService]:
     return port_services
 
 
+def get_open_ports(scan_results: dict[str, Any]) -> list[str]:
+    """Returns the sorted, de-duplicated open port numbers found in an nmap scan result."""
+    open_ports: set[str] = set()
+    if scan_results is None or scan_results.get("nmaprun") is None:
+        return []
+    hosts = scan_results["nmaprun"].get("host", [])
+    if isinstance(hosts, dict):
+        hosts = [hosts]
+    for host in hosts:
+        ports = (host.get("ports") or {}).get("port", [])
+        if isinstance(ports, dict):
+            ports = [ports]
+        for port in ports:
+            if (port.get("state") or {}).get("@state") == "open":
+                open_ports.add(port.get("@portid", ""))
+    return sorted((p for p in open_ports if p != ""), key=int)
+
+
 def get_os_fingerprints(scan_results: dict[str, Any]) -> list[OSFingerprint]:
     os_fingerprints = []
     if (
