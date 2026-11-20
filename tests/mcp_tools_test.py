@@ -46,7 +46,8 @@ def testScan_whenDomainsShareAnIp_discoversPortsOnceAndScansOnlyOpenPorts(
     assert agent_persist_mock[domain_scan.OPEN_PORTS_CACHE_KEY] == {
         "10.0.0.3": b"80,443"
     }
-    discovery_options = wrapper_init_spy.call_args_list[1].kwargs["options"]
+    assert wrapper_init_spy.call_count == 3
+    discovery_options = wrapper_init_spy.call_args_list[0].kwargs["options"]
     assert discovery_options.version_detection is False
     assert discovery_options.script_default is False
     assert discovery_options.scripts is None

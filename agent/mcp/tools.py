@@ -128,11 +128,9 @@ def _do_scan(target: str, persist: persist_mixin.AgentPersistMixin) -> dict[str,
         host_timeout=300,
         port_scanning_techniques=[nmap_options.PortScanningTechnique.TCP_CONNECT],
     )
-    client = nmap_wrapper.NmapWrapper(options)
-
     try:
-        if _is_ip_or_cidr(target):
-            return _scan_ip(client, target)
+        if _is_ip_or_cidr(target=target):
+            return _scan_ip(options=options, target=target)
         else:
             results = domain_scan.scan_domain(
                 domain_name=target, options=options, persist=persist
@@ -149,7 +147,7 @@ def _do_scan(target: str, persist: persist_mixin.AgentPersistMixin) -> dict[str,
         raise CalledToolError from e
 
 
-def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
+def _scan_ip(options: nmap_options.NmapOptions, target: str) -> dict[str, Any]:
     if "/" in target:
         network = ipaddress.ip_network(target, strict=False)
         host = str(network.network_address)
@@ -159,6 +157,7 @@ def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
         mask = 128 if ip.version == 6 else 32
         host = target
 
+    client = nmap_wrapper.NmapWrapper(options)
     scan_results, _ = client.scan_hosts(hosts=host, mask=mask)
     return scan_results
 
