@@ -5,7 +5,9 @@ import logging
 import subprocess
 from typing import Any
 
-from agent import nmap_options, nmap_wrapper, result_parser
+from agent import nmap_options
+from agent import nmap_wrapper
+from agent import result_parser
 from agent.mcp import mcp_types
 
 logger = logging.getLogger(__name__)

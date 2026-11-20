@@ -9,6 +9,7 @@ from xml.parsers import expat
 import xmltodict
 
 from agent import nmap_options
+from agent import result_parser
 
 XML_OUTPUT_PATH = "/tmp/xmloutput"
 NORMAL_OUTPUT_PATH = "/tmp/normal"
@@ -57,7 +58,7 @@ class NmapWrapper:
         Returns:
             list of the arguments that will be used to run the scan process.
         """
-        ip_version = ipaddress.ip_address(host).version
+        ip_version = ipaddress.ip_address(address=host).version
         command = [
             "nmap",
             *self._options.command_options,
@@ -71,12 +72,15 @@ class NmapWrapper:
         command.append(f"{host}/{mask}")
         return command
 
-    def _construct_command_domain(self, domain_name: str) -> list[str]:
+    def _construct_command_domain(
+        self, domain_name: str, is_ipv6: bool = False
+    ) -> list[str]:
         """
         Construct the Nmap command to be run.
 
         Args:
             domain: which domain to be scanned.
+            is_ipv6: scan the domain's IPv6 address instead of its IPv4 address.
 
         Returns:
             list of the arguments that will be used to run the scan process.
@@ -88,8 +92,10 @@ class NmapWrapper:
             XML_OUTPUT_PATH,
             "-oN",
             NORMAL_OUTPUT_PATH,
-            domain_name,
         ]
+        if is_ipv6 is True:
+            command.append("-6")
+        command.append(domain_name)
         return command
 
     def scan_hosts(self, hosts: str, mask: int) -> tuple[dict[str, Any], str]:
@@ -115,17 +121,41 @@ class NmapWrapper:
 
         return scan_results, normal_results
 
-    def scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str]:
+    def discover_open_ports(self, host: str) -> list[str]:
+        """Run a port-only scan of a single IP and return its open ports.
+
+        Args:
+            host: IP address to scan.
+
+        Returns:
+            Sorted list of open port numbers, empty if none were found or the scan timed out.
+        """
+        mask = 32 if ipaddress.ip_address(address=host).version == 4 else 128
+        logger.info("discovering open ports of %s", host)
+        command = self.construct_command_host(host=host, mask=mask)
+        subprocess.run(command, check=True)
+
+        with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:
+            scan_results = parse_output(o.read())
+
+        return result_parser.get_open_ports(scan_results=scan_results)
+
+    def scan_domain(
+        self, domain_name: str, is_ipv6: bool = False
+    ) -> tuple[dict[str, Any], str]:
         """Run the scan with nmap.
 
         Args:
             domain_name: which domain name to be scanned.
+            is_ipv6: scan the domain's IPv6 address instead of its IPv4 address.
 
         Returns:
             result of the scan.
         """
         logger.info("running the nmap scan")
-        command = self._construct_command_domain(domain_name)
+        command = self._construct_command_domain(
+            domain_name=domain_name, is_ipv6=is_ipv6
+        )
         subprocess.run(command, check=True)
 
         with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:

@@ -5,12 +5,15 @@ or `v3.asset.file.api_schema`, and emits back messages of type `v3.asset.ip.v[4,
 and `v3.report.vulnerability` with a technical report of the scan.
 """
 
+import dataclasses
 import datetime
 import ipaddress
 import logging
 import re
+import socket
 import subprocess
-from typing import Any, cast
+from typing import Any
+from typing import cast
 from urllib import parse
 
 from ostorlab.agent import agent
@@ -25,7 +28,10 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
-from agent import nmap_options, nmap_wrapper, process_scans, result_parser
+from agent import nmap_options
+from agent import nmap_wrapper
+from agent import process_scans
+from agent import result_parser
 from agent.mcp import runner as mcp_runner
 
 logging.basicConfig(
@@ -45,6 +51,13 @@ DNS_RESOLV_CONFIG_PATH = "/etc/resolv.conf"
 DEFAULT_MASK_IPV6 = 128
 # scan up to 65536 host
 IPV6_CIDR_LIMIT = 112
+
+OPEN_PORTS_CACHE_KEY = b"agent_nmap_ip_open_ports"
+
+# Nmap reads /etc/hosts before querying DNS.
+# Pinning the domain there makes nmap scan the same IP whose open ports were cached.
+HOSTS_FILE_PATH = "/etc/hosts"
+HOSTS_FILE_ENTRY_MARKER = "# agent_nmap"
 
 
 class Error(Exception):
@@ -166,10 +179,13 @@ class NmapAgent(
             if self._is_domain_in_scope(domain_name) is False:
                 return
             try:
-                scan_results, normal_results = self._scan_domain(domain_name)
+                results = self._scan_domain(domain_name=domain_name)
             except subprocess.CalledProcessError:
                 logger.error("Nmap command failed to scan domain name %s", domain_name)
                 return
+            if results is None:
+                return
+            scan_results, normal_results = results
             logger.info("scan results %s", scan_results)
 
             self._emit_services(scan_results, domain_name)
@@ -198,7 +214,16 @@ class NmapAgent(
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
-    def _scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str]:
+    def _scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str] | None:
+        """Scan a domain name.
+
+        Port discovery is done once per resolved IP address and cached in redis.
+        The name-dependent part still runs for every domain, but only on the cached open ports.
+
+        Returns:
+            The scan results, or None when the domain can not be resolved or its IP has no
+            open ports.
+        """
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
@@ -213,10 +238,97 @@ class NmapAgent(
             os_detection=self.args.get("os", False),
             host_timeout=self._host_timeout,
         )
+        ip = self._resolve_ip(domain_name=domain_name)
+        if ip is None:
+            logger.info("could not resolve %s, skipping it", domain_name)
+            return None
+        is_ipv6 = ipaddress.ip_address(address=ip).version == 6
+        open_ports = self._get_open_ports(ip=ip, options=options)
+        if len(open_ports) == 0:
+            logger.info(
+                "no open ports on %s (%s), skipping service scan", ip, domain_name
+            )
+            return None
+        options = dataclasses.replace(
+            options,
+            ports=",".join(open_ports),
+            top_ports=None,
+            fast_mode=False,
+            no_ping=True,
+            tcp_syn_ping_ports=None,
+        )
         client = nmap_wrapper.NmapWrapper(options)
         logger.info("scanning domain %s with options %s", domain_name, options)
-        scan_results, normal_results = client.scan_domain(domain_name=domain_name)
+        self._add_hosts_entry(ip=ip, domain_name=domain_name)
+        scan_results, normal_results = client.scan_domain(
+            domain_name=domain_name, is_ipv6=is_ipv6
+        )
         return scan_results, normal_results
+
+    def _add_hosts_entry(self, ip: str, domain_name: str) -> None:
+        """Append an entry resolving the domain to the IP to /etc/hosts.
+
+        The entry is not removed after the scan: the agent never scans the same domain twice, and
+        /etc/hosts belongs to the agent's container. The file is written in place, since container
+        runtimes bind mount /etc/hosts and renaming another file over it fails.
+        """
+        entry = f"{ip} {domain_name} {HOSTS_FILE_ENTRY_MARKER}\n"
+        try:
+            with open(HOSTS_FILE_PATH, "r+", encoding="utf-8") as hosts_file:
+                content = hosts_file.read()
+                if content != "" and content.endswith("\n") is False:
+                    hosts_file.write("\n")
+                hosts_file.write(entry)
+        except OSError as e:
+            logger.warning("could not write %s: %s", HOSTS_FILE_PATH, e)
+            return
+        logger.info("pinned in %s: %s", HOSTS_FILE_PATH, entry.strip())
+
+    def _resolve_ip(self, domain_name: str) -> str | None:
+        """Resolve a domain name to a single IP address, IPv4 first and IPv6 when it has no IPv4.
+
+        When the domain has several addresses, the numerically lowest one is used, so the same
+        domain always maps to the same cache entry even if the resolver rotates the address order.
+        """
+        for family in (socket.AF_INET, socket.AF_INET6):
+            try:
+                addresses = socket.getaddrinfo(
+                    host=domain_name,
+                    port=None,
+                    family=family,
+                    type=socket.SOCK_STREAM,
+                )
+            except (socket.gaierror, UnicodeError):
+                continue
+            ips = sorted(
+                {str(address[4][0]) for address in addresses},
+                key=ipaddress.ip_address,
+            )
+            if len(ips) > 0:
+                return ips[0]
+        return None
+
+    def _get_open_ports(self, ip: str, options: nmap_options.NmapOptions) -> list[str]:
+        """Return the open ports of an IP, from the redis cache or with a port-only scan."""
+        cached_ports = self.hash_get(hash_name=OPEN_PORTS_CACHE_KEY, key=ip)
+        if cached_ports is not None:
+            logger.info("open ports of %s found in cache: %s", ip, cached_ports)
+            return [port for port in cached_ports.decode().split(",") if port != ""]
+
+        discovery_options = dataclasses.replace(
+            options,
+            scripts=None,
+            script_default=False,
+            version_detection=False,
+            os_detection=False,
+        )
+        client = nmap_wrapper.NmapWrapper(options=discovery_options)
+        open_ports = client.discover_open_ports(host=ip)
+        self.hash_add(
+            hash_name=OPEN_PORTS_CACHE_KEY, mapping={ip: ",".join(open_ports)}
+        )
+        logger.info("open ports of %s cached: %s", ip, open_ports)
+        return open_ports
 
     def _is_domain_in_scope(self, domain: str) -> bool:
         """Check if a domain is in the scan scope with a regular expression."""

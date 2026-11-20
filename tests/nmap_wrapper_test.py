@@ -3,8 +3,11 @@
 import pathlib
 from unittest import mock
 
+from pytest_mock import plugin
+
 import agent.nmap_agent
-from agent import nmap_options, nmap_wrapper
+from agent import nmap_options
+from agent import nmap_wrapper
 
 
 def testNmapWrapper_whenFastMode_returnCommand(
@@ -229,3 +232,108 @@ def testNmapWrapper_whenTcpSynPingPortsIsUsed_returnCommand(
         "/tmp/normal",
         "127.0.0.1/24",
     ]
+
+
+def testNmapWrapper_whenDiscoveringOpenPorts_runsPortOnlyScanOnIpAndReturnsOpenPorts(
+    mocker: plugin.MockerFixture,
+) -> None:
+    xml_output = (
+        '<nmaprun><host><address addr="35.219.200.16" addrtype="ipv4"/><ports>'
+        '<port protocol="tcp" portid="443"><state state="open"/></port>'
+        '<port protocol="tcp" portid="80"><state state="open"/></port>'
+        '<port protocol="tcp" portid="22"><state state="filtered"/></port>'
+        "</ports></host></nmaprun>"
+    )
+    run_mock = mocker.patch("subprocess.run")
+    mocker.patch("builtins.open", mocker.mock_open(read_data=xml_output))
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="0-65535",
+        timing_template=nmap_options.TimingTemplate.T5,
+        scripts=None,
+        script_default=False,
+        version_detection=False,
+        os_detection=False,
+        no_ping=False,
+        host_timeout=900,
+    )
+    client = nmap_wrapper.NmapWrapper(options)
+
+    open_ports = client.discover_open_ports("35.219.200.16")
+
+    assert open_ports == ["80", "443"]
+    assert run_mock.call_args.args[0] == [
+        "nmap",
+        "-n",
+        "-p",
+        "0-65535",
+        "-T5",
+        "-sS",
+        "--host-timeout",
+        "900",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "35.219.200.16/32",
+    ]
+
+
+def testNmapWrapper_whenScanningDomainOverIpv6_addsIpv6FlagBeforeDomain(
+    mocker: plugin.MockerFixture,
+) -> None:
+    run_mock = mocker.patch("subprocess.run")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="<nmaprun></nmaprun>"))
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="443",
+        timing_template=nmap_options.TimingTemplate.T5,
+        scripts=None,
+        script_default=False,
+        version_detection=True,
+        os_detection=False,
+        no_ping=True,
+    )
+    client = nmap_wrapper.NmapWrapper(options)
+
+    client.scan_domain(domain_name="ipv6.ostorlab.co", is_ipv6=True)
+
+    assert run_mock.call_args.args[0] == [
+        "nmap",
+        "-sV",
+        "-n",
+        "-p",
+        "443",
+        "-T5",
+        "-sS",
+        "-Pn",
+        "-oX",
+        "/tmp/xmloutput",
+        "-oN",
+        "/tmp/normal",
+        "-6",
+        "ipv6.ostorlab.co",
+    ]
+
+
+def testNmapWrapper_whenScanningDomainOverIpv4_doesNotAddIpv6Flag(
+    mocker: plugin.MockerFixture,
+) -> None:
+    run_mock = mocker.patch("subprocess.run")
+    mocker.patch("builtins.open", mocker.mock_open(read_data="<nmaprun></nmaprun>"))
+    options = nmap_options.NmapOptions(
+        dns_resolution=False,
+        ports="443",
+        timing_template=nmap_options.TimingTemplate.T5,
+        scripts=None,
+        script_default=False,
+        version_detection=True,
+        os_detection=False,
+        no_ping=True,
+    )
+    client = nmap_wrapper.NmapWrapper(options)
+
+    client.scan_domain(domain_name="ostorlab.co")
+
+    assert "-6" not in run_mock.call_args.args[0]
+    assert run_mock.call_args.args[0][-1] == "ostorlab.co"
