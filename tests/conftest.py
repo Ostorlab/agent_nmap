@@ -154,6 +154,20 @@ def nat64_domain_scan_xml() -> str:
 
 
 @pytest.fixture
+def no_host_domain_scan_xml() -> str:
+    """Nmap XML output of a domain name scan run that found no host up."""
+    return (
+        '<nmaprun scanner="nmap" args="nmap -sV -n -F --resolve-all example.com" '
+        'version="7.94" xmloutputversion="1.05">'
+        '<scaninfo type="syn" protocol="tcp" numservices="100" services="7,9,13"/>'
+        '<verbose level="0"/><debugging level="0"/>'
+        '<runstats><finished elapsed="0.05" exit="success" '
+        'summary="0 IP addresses (0 hosts up) scanned in 0.05 seconds"/>'
+        '<hosts up="0" down="0" total="0"/></runstats></nmaprun>'
+    )
+
+
+@pytest.fixture
 def nmap_runs(
     tmp_path: pathlib.Path, mocker: plugin.MockerFixture
 ) -> Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock]:

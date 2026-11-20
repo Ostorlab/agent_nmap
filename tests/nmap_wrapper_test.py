@@ -316,14 +316,16 @@ def testNmapWrapperScanDomain_whenEveryRunFails_raises(
 
 def testNmapWrapperScanDomain_whenNoRunFindsAHost_returnsNoHost(
     nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+    no_host_domain_scan_xml: str,
 ) -> None:
     """Ensure a name that resolves to no address gives a result without hosts."""
-    nmap_runs(["<nmaprun></nmaprun>", "<nmaprun></nmaprun>"])
+    nmap_runs([no_host_domain_scan_xml, no_host_domain_scan_xml])
     client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
 
     scan_results, _ = client.scan_domain("example.com")
 
-    assert scan_results.get("nmaprun", {}).get("host") is None
+    assert scan_results["nmaprun"]["@scanner"] == "nmap"
+    assert scan_results["nmaprun"].get("host") is None
 
 
 def testNmapWrapperScanDomain_whenResolverTranslatesToNat64_leavesOutTheNat64Hosts(
