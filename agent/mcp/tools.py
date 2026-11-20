@@ -5,10 +5,18 @@ import logging
 import subprocess
 from typing import Any
 
-from agent import nmap_options, nmap_wrapper, result_parser
+from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
+from ostorlab.runtimes import definitions as runtime_definitions
+
+from agent import domain_scan
+from agent import nmap_options
+from agent import nmap_wrapper
+from agent import result_parser
 from agent.mcp import mcp_types
 
 logger = logging.getLogger(__name__)
+
+MCP_AGENT_KEY = "agent/ostorlab/nmap"
 
 
 class Error(Exception):
@@ -19,22 +27,37 @@ class CalledToolError(Error):
     """Generic exception raised when a tool call fails."""
 
 
-def scan(target: str) -> list[mcp_types.ServiceResult]:
-    """
-    Scan a target and return discovered services with fingerprints.
+class NmapTools(persist_mixin.AgentPersistMixin):
+    """Tools of the Nmap MCP server, caching the open ports of scanned IPs in the redis of the scan."""
 
-    This tool performs a comprehensive port scan and extracts:
-    - Service details: port, protocol, state, service name, banner
-    - Fingerprint details: OS information and backend component information
+    def __init__(self, redis_url: str) -> None:
+        super().__init__(
+            runtime_definitions.AgentSettings(key=MCP_AGENT_KEY, redis_url=redis_url)
+        )
 
-    Args:
-        target: A string representing the scan target, can be an IP address or a domain name.
+    def scan(self, target: str) -> list[mcp_types.ServiceResult]:
+        """
+        Scan a target and return discovered services with fingerprints.
 
-    Returns:
-        A list of ServiceResult objects, each containing service details
-        and associated fingerprint information.
-    """
-    scan_results = _do_scan(target)
+        This tool performs a comprehensive port scan and extracts:
+        - Service details: port, protocol, state, service name, banner
+        - Fingerprint details: OS information and backend component information
+
+        Args:
+            target: A string representing the scan target, can be an IP address or a domain name.
+
+        Returns:
+            A list of ServiceResult objects, each containing service details
+            and associated fingerprint information.
+        """
+        return _scan(target=target, persist=self)
+
+
+def _scan(
+    target: str, persist: persist_mixin.AgentPersistMixin
+) -> list[mcp_types.ServiceResult]:
+    """Scan a target and return its services with their fingerprints."""
+    scan_results = _do_scan(target=target, persist=persist)
 
     port_services = result_parser.get_port_services(scan_results)
     service_libraries = result_parser.get_service_libraries(scan_results)
@@ -50,7 +73,7 @@ def scan(target: str) -> list[mcp_types.ServiceResult]:
             state=svc.get("state") or "",
             service=svc.get("service") or "",
             banner=svc.get("banner") or "",
-            version=svc.get("version") or "4",
+            version=str(svc.get("version") or 4),
             fingerprints=[],
         )
         services.append(service)
@@ -58,7 +81,7 @@ def scan(target: str) -> list[mcp_types.ServiceResult]:
     for svc_fp in service_libraries:
         fp = mcp_types.FingerprintResult(
             host=svc_fp.get("host") or "unknown",
-            version=svc_fp.get("version") or "4",
+            version=str(svc_fp.get("version") or 4),
             library_type=svc_fp.get("library_type") or "BACKEND_COMPONENT",
             port=int(svc_fp.get("port") or 0),
             protocol=svc_fp.get("protocol"),
@@ -90,7 +113,7 @@ def scan(target: str) -> list[mcp_types.ServiceResult]:
     return services
 
 
-def _do_scan(target: str) -> dict[str, Any]:
+def _do_scan(target: str, persist: persist_mixin.AgentPersistMixin) -> dict[str, Any]:
     if target == "":
         raise ValueError(f"Invalid target: `{target}`")
 
@@ -105,20 +128,26 @@ def _do_scan(target: str) -> dict[str, Any]:
         host_timeout=300,
         port_scanning_techniques=[nmap_options.PortScanningTechnique.TCP_CONNECT],
     )
-    client = nmap_wrapper.NmapWrapper(options)
-
     try:
-        if _is_ip_or_cidr(target):
-            return _scan_ip(client, target)
+        if _is_ip_or_cidr(target=target):
+            return _scan_ip(options=options, target=target)
         else:
-            scan_results, _ = client.scan_domain(domain_name=target)
+            results = domain_scan.scan_domain(
+                domain_name=target, options=options, persist=persist
+            )
+            if results is None:
+                return {}
+            scan_results, _ = results
             return scan_results
     except subprocess.CalledProcessError as e:
         logger.error("Nmap command failed to scan target %s", target)
         raise CalledToolError from e
+    except nmap_wrapper.OutputParsingError as e:
+        logger.error("could not discover the open ports of %s: %s", target, e)
+        raise CalledToolError from e
 
 
-def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
+def _scan_ip(options: nmap_options.NmapOptions, target: str) -> dict[str, Any]:
     if "/" in target:
         network = ipaddress.ip_network(target, strict=False)
         host = str(network.network_address)
@@ -128,6 +157,7 @@ def _scan_ip(client: nmap_wrapper.NmapWrapper, target: str) -> dict[str, Any]:
         mask = 128 if ip.version == 6 else 32
         host = target
 
+    client = nmap_wrapper.NmapWrapper(options)
     scan_results, _ = client.scan_hosts(hosts=host, mask=mask)
     return scan_results
 

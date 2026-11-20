@@ -10,7 +10,8 @@ import ipaddress
 import logging
 import re
 import subprocess
-from typing import Any, cast
+from typing import Any
+from typing import cast
 from urllib import parse
 
 from ostorlab.agent import agent
@@ -25,7 +26,11 @@ from ostorlab.assets import ipv6 as ipv6_asset
 from ostorlab.runtimes import definitions as runtime_definitions
 from rich import logging as rich_logging
 
-from agent import nmap_options, nmap_wrapper, process_scans, result_parser
+from agent import domain_scan
+from agent import nmap_options
+from agent import nmap_wrapper
+from agent import process_scans
+from agent import result_parser
 from agent.mcp import runner as mcp_runner
 
 logging.basicConfig(
@@ -85,7 +90,7 @@ class NmapAgent(
 
         if self.should_start_mcp_server is True:
             logger.info("Running Nmap agent in MCP mode.")
-            mcp_runner.run()
+            mcp_runner.run(redis_url=cast(str, self._agent_settings.redis_url))
 
     def process(self, message: msg.Message) -> None:
         """Process messages of type v3.asset.ip.[v4,v6] and performs a network scan. Once the scan is completed, it
@@ -166,10 +171,18 @@ class NmapAgent(
             if self._is_domain_in_scope(domain_name) is False:
                 return
             try:
-                scan_results, normal_results = self._scan_domain(domain_name)
+                results = self._scan_domain(domain_name=domain_name)
             except subprocess.CalledProcessError:
                 logger.error("Nmap command failed to scan domain name %s", domain_name)
                 return
+            except nmap_wrapper.OutputParsingError as e:
+                logger.error(
+                    "could not discover the open ports of %s: %s", domain_name, e
+                )
+                return
+            if results is None:
+                return
+            scan_results, normal_results = results
             logger.info("scan results %s", scan_results)
 
             self._emit_services(scan_results, domain_name)
@@ -198,7 +211,16 @@ class NmapAgent(
         scan_results, normal_results = client.scan_hosts(hosts=host, mask=mask)
         return scan_results, normal_results
 
-    def _scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str]:
+    def _scan_domain(self, domain_name: str) -> tuple[dict[str, Any], str] | None:
+        """Scan a domain name.
+
+        Port discovery is done once per resolved IP address and cached in redis.
+        The name-dependent part still runs for every domain, but only on the cached open ports.
+
+        Returns:
+            The scan results, or None when the domain can not be resolved or its IP has no
+            open ports.
+        """
         options = nmap_options.NmapOptions(
             dns_resolution=False,
             ports=self.args.get("ports"),
@@ -213,10 +235,9 @@ class NmapAgent(
             os_detection=self.args.get("os", False),
             host_timeout=self._host_timeout,
         )
-        client = nmap_wrapper.NmapWrapper(options)
-        logger.info("scanning domain %s with options %s", domain_name, options)
-        scan_results, normal_results = client.scan_domain(domain_name=domain_name)
-        return scan_results, normal_results
+        return domain_scan.scan_domain(
+            domain_name=domain_name, options=options, persist=self
+        )
 
     def _is_domain_in_scope(self, domain: str) -> bool:
         """Check if a domain is in the scan scope with a regular expression."""
