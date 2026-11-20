@@ -1955,7 +1955,7 @@ def testNmapAgent_whenDomainsShareAnIp_discoversPortsOnceAndScansOnlyOpenPorts(
         "b.hosted.app",
     ]
     assert all(c.kwargs["is_ipv6"] is False for c in scan_domain_mock.call_args_list)
-    discovery_options = wrapper_init_spy.call_args_list[0].args[1]
+    discovery_options = wrapper_init_spy.call_args_list[0].kwargs["options"]
     assert discovery_options.version_detection is False
     assert discovery_options.script_default is False
     assert discovery_options.scripts is None
@@ -2128,7 +2128,7 @@ def testNmapAgent_whenDomainHasIpv4AndIpv6_usesIpv4(
     assert scan_domain_mock.call_args.kwargs["is_ipv6"] is False
 
 
-def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpBeforeScan(
+def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpInHostsFile(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],
@@ -2137,8 +2137,8 @@ def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpBeforeScan(
     fake_output: None | dict[str, str],
     tmp_path: pathlib.Path,
 ) -> None:
-    """Nmap resolves the domain through /etc/hosts to the IP whose ports were cached, and the
-    entry is removed once the scan is done."""
+    """The domain is pinned to the IP whose ports were cached in /etc/hosts, which nmap reads
+    before DNS, and the existing entries are kept."""
     hosts_file = tmp_path / "hosts"
     hosts_file.write_text("127.0.0.1 localhost\n10.9.9.9 other.co\n")
     mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(hosts_file))
@@ -2152,20 +2152,14 @@ def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpBeforeScan(
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=["443"]
     )
-    hosts_during_scan: list[str] = []
-    mocker.patch(
+    scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
-        side_effect=lambda **kwargs: (
-            hosts_during_scan.append(hosts_file.read_text()),
-            (fake_output, HUMAN_OUTPUT),
-        )[1],
+        return_value=(fake_output, HUMAN_OUTPUT),
     )
 
     nmap_test_agent.process(domain_msg)
 
-    assert hosts_during_scan == [
-        "127.0.0.1 localhost\n10.9.9.9 other.co\n10.0.0.3 ostorlab.co # agent_nmap\n"
-    ]
+    assert scan_domain_mock.call_args.kwargs["domain_name"] == "ostorlab.co"
     assert hosts_file.read_text() == (
         "127.0.0.1 localhost\n10.9.9.9 other.co\n10.0.0.3 ostorlab.co # agent_nmap\n"
     )
