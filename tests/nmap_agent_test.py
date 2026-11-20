@@ -12,6 +12,7 @@ from ostorlab.agent.message import message
 from ostorlab.utils import definitions as utils_definitions
 from pytest_mock import plugin
 
+from agent import domain_scan
 from agent import generators
 from agent import nmap_agent
 from agent import nmap_options
@@ -303,7 +304,7 @@ def testAgentLifecycle_whenLinkAssetAndScanRunsWithoutErrors_emitsBackMessagesAn
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
@@ -385,7 +386,7 @@ def testAgentEmitBannerScanDomain_whenScanRunsWithoutErrors_emitsMsgWithBanner(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -419,7 +420,7 @@ def testAgentScanDomain_whenScanRunsWithoutErrors_emitsDomainService(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -458,7 +459,7 @@ def testAgentNmap_whenUrlsScriptsGivent_RunScan(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -503,7 +504,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -550,7 +551,7 @@ def testAgentNmapOptions_whenUrlsScriptsGivent_RunScan2(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output_range, HUMAN_OUTPUT),
@@ -598,7 +599,7 @@ def testEmitFingerprints_whenScanFindsBanner_emitsFingerprint(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -703,7 +704,7 @@ def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -734,7 +735,7 @@ def testNmapAgent_withDomainScopeArgAndLinkMessageNotInScope_targetShouldNotBeSc
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     del agent_persist_mock
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
@@ -770,7 +771,7 @@ def testAgentNmapOptions_whenServiceHasProduct_reportsFingerprint(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output_product, HUMAN_OUTPUT),
@@ -854,7 +855,7 @@ def testNmapAgent_whenDomainIsNotUp_shouldNotRaisAnError(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output_with_down_host, HUMAN_OUTPUT),
@@ -1433,7 +1434,7 @@ def testAgentNmapOptions_whenServiceHasNoProduct_reportsFingerprint(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(SCAN_RESULT_NO_PRODUCT, HUMAN_OUTPUT),
@@ -1462,7 +1463,7 @@ def testAgentNmapOptions_whenNmaprunHostIsList_noCrash(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(SCAN_RESULT_HOST_AS_LIST, HUMAN_OUTPUT),
@@ -1506,7 +1507,7 @@ def testAgentNmap_whenApiSchemaMessage_shouldScanDomain(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1539,7 +1540,7 @@ def testAgentNmap_whenSameApiSchemaReceivedTwice_shouldScanOnce(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mock_scan = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1569,7 +1570,7 @@ def testNmapAgent_withUrlsScopeArgAndDomainInScope_domainIsScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1597,7 +1598,7 @@ def testNmapAgent_withUrlsScopeArgAndDomainNotInScope_domainIsNotScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1629,7 +1630,7 @@ def testNmapAgent_withUrlsScopeArgAndLinkInScope_linkDomainIsScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1657,7 +1658,7 @@ def testNmapAgent_withUrlsScopeArgAndLinkNotInScope_linkDomainIsNotScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1690,7 +1691,7 @@ def testNmapAgent_withUrlsScopeArgAndApiSchemaNotInScope_endpointIsNotScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1718,7 +1719,7 @@ def testNmapAgent_withUrlsScopeArgAndApiSchemaInScope_endpointIsScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1772,7 +1773,7 @@ def testNmapAgent_withEmptyUrlsScopeArg_domainIsScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1801,7 +1802,7 @@ def testNmapAgent_withInvalidUrlsScopeArg_domainIsNotScanned(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
         return_value=["21", "22", "80"],
     )
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
@@ -1920,7 +1921,7 @@ def testNmapAgent_whenDomainsShareAnIp_discoversPortsOnceAndScansOnlyOpenPorts(
 ) -> None:
     """Domains resolving to the same IP run the port discovery once, then each domain runs the
     service scan on the cached open ports only."""
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "socket.getaddrinfo",
         return_value=[
@@ -1960,12 +1961,14 @@ def testNmapAgent_whenDomainsShareAnIp_discoversPortsOnceAndScansOnlyOpenPorts(
     assert discovery_options.script_default is False
     assert discovery_options.scripts is None
     assert discovery_options.os_detection is False
-    service_scan_options = [c.args[1] for c in wrapper_init_spy.call_args_list[1:]]
+    service_scan_options = [
+        c.kwargs["options"] for c in wrapper_init_spy.call_args_list[1:]
+    ]
     assert [o.ports for o in service_scan_options] == ["80,443", "80,443"]
     assert all(o.no_ping is True for o in service_scan_options) is True
     assert all(o.top_ports is None for o in service_scan_options) is True
     assert (
-        nmap_test_agent.hash_get(nmap_agent.OPEN_PORTS_CACHE_KEY, "35.219.200.16")
+        nmap_test_agent.hash_get(domain_scan.OPEN_PORTS_CACHE_KEY, "35.219.200.16")
         == b"80,443"
     )
     assert any(m.selector == "v3.asset.domain_name.service" for m in agent_mock) is True
@@ -1985,7 +1988,7 @@ def testNmapAgent_whenCachedIpHasNoOpenPorts_skipsServiceScan(
             (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("35.219.200.16", 0)),
         ],
     )
-    nmap_test_agent.hash_add(nmap_agent.OPEN_PORTS_CACHE_KEY, {"35.219.200.16": ""})
+    nmap_test_agent.hash_add(domain_scan.OPEN_PORTS_CACHE_KEY, {"35.219.200.16": ""})
     discover_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.discover_open_ports")
     scan_domain_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.scan_domain")
 
@@ -2019,7 +2022,7 @@ def testNmapAgent_whenDiscoveryOutputCannotBeParsed_doesNotCacheIpAndSkipsDomain
     nmap_test_agent.process(domain_msg)
 
     assert (
-        nmap_test_agent.hash_get(nmap_agent.OPEN_PORTS_CACHE_KEY, "35.219.200.16")
+        nmap_test_agent.hash_get(domain_scan.OPEN_PORTS_CACHE_KEY, "35.219.200.16")
         is None
     )
     assert scan_domain_mock.call_count == 0
@@ -2036,7 +2039,7 @@ def testNmapAgent_whenDomainResolvesToSeveralIps_cachesUnderLowestIp(
     tmp_path: pathlib.Path,
 ) -> None:
     """A round-robin domain always maps to the same cache entry, whatever the resolver order."""
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "socket.getaddrinfo",
         return_value=[
@@ -2092,7 +2095,7 @@ def testNmapAgent_whenDomainHasOnlyIpv6_discoversPortsOnIpv6AndScansDomainWithIp
 ) -> None:
     """A domain without an IPv4 address falls back to its IPv6 address for the port discovery and
     the cache, and the domain service scan is run over IPv6 so it hits the same address."""
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     getaddrinfo_mock = mocker.patch(
         "socket.getaddrinfo",
         side_effect=[
@@ -2120,7 +2123,7 @@ def testNmapAgent_whenDomainHasOnlyIpv6_discoversPortsOnIpv6AndScansDomainWithIp
     assert discover_mock.call_args.kwargs["host"] == "2001:db8::3"
     assert scan_domain_mock.call_args.kwargs["is_ipv6"] is True
     assert (
-        nmap_test_agent.hash_get(nmap_agent.OPEN_PORTS_CACHE_KEY, "2001:db8::3")
+        nmap_test_agent.hash_get(domain_scan.OPEN_PORTS_CACHE_KEY, "2001:db8::3")
         == b"443"
     )
 
@@ -2135,7 +2138,7 @@ def testNmapAgent_whenDomainHasIpv4AndIpv6_usesIpv4(
     tmp_path: pathlib.Path,
 ) -> None:
     """IPv4 is preferred, like nmap does when scanning a domain without -6."""
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     getaddrinfo_mock = mocker.patch(
         "socket.getaddrinfo",
         return_value=[
@@ -2171,7 +2174,7 @@ def testNmapAgent_whenScanningDomain_removesPinFromHostsFileAfterScan(
     are kept."""
     hosts_file = tmp_path / "hosts"
     hosts_file.write_text("127.0.0.1 localhost\n10.9.9.9 other.co\n")
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(hosts_file))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(hosts_file))
     mocker.patch(
         "socket.getaddrinfo",
         return_value=[
@@ -2203,7 +2206,7 @@ def testNmapAgent_whenHostsFileNotWritable_stillScansDomain(
     tmp_path: pathlib.Path,
 ) -> None:
     mocker.patch.object(
-        nmap_agent, "HOSTS_FILE_PATH", str(tmp_path / "missing_dir" / "hosts")
+        domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "missing_dir" / "hosts")
     )
     mocker.patch(
         "socket.getaddrinfo",
@@ -2257,7 +2260,7 @@ def testNmapAgent_whenDomainScanFails_leavesPinToCachedIpInHostsFile(
     before removing it, so it is still in /etc/hosts."""
     hosts_file = tmp_path / "hosts"
     hosts_file.write_text("127.0.0.1 localhost")
-    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(hosts_file))
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(hosts_file))
     mocker.patch(
         "socket.getaddrinfo",
         return_value=[

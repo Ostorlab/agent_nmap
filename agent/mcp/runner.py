@@ -6,12 +6,14 @@ logger = logging.getLogger(__name__)
 RUN_SERVER_PATH = "/app/agent/mcp/server.py"
 
 
-def run() -> None:
+def run(redis_url: str) -> None:
     """Start the MCP server with the streamable-http transport."""
     logger.info("Starting MCP server.")
     subprocess.Popen(
         [
             "python3.14",
             RUN_SERVER_PATH,
+            "--redis-url",
+            redis_url,
         ]
     )

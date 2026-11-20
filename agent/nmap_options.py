@@ -173,3 +173,36 @@ class NmapOptions:
         command_options.extend(self._set_script_default())
         command_options.extend(self._set_host_timeout())
         return command_options
+
+
+def get_port_discovery_options(options: NmapOptions) -> NmapOptions:
+    """Ports-only version of the options.
+
+    Keeps the port selection, timing, host discovery and host timeout, but drops service
+    detection, scripts and OS detection, so the scan only finds which ports are open.
+    """
+    return dataclasses.replace(
+        options,
+        scripts=None,
+        script_default=False,
+        version_detection=False,
+        os_detection=False,
+    )
+
+
+def get_open_ports_scan_options(
+    options: NmapOptions, open_ports: list[str]
+) -> NmapOptions:
+    """Version of the options that scans only the given open ports.
+
+    Port selection by top ports or fast mode is cleared so that -p applies, and host discovery
+    is skipped with -Pn, since the host is known to be up.
+    """
+    return dataclasses.replace(
+        options,
+        ports=",".join(open_ports),
+        top_ports=None,
+        fast_mode=False,
+        no_ping=True,
+        tcp_syn_ping_ports=None,
+    )

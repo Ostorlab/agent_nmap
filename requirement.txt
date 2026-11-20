@@ -3,3 +3,4 @@ xmltodict
 pytablewriter
 rich
 fastmcp
+click
