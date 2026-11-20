@@ -73,7 +73,7 @@ def _scan(
             state=svc.get("state") or "",
             service=svc.get("service") or "",
             banner=svc.get("banner") or "",
-            version=svc.get("version") or "4",
+            version=str(svc.get("version") or 4),
             fingerprints=[],
         )
         services.append(service)
@@ -81,7 +81,7 @@ def _scan(
     for svc_fp in service_libraries:
         fp = mcp_types.FingerprintResult(
             host=svc_fp.get("host") or "unknown",
-            version=svc_fp.get("version") or "4",
+            version=str(svc_fp.get("version") or 4),
             library_type=svc_fp.get("library_type") or "BACKEND_COMPONENT",
             port=int(svc_fp.get("port") or 0),
             protocol=svc_fp.get("protocol"),

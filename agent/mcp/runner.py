@@ -3,7 +3,11 @@ import subprocess
 
 logger = logging.getLogger(__name__)
 
-RUN_SERVER_PATH = "/app/agent/mcp/server.py"
+# Run the server as a module from the app directory: running agent/mcp/server.py as a script puts
+# agent/mcp/ first on the import path, where agent/mcp/mcp_types.py shadows the mcp_types package
+# that fastmcp imports.
+RUN_SERVER_MODULE = "agent.mcp.server"
+APP_PATH = "/app"
 
 
 def run(redis_url: str) -> None:
@@ -12,8 +16,10 @@ def run(redis_url: str) -> None:
     subprocess.Popen(
         [
             "python3.14",
-            RUN_SERVER_PATH,
+            "-m",
+            RUN_SERVER_MODULE,
             "--redis-url",
             redis_url,
-        ]
+        ],
+        cwd=APP_PATH,
     )

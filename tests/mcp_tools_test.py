@@ -4,6 +4,7 @@ import pathlib
 import socket
 from typing import Any
 
+import fastmcp
 import pytest
 from click import testing
 from pytest_mock import plugin
@@ -149,17 +150,53 @@ def testScan_whenDiscoveryOutputCannotBeParsed_raisesAndDoesNotCacheIp(
     assert scan_domain_mock.call_count == 0
 
 
-def testRun_whenRedisUrlGiven_passesItToMcpServerAsArgument(
+def testRun_whenRedisUrlGiven_startsServerAsModuleFromAppDirectory(
     mocker: plugin.MockerFixture,
 ) -> None:
+    """Running server.py as a script would let agent/mcp/mcp_types.py shadow fastmcp's mcp_types."""
     popen_mock = mocker.patch("subprocess.Popen")
 
     mcp_runner.run(redis_url="redis://guest:guest@localhost:6379")
 
-    assert popen_mock.call_args.args[0][-2:] == [
+    assert popen_mock.call_args.args[0] == [
+        "python3.14",
+        "-m",
+        "agent.mcp.server",
         "--redis-url",
         "redis://guest:guest@localhost:6379",
     ]
+    assert popen_mock.call_args.kwargs["cwd"] == "/app"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def testScan_whenCalledThroughMcpServer_returnsIpVersionsAsStrings(
+    mocker: plugin.MockerFixture,
+    agent_persist_mock: dict[str | bytes, Any],
+    fake_output_multi_host: dict[str, Any],
+) -> None:
+    """fastmcp validates the tool output against its schema, where every version is a string."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(fake_output_multi_host, ""),
+    )
+    server = fastmcp.FastMCP(
+        name="nmap",
+        tools=[mcp_tools.NmapTools(redis_url="redis://localhost:6379").scan],
+    )
+
+    async with fastmcp.Client(server) as client:
+        result = await client.call_tool("scan", {"target": "10.0.0.0/24"})
+
+    assert result.structured_content is not None
+    services = result.structured_content["result"]
+    assert len(services) > 0
+    assert {service["version"] for service in services} == {"4"}
+    fingerprints = [fp for service in services for fp in service["fingerprints"]]
+    assert {fp["version"] for fp in fingerprints if fp["library_type"] != "OS"} == {"4"}
+    assert {fp["version"] for fp in fingerprints if fp["library_type"] == "OS"} == {
+        "ipv4"
+    }
 
 
 def testMain_whenRedisUrlOptionGiven_buildsToolsWithIt(
