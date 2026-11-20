@@ -5,6 +5,9 @@ from collections.abc import Iterator
 from typing import Any
 
 IP_VERSIONS = {"ipv4": 4, "ipv6": 6}
+# nmap names the protocol it found inside a TLS tunnel; these are the names of their TLS forms.
+TLS_SERVICE_NAMES = {"http": "https"}
+TLS_TUNNEL = "ssl"
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +59,21 @@ def get_host_services(host: dict[str, Any]) -> Iterator[dict[str, Any]]:
         data["port"] = int(port.get("@portid"))
         data["protocol"] = port.get("@protocol")
         data["state"] = port.get("state", {}).get("@state", "closed")
-        data["service"] = port.get("service", {}).get("@name", "")
+        data["service"] = _service_name(
+            port.get("service", {}).get("@name", ""),
+            port.get("service", {}).get("@tunnel"),
+        )
         data["product"] = port.get("service", {}).get("@product", "")
         data["product_version"] = port.get("service", {}).get("@version", "")
         data["banner"] = get_script_by_name(name="banner", port=port)
         yield data
+
+
+def _service_name(name: str, tunnel: str | None) -> str:
+    """The service name, with the TLS form of a protocol nmap found inside a TLS tunnel."""
+    if tunnel == TLS_TUNNEL:
+        return TLS_SERVICE_NAMES.get(name, name)
+    return name
 
 
 # get banner from script

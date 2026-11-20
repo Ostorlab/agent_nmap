@@ -1696,11 +1696,11 @@ def testAgentScanDomain_whenNameResolvesToSeveralAddresses_emitsTheServicesOfEac
     )
     assert port_services == [
         ("v3.asset.ip.v4.port.service", "192.0.2.10", 80, "http"),
-        ("v3.asset.ip.v4.port.service", "192.0.2.10", 443, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.10", 443, "https"),
         ("v3.asset.ip.v4.port.service", "192.0.2.11", 80, "http"),
-        ("v3.asset.ip.v4.port.service", "192.0.2.11", 443, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.11", 443, "https"),
         ("v3.asset.ip.v6.port.service", "2001:db8::10", 80, "http"),
-        ("v3.asset.ip.v6.port.service", "2001:db8::10", 443, "http"),
+        ("v3.asset.ip.v6.port.service", "2001:db8::10", 443, "https"),
     ]
 
 
@@ -1724,13 +1724,13 @@ def testAgentScanDomain_whenNameResolvesToSeveralAddresses_emitsEachDomainServic
         for m in agent_mock
         if m.selector == "v3.asset.domain_name.service"
     ]
-    assert domain_services == [(80, "http"), (443, "http")]
+    assert domain_services == [(80, "http"), (443, "https")]
     domain_fingerprints = [
         (m.data["port"], m.data["schema"], m.data["library_name"])
         for m in agent_mock
         if m.selector == "v3.fingerprint.domain_name.service.library"
     ]
-    assert domain_fingerprints == [(80, "http", "nginx"), (443, "http", "nginx")]
+    assert domain_fingerprints == [(80, "http", "nginx"), (443, "https", "nginx")]
 
 
 def testAgentScanDomain_whenNameResolvesToSeveralAddresses_reportsOneFindingWithTheirPorts(
@@ -1753,3 +1753,18 @@ def testAgentScanDomain_whenNameResolvesToSeveralAddresses_reportsOneFindingWith
     location = findings[0].data["vulnerability_location"]
     assert location["domain_name"]["name"] == "ostorlab.co"
     assert [metadata["value"] for metadata in location["metadata"]] == ["80", "443"]
+
+
+def testGetHostServices_whenHttpRunsInsideTls_returnsHttps(
+    fake_output_product: dict[str, Any],
+) -> None:
+    """Ensure a TLS port nmap identifies as http is reported as https."""
+    host = fake_output_product["nmaprun"]["host"]
+
+    services = {
+        service["port"]: service["service"]
+        for service in generators.get_host_services(host)
+    }
+
+    assert services[443] == "https"
+    assert services[80] == "http-proxy"
