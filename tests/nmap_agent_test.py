@@ -2248,7 +2248,7 @@ def testNmapAgent_whenDomainDoesNotResolve_skipsDomain(
     assert len(agent_mock) == 0
 
 
-def testNmapAgent_whenDomainScanFails_leavesPinToCachedIpInHostsFile(
+def testNmapAgent_whenDomainScanFails_removesPinToCachedIpFromHostsFile(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],
@@ -2256,8 +2256,7 @@ def testNmapAgent_whenDomainScanFails_leavesPinToCachedIpInHostsFile(
     mocker: plugin.MockerFixture,
     tmp_path: pathlib.Path,
 ) -> None:
-    """The pin to the cached IP is written before nmap runs: when the scan fails, the agent stops
-    before removing it, so it is still in /etc/hosts."""
+    """The pin to the cached IP is written before nmap runs, and removed even when the scan fails."""
     hosts_file = tmp_path / "hosts"
     hosts_file.write_text("127.0.0.1 localhost")
     mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(hosts_file))
@@ -2275,10 +2274,13 @@ def testNmapAgent_whenDomainScanFails_leavesPinToCachedIpInHostsFile(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         side_effect=subprocess.CalledProcessError(1, "nmap"),
     )
+    add_hosts_entry_spy = mocker.spy(domain_scan, "add_hosts_entry")
 
     nmap_test_agent.process(domain_msg)
 
-    assert hosts_file.read_text() == (
-        "127.0.0.1 localhost\n10.0.0.3 ostorlab.co # agent_nmap\n"
-    )
+    assert add_hosts_entry_spy.call_args.kwargs == {
+        "ip": "10.0.0.3",
+        "domain_name": "ostorlab.co",
+    }
+    assert hosts_file.read_text() == "127.0.0.1 localhost\n"
     assert len(agent_mock) == 0

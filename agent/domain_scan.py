@@ -59,11 +59,13 @@ def scan_domain(
     client = nmap_wrapper.NmapWrapper(options=options)
     logger.info("scanning domain %s with options %s", domain_name, options)
     add_hosts_entry(ip=ip, domain_name=domain_name)
-    scan_results, normal_results = client.scan_domain(
-        domain_name=domain_name,
-        is_ipv6=ipaddress.ip_address(address=ip).version == 6,
-    )
-    remove_hosts_entry(ip=ip, domain_name=domain_name)
+    try:
+        scan_results, normal_results = client.scan_domain(
+            domain_name=domain_name,
+            is_ipv6=ipaddress.ip_address(address=ip).version == 6,
+        )
+    finally:
+        remove_hosts_entry(ip=ip, domain_name=domain_name)
     return scan_results, normal_results
 
 
