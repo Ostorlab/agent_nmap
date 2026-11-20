@@ -1996,6 +1996,36 @@ def testNmapAgent_whenCachedIpHasNoOpenPorts_skipsServiceScan(
     assert len(agent_mock) == 0
 
 
+def testNmapAgent_whenDiscoveryOutputCannotBeParsed_doesNotCacheIpAndSkipsDomain(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """A failed discovery is not cached as "no open ports", so other domains on the IP retry it."""
+    mocker.patch(
+        "socket.getaddrinfo",
+        return_value=[
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("35.219.200.16", 0)),
+        ],
+    )
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports",
+        side_effect=nmap_wrapper.OutputParsingError("truncated xml"),
+    )
+    scan_domain_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.scan_domain")
+
+    nmap_test_agent.process(domain_msg)
+
+    assert (
+        nmap_test_agent.hash_get(nmap_agent.OPEN_PORTS_CACHE_KEY, "35.219.200.16")
+        is None
+    )
+    assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
+
+
 def testNmapAgent_whenDomainResolvesToSeveralIps_cachesUnderLowestIp(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
@@ -2128,7 +2158,7 @@ def testNmapAgent_whenDomainHasIpv4AndIpv6_usesIpv4(
     assert scan_domain_mock.call_args.kwargs["is_ipv6"] is False
 
 
-def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpInHostsFile(
+def testNmapAgent_whenScanningDomain_removesPinFromHostsFileAfterScan(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],
@@ -2137,8 +2167,8 @@ def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpInHostsFile(
     fake_output: None | dict[str, str],
     tmp_path: pathlib.Path,
 ) -> None:
-    """The domain is pinned to the IP whose ports were cached in /etc/hosts, which nmap reads
-    before DNS, and the existing entries are kept."""
+    """The pin is removed from /etc/hosts once the domain scan is done, and the existing entries
+    are kept."""
     hosts_file = tmp_path / "hosts"
     hosts_file.write_text("127.0.0.1 localhost\n10.9.9.9 other.co\n")
     mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(hosts_file))
@@ -2160,9 +2190,7 @@ def testNmapAgent_whenScanningDomain_pinsDomainToCachedIpInHostsFile(
     nmap_test_agent.process(domain_msg)
 
     assert scan_domain_mock.call_args.kwargs["domain_name"] == "ostorlab.co"
-    assert hosts_file.read_text() == (
-        "127.0.0.1 localhost\n10.9.9.9 other.co\n10.0.0.3 ostorlab.co # agent_nmap\n"
-    )
+    assert hosts_file.read_text() == "127.0.0.1 localhost\n10.9.9.9 other.co\n"
 
 
 def testNmapAgent_whenHostsFileNotWritable_stillScansDomain(
@@ -2214,4 +2242,40 @@ def testNmapAgent_whenDomainDoesNotResolve_skipsDomain(
     ]
     assert discover_mock.call_count == 0
     assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_whenDomainScanFails_leavesPinToCachedIpInHostsFile(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    tmp_path: pathlib.Path,
+) -> None:
+    """The pin to the cached IP is written before nmap runs: when the scan fails, the agent stops
+    before removing it, so it is still in /etc/hosts."""
+    hosts_file = tmp_path / "hosts"
+    hosts_file.write_text("127.0.0.1 localhost")
+    mocker.patch.object(nmap_agent, "HOSTS_FILE_PATH", str(hosts_file))
+    mocker.patch(
+        "socket.getaddrinfo",
+        return_value=[
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.20", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.3", 0)),
+        ],
+    )
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=["443"]
+    )
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        side_effect=subprocess.CalledProcessError(1, "nmap"),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    assert hosts_file.read_text() == (
+        "127.0.0.1 localhost\n10.0.0.3 ostorlab.co # agent_nmap\n"
+    )
     assert len(agent_mock) == 0

@@ -183,6 +183,11 @@ class NmapAgent(
             except subprocess.CalledProcessError:
                 logger.error("Nmap command failed to scan domain name %s", domain_name)
                 return
+            except nmap_wrapper.OutputParsingError as e:
+                logger.error(
+                    "could not discover the open ports of %s: %s", domain_name, e
+                )
+                return
             if results is None:
                 return
             scan_results, normal_results = results
@@ -263,15 +268,11 @@ class NmapAgent(
         scan_results, normal_results = client.scan_domain(
             domain_name=domain_name, is_ipv6=is_ipv6
         )
+        self._remove_hosts_entry(ip=ip, domain_name=domain_name)
         return scan_results, normal_results
 
     def _add_hosts_entry(self, ip: str, domain_name: str) -> None:
-        """Append an entry resolving the domain to the IP to /etc/hosts.
-
-        The entry is not removed after the scan: the agent never scans the same domain twice, and
-        /etc/hosts belongs to the agent's container. The file is written in place, since container
-        runtimes bind mount /etc/hosts and renaming another file over it fails.
-        """
+        """Append an entry resolving the domain to the IP to /etc/hosts."""
         entry = f"{ip} {domain_name} {HOSTS_FILE_ENTRY_MARKER}\n"
         try:
             with open(HOSTS_FILE_PATH, "r+", encoding="utf-8") as hosts_file:
@@ -283,6 +284,18 @@ class NmapAgent(
             logger.warning("could not write %s: %s", HOSTS_FILE_PATH, e)
             return
         logger.info("pinned in %s: %s", HOSTS_FILE_PATH, entry.strip())
+
+    def _remove_hosts_entry(self, ip: str, domain_name: str) -> None:
+        """Remove the entry resolving the domain to the IP from /etc/hosts."""
+        entry = f"{ip} {domain_name} {HOSTS_FILE_ENTRY_MARKER}\n"
+        try:
+            with open(HOSTS_FILE_PATH, "r+", encoding="utf-8") as hosts_file:
+                lines = [line for line in hosts_file if line != entry]
+                hosts_file.seek(0)
+                hosts_file.writelines(lines)
+                hosts_file.truncate()
+        except OSError as e:
+            logger.warning("could not write %s: %s", HOSTS_FILE_PATH, e)
 
     def _resolve_ip(self, domain_name: str) -> str | None:
         """Resolve a domain name to a single IP address, IPv4 first and IPv6 when it has no IPv4.

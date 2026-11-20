@@ -17,6 +17,10 @@ NORMAL_OUTPUT_PATH = "/tmp/normal"
 logger = logging.getLogger(__name__)
 
 
+class OutputParsingError(Exception):
+    """Error when the XML output of an nmap scan cannot be parsed."""
+
+
 def parse_output(xml_output: str) -> dict[str, Any]:
     """Parse the xml_output of the nmap scan command.
 
@@ -129,6 +133,9 @@ class NmapWrapper:
 
         Returns:
             Sorted list of open port numbers, empty if none were found or the scan timed out.
+
+        Raises:
+            OutputParsingError: the XML output could not be parsed, so the open ports are unknown.
         """
         mask = 32 if ipaddress.ip_address(address=host).version == 4 else 128
         logger.info("discovering open ports of %s", host)
@@ -137,6 +144,9 @@ class NmapWrapper:
 
         with open(XML_OUTPUT_PATH, "r", encoding="utf-8") as o:
             scan_results = parse_output(o.read())
+
+        if scan_results == {}:
+            raise OutputParsingError(f"could not parse the nmap output of {host}")
 
         return result_parser.get_open_ports(scan_results=scan_results)
 

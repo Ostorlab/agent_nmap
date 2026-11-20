@@ -3,6 +3,7 @@
 import pathlib
 from unittest import mock
 
+import pytest
 from pytest_mock import plugin
 
 import agent.nmap_agent
@@ -337,3 +338,16 @@ def testNmapWrapper_whenScanningDomainOverIpv4_doesNotAddIpv6Flag(
 
     assert "-6" not in run_mock.call_args.args[0]
     assert run_mock.call_args.args[0][-1] == "ostorlab.co"
+
+
+def testNmapWrapper_whenDiscoveryOutputCannotBeParsed_raisesOutputParsingError(
+    mocker: plugin.MockerFixture,
+) -> None:
+    mocker.patch("subprocess.run")
+    mocker.patch(
+        "builtins.open", mocker.mock_open(read_data="<nmaprun><host><ports><port")
+    )
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(ports="0-65535"))
+
+    with pytest.raises(nmap_wrapper.OutputParsingError):
+        client.discover_open_ports("35.219.200.16")
