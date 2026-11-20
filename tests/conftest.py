@@ -3,7 +3,10 @@
 import json
 import os
 import pathlib
+import subprocess
+from collections.abc import Callable
 from typing import Any
+from unittest import mock
 
 import pytest
 import xmltodict
@@ -11,6 +14,7 @@ from ostorlab.agent import definitions as agent_definitions
 from ostorlab.agent.message import message
 from ostorlab.runtimes import definitions as runtime_definitions
 from ostorlab.utils import definitions as utils_definitions
+from pytest_mock import plugin
 
 from agent import nmap_agent
 
@@ -106,6 +110,78 @@ def fake_output_product() -> Any:
         encoding="utf-8",
     ) as o:
         return xmltodict.parse(o.read())
+
+
+@pytest.fixture
+def fake_output_domain_addresses() -> Any:
+    """Scan of a domain name resolving to two IPv4 and one IPv6 address, each serving http and http over TLS."""
+    with open(
+        os.path.join(os.path.dirname(__file__), "fake_output_domain_addresses.xml"),
+        "r",
+        encoding="utf-8",
+    ) as o:
+        return xmltodict.parse(o.read())
+
+
+@pytest.fixture
+def ipv4_domain_scan_xml() -> str:
+    """Nmap XML output of the IPv4 run of a domain name scan."""
+    return (
+        '<nmaprun><host><address addr="192.0.2.10" addrtype="ipv4"/>'
+        '<ports><port protocol="tcp" portid="80"><state state="open"/>'
+        '<service name="http"/></port></ports></host></nmaprun>'
+    )
+
+
+@pytest.fixture
+def ipv6_domain_scan_xml() -> str:
+    """Nmap XML output of the IPv6 run of a domain name scan."""
+    return (
+        '<nmaprun><host><address addr="2001:db8::10" addrtype="ipv6"/>'
+        '<ports><port protocol="tcp" portid="80"><state state="open"/>'
+        '<service name="http"/></port></ports></host></nmaprun>'
+    )
+
+
+@pytest.fixture
+def nat64_domain_scan_xml() -> str:
+    """Nmap XML output of an IPv6 run whose resolver translated the IPv4 address into a NAT64 prefix."""
+    return (
+        '<nmaprun><host><address addr="64:ff9b::c000:20a" addrtype="ipv6"/>'
+        '<ports><port protocol="tcp" portid="80"><state state="open"/>'
+        '<service name="http"/></port></ports></host></nmaprun>'
+    )
+
+
+@pytest.fixture
+def nmap_runs(
+    tmp_path: pathlib.Path, mocker: plugin.MockerFixture
+) -> Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock]:
+    """Makes each nmap run write the next XML output, or raise the next error, in temporary output files."""
+    xml_path = tmp_path / "xmloutput"
+    normal_path = tmp_path / "normal"
+    mocker.patch("agent.nmap_wrapper.XML_OUTPUT_PATH", str(xml_path))
+    mocker.patch("agent.nmap_wrapper.NORMAL_OUTPUT_PATH", str(normal_path))
+
+    def configure(
+        outputs: list[str | subprocess.CalledProcessError],
+    ) -> mock.MagicMock:
+        remaining = list(outputs)
+
+        def run(command: list[str], check: bool) -> None:
+            del check
+            output = remaining.pop(0)
+            if isinstance(output, subprocess.CalledProcessError):
+                raise output
+            xml_path.write_text(output, encoding="utf-8")
+            normal_path.write_text(f"Nmap scan report for {command[-1]}", "utf-8")
+
+        run_mock: mock.MagicMock = mocker.patch(
+            "agent.nmap_wrapper.subprocess.run", side_effect=run
+        )
+        return run_mock
+
+    return configure
 
 
 @pytest.fixture

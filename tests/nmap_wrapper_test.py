@@ -1,7 +1,11 @@
 """Nmap wrapper unit tests"""
 
 import pathlib
+import subprocess
+from collections.abc import Callable
 from unittest import mock
+
+import pytest
 
 import agent.nmap_agent
 from agent import nmap_options, nmap_wrapper
@@ -229,3 +233,109 @@ def testNmapWrapper_whenTcpSynPingPortsIsUsed_returnCommand(
         "/tmp/normal",
         "127.0.0.1/24",
     ]
+
+
+def testNmapWrapperScanDomain_always_scansEveryIpv4AndIpv6AddressOfTheName(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+    ipv4_domain_scan_xml: str,
+    ipv6_domain_scan_xml: str,
+) -> None:
+    """Ensure the domain name is scanned once per IP version, on all of its addresses."""
+    run_mock = nmap_runs([ipv4_domain_scan_xml, ipv6_domain_scan_xml])
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    client.scan_domain("example.com")
+
+    ipv4_command, ipv6_command = [call.args[0] for call in run_mock.call_args_list]
+    assert "--resolve-all" in ipv4_command
+    assert "-6" not in ipv4_command
+    assert ipv4_command[-1] == "example.com"
+    assert "--resolve-all" in ipv6_command
+    assert ipv6_command[-2:] == ["-6", "example.com"]
+
+
+def testNmapWrapperScanDomain_whenBothIpVersionsHaveHosts_returnsTheHostsOfBoth(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+    ipv4_domain_scan_xml: str,
+    ipv6_domain_scan_xml: str,
+) -> None:
+    """Ensure the results of the IPv4 and IPv6 runs are merged."""
+    nmap_runs([ipv4_domain_scan_xml, ipv6_domain_scan_xml])
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    scan_results, normal_results = client.scan_domain("example.com")
+
+    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
+    assert addresses == ["192.0.2.10", "2001:db8::10"]
+    assert normal_results.count("Nmap scan report for example.com") == 2
+
+
+def testNmapWrapperScanDomain_whenIpv6RunFails_returnsTheIpv4Results(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+    ipv4_domain_scan_xml: str,
+) -> None:
+    """Ensure a failed IPv6 run keeps the results of the IPv4 run."""
+    nmap_runs([ipv4_domain_scan_xml, subprocess.CalledProcessError(1, "nmap")])
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    scan_results, _ = client.scan_domain("example.com")
+
+    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
+    assert addresses == ["192.0.2.10"]
+
+
+def testNmapWrapperScanDomain_whenIpv4RunFails_returnsTheIpv6Results(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+    ipv6_domain_scan_xml: str,
+) -> None:
+    """Ensure a failed IPv4 run keeps the results of the IPv6 run."""
+    nmap_runs([subprocess.CalledProcessError(1, "nmap"), ipv6_domain_scan_xml])
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    scan_results, _ = client.scan_domain("example.com")
+
+    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
+    assert addresses == ["2001:db8::10"]
+
+
+def testNmapWrapperScanDomain_whenEveryRunFails_raises(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+) -> None:
+    """Ensure the error is raised when nmap fails for both IP versions."""
+    nmap_runs(
+        [
+            subprocess.CalledProcessError(1, "nmap"),
+            subprocess.CalledProcessError(1, "nmap"),
+        ]
+    )
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    with pytest.raises(subprocess.CalledProcessError):
+        client.scan_domain("example.com")
+
+
+def testNmapWrapperScanDomain_whenNoRunFindsAHost_returnsNoHost(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+) -> None:
+    """Ensure a name that resolves to no address gives a result without hosts."""
+    nmap_runs(["<nmaprun></nmaprun>", "<nmaprun></nmaprun>"])
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    scan_results, _ = client.scan_domain("example.com")
+
+    assert scan_results.get("nmaprun", {}).get("host") is None
+
+
+def testNmapWrapperScanDomain_whenResolverTranslatesToNat64_leavesOutTheNat64Hosts(
+    nmap_runs: Callable[[list[str | subprocess.CalledProcessError]], mock.MagicMock],
+    ipv4_domain_scan_xml: str,
+    nat64_domain_scan_xml: str,
+) -> None:
+    """Ensure IPv4 addresses a DNS64 resolver translated are not reported as IPv6 hosts."""
+    nmap_runs([ipv4_domain_scan_xml, nat64_domain_scan_xml])
+    client = nmap_wrapper.NmapWrapper(nmap_options.NmapOptions(scripts=None))
+
+    scan_results, _ = client.scan_domain("example.com")
+
+    addresses = [host["address"]["@addr"] for host in scan_results["nmaprun"]["host"]]
+    assert addresses == ["192.0.2.10"]

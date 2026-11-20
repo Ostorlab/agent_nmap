@@ -1672,3 +1672,84 @@ def testGetHostServices_whenMaterialized_yieldsDistinctDictPerPort(
         ("10.0.0.1", 80, "http"),
     ]
     assert services[0] is not services[1]
+
+
+def testAgentScanDomain_whenNameResolvesToSeveralAddresses_emitsTheServicesOfEachAddress(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_domain_addresses: dict[str, Any],
+) -> None:
+    """Ensure every address of the domain name gets its port services."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output_domain_addresses, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    port_services = sorted(
+        (m.selector, m.data["host"], m.data["port"], m.data["service"])
+        for m in agent_mock
+        if m.selector.endswith(".port.service")
+    )
+    assert port_services == [
+        ("v3.asset.ip.v4.port.service", "192.0.2.10", 80, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.10", 443, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.11", 80, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.11", 443, "http"),
+        ("v3.asset.ip.v6.port.service", "2001:db8::10", 80, "http"),
+        ("v3.asset.ip.v6.port.service", "2001:db8::10", 443, "http"),
+    ]
+
+
+def testAgentScanDomain_whenNameResolvesToSeveralAddresses_emitsEachDomainServiceOnce(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_domain_addresses: dict[str, Any],
+) -> None:
+    """Ensure the services the addresses share are reported once for the domain name."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output_domain_addresses, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    domain_services = [
+        (m.data["port"], m.data["schema"])
+        for m in agent_mock
+        if m.selector == "v3.asset.domain_name.service"
+    ]
+    assert domain_services == [(80, "http"), (443, "http")]
+    domain_fingerprints = [
+        (m.data["port"], m.data["schema"], m.data["library_name"])
+        for m in agent_mock
+        if m.selector == "v3.fingerprint.domain_name.service.library"
+    ]
+    assert domain_fingerprints == [(80, "http", "nginx"), (443, "http", "nginx")]
+
+
+def testAgentScanDomain_whenNameResolvesToSeveralAddresses_reportsOneFindingWithTheirPorts(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output_domain_addresses: dict[str, Any],
+) -> None:
+    """Ensure the domain name gets one network scan finding holding the ports of all its addresses."""
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output_domain_addresses, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    findings = [m for m in agent_mock if m.selector == "v3.report.vulnerability"]
+    assert len(findings) == 1
+    location = findings[0].data["vulnerability_location"]
+    assert location["domain_name"]["name"] == "ostorlab.co"
+    assert [metadata["value"] for metadata in location["metadata"]] == ["80", "443"]

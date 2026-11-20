@@ -47,6 +47,15 @@ DEFAULT_MASK_IPV6 = 128
 IPV6_CIDR_LIMIT = 112
 
 
+def _as_list(value: Any) -> list[Any]:
+    """The entries of an nmap XML element, which is a dict for one entry and empty for none."""
+    if isinstance(value, dict):
+        return [value]
+    if isinstance(value, list):
+        return value
+    return []
+
+
 class Error(Exception):
     """Base Custom Error Class."""
 
@@ -293,36 +302,19 @@ class NmapAgent(
 
     def _emit_network_domain_name_finding(
         self,
-        domains: dict[str, dict[str, str]] | dict[str, list[dict[str, str]]],
+        domain: str,
         technical_detail: str,
-        ports: list[dict[str, str]],
+        ports: list[dict[str, Any]],
     ) -> None:
-        domains_hostname: dict[str, str] | list[dict[str, str]] = domains.get(
-            "hostname", {}
+        self.report_vulnerability(
+            entry=kb.KB.NETWORK_PORT_SCAN,
+            technical_detail=technical_detail,
+            risk_rating=vuln_mixin.RiskRating.INFO,
+            vulnerability_location=vuln_mixin.VulnerabilityLocation(
+                metadata=self._prepare_metadata(ports),
+                asset=domain_name_asset.DomainName(name=domain),
+            ),
         )
-        if isinstance(domains_hostname, list):
-            for domain_dict in domains_hostname:
-                domain = domain_dict.get("@name", "")
-                self.report_vulnerability(
-                    entry=kb.KB.NETWORK_PORT_SCAN,
-                    technical_detail=technical_detail,
-                    risk_rating=vuln_mixin.RiskRating.INFO,
-                    vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                        metadata=self._prepare_metadata(ports),
-                        asset=domain_name_asset.DomainName(name=domain),
-                    ),
-                )
-        elif isinstance(domains_hostname, dict):
-            domain = domains_hostname.get("@name", "")
-            self.report_vulnerability(
-                entry=kb.KB.NETWORK_PORT_SCAN,
-                technical_detail=technical_detail,
-                risk_rating=vuln_mixin.RiskRating.INFO,
-                vulnerability_location=vuln_mixin.VulnerabilityLocation(
-                    metadata=self._prepare_metadata(ports),
-                    asset=domain_name_asset.DomainName(name=domain),
-                ),
-            )
 
     def _emit_network_scan_finding(
         self, scan_results: dict[str, Any], normal_results: str
@@ -335,14 +327,24 @@ class NmapAgent(
             hosts = scan_results.get("nmaprun", {}).get("host", {})
             if isinstance(hosts, dict) is True:
                 hosts = [hosts]
+            # The ports of every address of a hostname, keyed by protocol and port.
+            hostname_ports: dict[
+                tuple[str, str], dict[tuple[str, str], dict[str, Any]]
+            ] = {}
             for host in hosts:
                 domains = host.get("hostnames", {})
                 ports = host.get("ports", {}).get("port", "")
                 address = host.get("address", {})
                 if domains is not None and len(domains.values()) > 0:
-                    self._emit_network_domain_name_finding(
-                        domains, technical_detail, ports
-                    )
+                    for hostname in _as_list(domains.get("hostname", {})):
+                        entries = hostname_ports.setdefault(
+                            (hostname.get("@name", ""), hostname.get("@type", "")), {}
+                        )
+                        for port in _as_list(ports):
+                            entries.setdefault(
+                                (port.get("@protocol", ""), port.get("@portid", "")),
+                                port,
+                            )
                 elif address.get("@addrtype", "") == "ipv4":
                     self.report_vulnerability(
                         entry=kb.KB.NETWORK_PORT_SCAN,
@@ -363,6 +365,10 @@ class NmapAgent(
                             asset=ipv6_asset.IPv6(host=address.get("@addr", "")),
                         ),
                     )
+            for (domain, _), entries in hostname_ports.items():
+                self._emit_network_domain_name_finding(
+                    domain, technical_detail, list(entries.values())
+                )
 
     def _emit_services(
         self, scan_results: dict[str, Any], domain_name: str | None
