@@ -74,6 +74,9 @@ def get_domain_name_services(
                 "schema": data.get("service"),
                 "state": data.get("state"),
             }
+            # The domain's addresses often answer the same: each service is reported once.
+            if domain_name_service in domain_name_services:
+                continue
             domain_name_services.append(domain_name_service)
     return domain_name_services
 
@@ -268,7 +271,8 @@ def get_domain_name_service_library_fingerprints(
                     "library_type": "BACKEND_COMPONENT",
                     "detail": f"Nmap Detected {data_product} on {domain_name}",
                 }
-                fingerprints.append(fp)
+                if fp not in fingerprints:
+                    fingerprints.append(fp)
             if data_banner is not None and data_banner != "":
                 fp = {
                     "name": domain_name,
@@ -279,5 +283,6 @@ def get_domain_name_service_library_fingerprints(
                     "library_type": "BACKEND_COMPONENT",
                     "detail": f"Nmap Detected {data_banner} on {domain_name}",
                 }
-                fingerprints.append(fp)
+                if fp not in fingerprints:
+                    fingerprints.append(fp)
     return fingerprints

@@ -1,4 +1,4 @@
-"""Scan a domain name on the open ports of its IP, discovered once per IP and cached in redis.
+"""Scan a domain name on the open ports of each of its IPs, discovered once per IP and cached in redis.
 
 The open ports of an IP do not depend on the name used to reach it, so a ports-only scan runs once per IP.
 The name-dependent part still runs for every domain, but only on those ports.
@@ -7,6 +7,7 @@ The name-dependent part still runs for every domain, but only on those ports.
 import ipaddress
 import logging
 import socket
+import subprocess
 from typing import Any
 
 from ostorlab.agent.mixins import agent_persist_mixin as persist_mixin
@@ -24,13 +25,19 @@ OPEN_PORTS_CACHE_KEY = b"agent_nmap_ip_open_ports"
 HOSTS_FILE_PATH = "/etc/hosts"
 HOSTS_FILE_ENTRY_MARKER = "# agent_nmap"
 
+# A resolver doing DNS64 answers with IPv4 addresses translated into these NAT64 prefixes.
+NAT64_NETWORKS = (
+    ipaddress.ip_network("64:ff9b::/96"),
+    ipaddress.ip_network("64:ff9b:1::/48"),
+)
+
 
 def scan_domain(
     domain_name: str,
     options: nmap_options.NmapOptions,
     persist: persist_mixin.AgentPersistMixin,
 ) -> tuple[dict[str, Any], str] | None:
-    """Scan a domain name on the open ports of its IP.
+    """Scan a domain name on the open ports of each of its IPv4 and IPv6 addresses.
 
     Args:
         domain_name: Domain name to scan.
@@ -38,35 +45,93 @@ def scan_domain(
         persist: Redis storage holding the open ports cache.
 
     Returns:
-        The XML and normal scan results, or None when the domain can not be resolved or its IP
-        has no open ports.
+        The XML and normal scan results of all its IPs, or None when the domain can not be
+        resolved or none of its IPs has open ports.
 
     Raises:
-        subprocess.CalledProcessError: an nmap command failed.
-        nmap_wrapper.OutputParsingError: the discovery output could not be parsed.
+        subprocess.CalledProcessError: an nmap command failed and no IP was scanned.
+        nmap_wrapper.OutputParsingError: a discovery output could not be parsed and no IP was
+            scanned.
     """
-    ip = resolve_ip(domain_name=domain_name)
-    if ip is None:
+    ips = resolve_ips(domain_name=domain_name)
+    if len(ips) == 0:
         logger.info("could not resolve %s, skipping it", domain_name)
         return None
+    results: list[tuple[dict[str, Any], str]] = []
+    errors: list[subprocess.CalledProcessError | nmap_wrapper.OutputParsingError] = []
+    for ip in ips:
+        try:
+            result = _scan_domain_on_ip(
+                domain_name=domain_name, ip=ip, options=options, persist=persist
+            )
+        except (
+            subprocess.CalledProcessError,
+            nmap_wrapper.OutputParsingError,
+        ) as e:
+            logger.warning("could not scan %s on %s: %s", domain_name, ip, e)
+            errors.append(e)
+            continue
+        if result is not None:
+            results.append(result)
+    if len(results) == 0:
+        if len(errors) > 0:
+            raise errors[0]
+        return None
+    return merge_results(results=results)
+
+
+def _scan_domain_on_ip(
+    domain_name: str,
+    ip: str,
+    options: nmap_options.NmapOptions,
+    persist: persist_mixin.AgentPersistMixin,
+) -> tuple[dict[str, Any], str] | None:
+    """Scan a domain name pinned to one of its IPs, on the open ports of that IP."""
     open_ports = get_open_ports(ip=ip, options=options, persist=persist)
     if len(open_ports) == 0:
         logger.info("no open ports on %s (%s), skipping service scan", ip, domain_name)
         return None
-    options = nmap_options.get_open_ports_scan_options(
+    ip_options = nmap_options.get_open_ports_scan_options(
         options=options, open_ports=open_ports
     )
-    client = nmap_wrapper.NmapWrapper(options=options)
-    logger.info("scanning domain %s with options %s", domain_name, options)
+    client = nmap_wrapper.NmapWrapper(options=ip_options)
+    logger.info("scanning domain %s on %s with options %s", domain_name, ip, ip_options)
     add_hosts_entry(ip=ip, domain_name=domain_name)
     try:
-        scan_results, normal_results = client.scan_domain(
+        return client.scan_domain(
             domain_name=domain_name,
             is_ipv6=ipaddress.ip_address(address=ip).version == 6,
         )
     finally:
         remove_hosts_entry(ip=ip, domain_name=domain_name)
-    return scan_results, normal_results
+
+
+def merge_results(
+    results: list[tuple[dict[str, Any], str]],
+) -> tuple[dict[str, Any], str]:
+    """Merge the results of several nmap runs into one holding the hosts of all of them.
+
+    Args:
+        results: parsed xml output and normal output of each run.
+
+    Returns:
+        the merged parsed xml output and the normal outputs joined.
+    """
+    merged: dict[str, Any] = {}
+    hosts: list[dict[str, Any]] = []
+    for scan_results, _ in results:
+        nmaprun = scan_results.get("nmaprun")
+        if nmaprun is None:
+            continue
+        if len(merged) == 0:
+            merged = {"nmaprun": dict(nmaprun)}
+            merged["nmaprun"].pop("host", None)
+        run_hosts = nmaprun.get("host", [])
+        hosts.extend([run_hosts] if isinstance(run_hosts, dict) else run_hosts)
+    if len(hosts) > 0:
+        merged["nmaprun"]["host"] = hosts
+    normal_results = "\n".join(normal for _, normal in results if normal != "")
+    return merged, normal_results
 
 
 def get_open_ports(
@@ -89,12 +154,12 @@ def get_open_ports(
     return open_ports
 
 
-def resolve_ip(domain_name: str) -> str | None:
-    """Resolve a domain name to a single IP address, IPv4 first and IPv6 when it has no IPv4.
+def resolve_ips(domain_name: str) -> list[str]:
+    """Resolve a domain name to its IPv4 and IPv6 addresses, IPv4 first, each sorted numerically.
 
-    When the domain has several addresses, the numerically lowest one is used, so the same
-    domain always maps to the same cache entry even if the resolver rotates the address order.
+    NAT64 addresses are left out: they are IPv4 addresses a DNS64 resolver translated.
     """
+    ips: set[str] = set()
     for family in (socket.AF_INET, socket.AF_INET6):
         try:
             addresses = socket.getaddrinfo(
@@ -105,13 +170,17 @@ def resolve_ip(domain_name: str) -> str | None:
             )
         except (socket.gaierror, UnicodeError):
             continue
-        ips = sorted(
-            {str(address[4][0]) for address in addresses},
-            key=ipaddress.ip_address,
-        )
-        if len(ips) > 0:
-            return ips[0]
-    return None
+        ips.update(str(address[4][0]) for address in addresses)
+    return sorted(
+        (ip for ip in ips if _is_nat64_address(ip=ip) is False),
+        key=lambda ip: (ipaddress.ip_address(ip).version, ipaddress.ip_address(ip)),
+    )
+
+
+def _is_nat64_address(ip: str) -> bool:
+    """Whether an address is an IPv4 address translated into a NAT64 prefix."""
+    address = ipaddress.ip_address(ip)
+    return any(address in network for network in NAT64_NETWORKS)
 
 
 def add_hosts_entry(ip: str, domain_name: str) -> None:

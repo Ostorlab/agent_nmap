@@ -5,6 +5,7 @@ import pathlib
 import socket
 import subprocess
 from typing import Any
+from unittest import mock
 
 import pytest
 import requests_mock as rq_mock
@@ -2029,7 +2030,7 @@ def testNmapAgent_whenDiscoveryOutputCannotBeParsed_doesNotCacheIpAndSkipsDomain
     assert len(agent_mock) == 0
 
 
-def testNmapAgent_whenDomainResolvesToSeveralIps_cachesUnderLowestIp(
+def testNmapAgent_whenDomainResolvesToSeveralIps_discoversAndScansEachIp(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],
@@ -2038,7 +2039,7 @@ def testNmapAgent_whenDomainResolvesToSeveralIps_cachesUnderLowestIp(
     fake_output: None | dict[str, str],
     tmp_path: pathlib.Path,
 ) -> None:
-    """A round-robin domain always maps to the same cache entry, whatever the resolver order."""
+    """Every IP of a round-robin domain is scanned, in the same order whatever the resolver order."""
     mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "socket.getaddrinfo",
@@ -2050,14 +2051,26 @@ def testNmapAgent_whenDomainResolvesToSeveralIps_cachesUnderLowestIp(
     discover_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=["22"]
     )
-    mocker.patch(
+    scan_domain_mock = mocker.patch(
         "agent.nmap_wrapper.NmapWrapper.scan_domain",
         return_value=(fake_output, HUMAN_OUTPUT),
     )
+    add_hosts_entry_spy = mocker.spy(domain_scan, "add_hosts_entry")
 
     nmap_test_agent.process(domain_msg)
 
-    assert discover_mock.call_args.kwargs["host"] == "10.0.0.3"
+    assert [c.kwargs["host"] for c in discover_mock.call_args_list] == [
+        "10.0.0.3",
+        "10.0.0.20",
+    ]
+    assert [c.kwargs["ip"] for c in add_hosts_entry_spy.call_args_list] == [
+        "10.0.0.3",
+        "10.0.0.20",
+    ]
+    assert scan_domain_mock.call_count == 2
+    assert (
+        nmap_test_agent.hash_get(domain_scan.OPEN_PORTS_CACHE_KEY, "10.0.0.20") == b"22"
+    )
 
 
 def testGetOpenPorts_whenScanHasOpenPorts_returnsSortedPortNumbers(
@@ -2093,8 +2106,8 @@ def testNmapAgent_whenDomainHasOnlyIpv6_discoversPortsOnIpv6AndScansDomainWithIp
     fake_output: None | dict[str, str],
     tmp_path: pathlib.Path,
 ) -> None:
-    """A domain without an IPv4 address falls back to its IPv6 address for the port discovery and
-    the cache, and the domain service scan is run over IPv6 so it hits the same address."""
+    """A domain without an IPv4 address gets its IPv6 addresses discovered and cached, and the
+    domain service scan is run over IPv6 so it hits the same addresses."""
     mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     getaddrinfo_mock = mocker.patch(
         "socket.getaddrinfo",
@@ -2120,15 +2133,18 @@ def testNmapAgent_whenDomainHasOnlyIpv6_discoversPortsOnIpv6AndScansDomainWithIp
         socket.AF_INET,
         socket.AF_INET6,
     ]
-    assert discover_mock.call_args.kwargs["host"] == "2001:db8::3"
-    assert scan_domain_mock.call_args.kwargs["is_ipv6"] is True
+    assert [c.kwargs["host"] for c in discover_mock.call_args_list] == [
+        "2001:db8::3",
+        "2001:db8::20",
+    ]
+    assert all(c.kwargs["is_ipv6"] is True for c in scan_domain_mock.call_args_list)
     assert (
         nmap_test_agent.hash_get(domain_scan.OPEN_PORTS_CACHE_KEY, "2001:db8::3")
         == b"443"
     )
 
 
-def testNmapAgent_whenDomainHasIpv4AndIpv6_usesIpv4(
+def testNmapAgent_whenDomainHasIpv4AndIpv6_scansIpv4ThenIpv6(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],
@@ -2137,12 +2153,13 @@ def testNmapAgent_whenDomainHasIpv4AndIpv6_usesIpv4(
     fake_output: None | dict[str, str],
     tmp_path: pathlib.Path,
 ) -> None:
-    """IPv4 is preferred, like nmap does when scanning a domain without -6."""
+    """Both IP versions are scanned, the IPv6 address over IPv6 so it hits the same address."""
     mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     getaddrinfo_mock = mocker.patch(
         "socket.getaddrinfo",
-        return_value=[
-            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.3", 0)),
+        side_effect=[
+            [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.3", 0))],
+            [(socket.AF_INET6, socket.SOCK_STREAM, 6, "", ("2001:db8::3", 0, 0, 0))],
         ],
     )
     discover_mock = mocker.patch(
@@ -2155,10 +2172,18 @@ def testNmapAgent_whenDomainHasIpv4AndIpv6_usesIpv4(
 
     nmap_test_agent.process(domain_msg)
 
-    assert getaddrinfo_mock.call_count == 1
-    assert getaddrinfo_mock.call_args.kwargs["family"] == socket.AF_INET
-    assert discover_mock.call_args.kwargs["host"] == "10.0.0.3"
-    assert scan_domain_mock.call_args.kwargs["is_ipv6"] is False
+    assert [c.kwargs["family"] for c in getaddrinfo_mock.call_args_list] == [
+        socket.AF_INET,
+        socket.AF_INET6,
+    ]
+    assert [c.kwargs["host"] for c in discover_mock.call_args_list] == [
+        "10.0.0.3",
+        "2001:db8::3",
+    ]
+    assert [c.kwargs["is_ipv6"] for c in scan_domain_mock.call_args_list] == [
+        False,
+        True,
+    ]
 
 
 def testNmapAgent_whenScanningDomain_removesPinFromHostsFileAfterScan(
@@ -2256,7 +2281,7 @@ def testNmapAgent_whenDomainScanFails_removesPinToCachedIpFromHostsFile(
     mocker: plugin.MockerFixture,
     tmp_path: pathlib.Path,
 ) -> None:
-    """The pin to the cached IP is written before nmap runs, and removed even when the scan fails."""
+    """The pin to each cached IP is written before nmap runs, and removed even when the scan fails."""
     hosts_file = tmp_path / "hosts"
     hosts_file.write_text("127.0.0.1 localhost")
     mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(hosts_file))
@@ -2278,9 +2303,197 @@ def testNmapAgent_whenDomainScanFails_removesPinToCachedIpFromHostsFile(
 
     nmap_test_agent.process(domain_msg)
 
-    assert add_hosts_entry_spy.call_args.kwargs == {
-        "ip": "10.0.0.3",
-        "domain_name": "ostorlab.co",
-    }
+    assert [c.kwargs for c in add_hosts_entry_spy.call_args_list] == [
+        {"ip": "10.0.0.3", "domain_name": "ostorlab.co"},
+        {"ip": "10.0.0.20", "domain_name": "ostorlab.co"},
+    ]
     assert hosts_file.read_text() == "127.0.0.1 localhost\n"
     assert len(agent_mock) == 0
+
+
+def testAgentScanDomain_whenNameResolvesToSeveralAddresses_emitsTheServicesOfEachAddress(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    scan_of_each_domain_address: mock.MagicMock,
+) -> None:
+    """Ensure every address of the domain name gets its port services."""
+    nmap_test_agent.process(domain_msg)
+
+    port_services = sorted(
+        (m.selector, m.data["host"], m.data["port"], m.data["service"])
+        for m in agent_mock
+        if m.selector.endswith(".port.service")
+    )
+    assert port_services == [
+        ("v3.asset.ip.v4.port.service", "192.0.2.10", 80, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.10", 443, "https"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.11", 80, "http"),
+        ("v3.asset.ip.v4.port.service", "192.0.2.11", 443, "https"),
+        ("v3.asset.ip.v6.port.service", "2001:db8::10", 80, "http"),
+        ("v3.asset.ip.v6.port.service", "2001:db8::10", 443, "https"),
+    ]
+    assert [
+        c.kwargs["is_ipv6"] for c in scan_of_each_domain_address.call_args_list
+    ] == [
+        False,
+        False,
+        True,
+    ]
+
+
+def testAgentScanDomain_whenNameResolvesToSeveralAddresses_emitsEachDomainServiceOnce(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    scan_of_each_domain_address: mock.MagicMock,
+) -> None:
+    """Ensure the services the addresses share are reported once for the domain name."""
+    nmap_test_agent.process(domain_msg)
+
+    domain_services = [
+        (m.data["port"], m.data["schema"])
+        for m in agent_mock
+        if m.selector == "v3.asset.domain_name.service"
+    ]
+    assert domain_services == [(80, "http"), (443, "https")]
+    domain_fingerprints = [
+        (m.data["port"], m.data["schema"], m.data["library_name"])
+        for m in agent_mock
+        if m.selector == "v3.fingerprint.domain_name.service.library"
+    ]
+    assert domain_fingerprints == [(80, "http", "nginx"), (443, "https", "nginx")]
+
+
+def testAgentScanDomain_whenNameResolvesToSeveralAddresses_reportsOneFindingWithTheirPorts(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    scan_of_each_domain_address: mock.MagicMock,
+) -> None:
+    """Ensure the domain name gets one network scan finding holding the ports of all its addresses."""
+    nmap_test_agent.process(domain_msg)
+
+    findings = [m for m in agent_mock if m.selector == "v3.report.vulnerability"]
+    assert len(findings) == 1
+    location = findings[0].data["vulnerability_location"]
+    assert location["domain_name"]["name"] == "ostorlab.co"
+    assert [metadata["value"] for metadata in location["metadata"]] == ["80", "443"]
+
+
+def testAgentScanDomain_whenScanOfOneAddressFails_emitsTheServicesOfTheOtherAddresses(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    scan_of_each_domain_address: mock.MagicMock,
+    fake_output_domain_addresses: dict[str, Any],
+) -> None:
+    """Ensure a failed scan of one address keeps the results of the other addresses."""
+    hosts = fake_output_domain_addresses["nmaprun"]["host"]
+    scan_of_each_domain_address.side_effect = [
+        subprocess.CalledProcessError(1, "nmap"),
+        ({"nmaprun": {"host": hosts[1]}}, HUMAN_OUTPUT),
+        ({"nmaprun": {"host": hosts[2]}}, HUMAN_OUTPUT),
+    ]
+
+    nmap_test_agent.process(domain_msg)
+
+    scanned_hosts = {
+        m.data["host"] for m in agent_mock if m.selector.endswith(".port.service")
+    }
+    assert scanned_hosts == {"192.0.2.11", "2001:db8::10"}
+
+
+def testAgentScanDomain_whenResolverAnswersWithNat64Addresses_leavesThemOut(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    domain_msg: message.Message,
+    mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+    tmp_path: pathlib.Path,
+) -> None:
+    """Ensure the IPv6 addresses a DNS64 resolver makes up from the IPv4 addresses are not scanned."""
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch(
+        "socket.getaddrinfo",
+        side_effect=[
+            [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("192.0.2.10", 0))],
+            [
+                (
+                    socket.AF_INET6,
+                    socket.SOCK_STREAM,
+                    6,
+                    "",
+                    ("64:ff9b::c000:20a", 0, 0, 0),
+                )
+            ],
+        ],
+    )
+    discover_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=["443"]
+    )
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
+
+    nmap_test_agent.process(domain_msg)
+
+    assert [c.kwargs["host"] for c in discover_mock.call_args_list] == ["192.0.2.10"]
+    assert [c.kwargs["is_ipv6"] for c in scan_domain_mock.call_args_list] == [False]
+
+
+def testScanDomain_whenNoAddressHasAHostUp_returnsTheRunWithoutHosts(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    mocker: plugin.MockerFixture,
+    no_host_domain_scan_xml: str,
+    tmp_path: pathlib.Path,
+) -> None:
+    """Ensure scans that found no host up give nmap's run without hosts."""
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
+    mocker.patch(
+        "socket.getaddrinfo",
+        return_value=[
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("192.0.2.10", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("192.0.2.11", 0)),
+        ],
+    )
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=["443"]
+    )
+    mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(nmap_wrapper.parse_output(no_host_domain_scan_xml), ""),
+    )
+
+    results = domain_scan.scan_domain(
+        domain_name="example.com",
+        options=nmap_options.NmapOptions(scripts=None),
+        persist=nmap_test_agent,
+    )
+
+    assert results is not None
+    scan_results, _ = results
+    assert scan_results["nmaprun"]["@scanner"] == "nmap"
+    assert scan_results["nmaprun"].get("host") is None
+
+
+def testGetHostServices_whenHttpRunsInsideTls_returnsHttps(
+    fake_output_product: dict[str, Any],
+) -> None:
+    """Ensure a TLS port nmap identifies as http is reported as https."""
+    host = fake_output_product["nmaprun"]["host"]
+
+    services = {
+        service["port"]: service["service"]
+        for service in generators.get_host_services(host)
+    }
+
+    assert services[443] == "https"
+    assert services[80] == "http-proxy"

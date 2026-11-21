@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<nmaprun scanner="nmap" args="nmap -sV -n -F -T3 -sS --script banner --resolve-all -oX /tmp/xmloutput -oN /tmp/normal ostorlab.co" start="1795180000" startstr="Fri Nov 20 12:00:00 2026" version="7.94" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="100" services="7,9,13,21-23,25-26,37,53,79-81,88,106,110-111,113,119,135,139,143-144,179,199,389,427,443-445,465,513-515,543-544,548,554,587,631,646,873,990,993,995,1025-1029,1110,1433,1720,1723,1755,1900,2000-2001,2049,2121,2717,3000,3128,3306,3389,3986,4899,5000,5009,5051,5060,5101,5190,5357,5432,5631,5666,5800,5900,6000-6001,6646,7070,8000,8008-8009,8080-8081,8443,8888,9100,9999-10000,32768,49152-49157"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1795180001" endtime="1795180020"><status state="up" reason="syn-ack" reason_ttl="54"/>
+<address addr="192.0.2.10" addrtype="ipv4"/>
+<hostnames>
+<hostname name="ostorlab.co" type="user"/>
+</hostnames>
+<ports><extraports state="filtered" count="98">
+<extrareasons reason="no-response" count="98" proto="tcp" ports="7,9,13,21-23,25-26,37,53,79,81,88,106,110-111,113,119,135,139,143-144,179,199,389,427,444-445,465,513-515,543-544,548,554,587,631,646,873,990,993,995,1025-1029,1110,1433,1720,1723,1755,1900,2000-2001,2049,2121,2717,3000,3128,3306,3389,3986,4899,5000,5009,5051,5060,5101,5190,5357,5432,5631,5666,5800,5900,6000-6001,6646,7070,8000,8008-8009,8080-8081,8443,8888,9100,9999-10000,32768,49152-49157"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="54"/><service name="http" product="nginx" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx</cpe></service></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="54"/><service name="http" product="nginx" tunnel="ssl" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx</cpe></service></port>
+</ports>
+<times srtt="21000" rttvar="5000" to="100000"/>
+</host>
+<host starttime="1795180001" endtime="1795180021"><status state="up" reason="syn-ack" reason_ttl="54"/>
+<address addr="192.0.2.11" addrtype="ipv4"/>
+<hostnames>
+<hostname name="ostorlab.co" type="user"/>
+</hostnames>
+<ports><extraports state="filtered" count="98">
+<extrareasons reason="no-response" count="98" proto="tcp" ports="7,9,13,21-23,25-26,37,53,79,81,88,106,110-111,113,119,135,139,143-144,179,199,389,427,444-445,465,513-515,543-544,548,554,587,631,646,873,990,993,995,1025-1029,1110,1433,1720,1723,1755,1900,2000-2001,2049,2121,2717,3000,3128,3306,3389,3986,4899,5000,5009,5051,5060,5101,5190,5357,5432,5631,5666,5800,5900,6000-6001,6646,7070,8000,8008-8009,8080-8081,8443,8888,9100,9999-10000,32768,49152-49157"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="54"/><service name="http" product="nginx" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx</cpe></service></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="54"/><service name="http" product="nginx" tunnel="ssl" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx</cpe></service></port>
+</ports>
+<times srtt="22000" rttvar="5000" to="100000"/>
+</host>
+<host starttime="1795180030" endtime="1795180049"><status state="up" reason="syn-ack" reason_ttl="54"/>
+<address addr="2001:db8::10" addrtype="ipv6"/>
+<hostnames>
+<hostname name="ostorlab.co" type="user"/>
+</hostnames>
+<ports><extraports state="filtered" count="98">
+<extrareasons reason="no-response" count="98" proto="tcp" ports="7,9,13,21-23,25-26,37,53,79,81,88,106,110-111,113,119,135,139,143-144,179,199,389,427,444-445,465,513-515,543-544,548,554,587,631,646,873,990,993,995,1025-1029,1110,1433,1720,1723,1755,1900,2000-2001,2049,2121,2717,3000,3128,3306,3389,3986,4899,5000,5009,5051,5060,5101,5190,5357,5432,5631,5666,5800,5900,6000-6001,6646,7070,8000,8008-8009,8080-8081,8443,8888,9100,9999-10000,32768,49152-49157"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="54"/><service name="http" product="nginx" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx</cpe></service></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="54"/><service name="http" product="nginx" tunnel="ssl" method="probed" conf="10"><cpe>cpe:/a:igor_sysoev:nginx</cpe></service></port>
+</ports>
+<times srtt="23000" rttvar="5000" to="100000"/>
+</host>
+<runstats><finished time="1795180050" timestr="Fri Nov 20 12:00:50 2026" summary="Nmap done at Fri Nov 20 12:00:50 2026; 3 IP addresses (3 hosts up) scanned in 50.00 seconds" elapsed="50.00" exit="success"/><hosts up="3" down="0" total="3"/>
+</runstats>
+</nmaprun>
