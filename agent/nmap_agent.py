@@ -157,9 +157,9 @@ class NmapAgent(
                     ipaddress.ip_network(f"{host}/{mask}", strict=False),
                 ):
                     logger.debug(
-                        "target %s/%s was processed before, exiting", host, mask
+                        "target %s/%s was processed before, skipping it", host, mask
                     )
-                    return
+                    continue
                 try:
                     scan_results, normal_results = self._scan_host(host, mask)
                 except subprocess.CalledProcessError:

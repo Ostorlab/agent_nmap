@@ -18,6 +18,7 @@ from agent import nmap_wrapper
 logger = logging.getLogger(__name__)
 
 # Redis hash mapping an IP to its comma separated open ports.
+# An IP with no open ports is not cached: the host may only have been down or unreachable.
 OPEN_PORTS_CACHE_KEY = b"agent_nmap_ip_open_ports"
 
 # Nmap reads /etc/hosts before querying DNS.
@@ -139,9 +140,12 @@ def get_open_ports(
     options: nmap_options.NmapOptions,
     persist: persist_mixin.AgentPersistMixin,
 ) -> list[str]:
-    """Return the open ports of an IP, from the redis cache or with a ports-only scan."""
+    """Return the open ports of an IP, from the redis cache or with a ports-only scan.
+
+    An empty result is not cached, so the next domain on the IP runs the discovery again.
+    """
     cached_ports = persist.hash_get(hash_name=OPEN_PORTS_CACHE_KEY, key=ip)
-    if cached_ports is not None:
+    if cached_ports is not None and cached_ports != b"":
         logger.info("open ports of %s found in cache: %s", ip, cached_ports)
         return [port for port in cached_ports.decode().split(",") if port != ""]
 
@@ -149,6 +153,9 @@ def get_open_ports(
         options=nmap_options.get_port_discovery_options(options=options)
     )
     open_ports = client.discover_open_ports(host=ip)
+    if len(open_ports) == 0:
+        logger.info("no open ports found on %s, not caching it", ip)
+        return []
     persist.hash_add(hash_name=OPEN_PORTS_CACHE_KEY, mapping={ip: ",".join(open_ports)})
     logger.info("open ports of %s cached: %s", ip, open_ports)
     return open_ports

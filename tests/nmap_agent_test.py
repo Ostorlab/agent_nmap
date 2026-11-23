@@ -687,6 +687,42 @@ def testAgentProcessMessage_whenASubnetIsTargetdAfterABiggerRangeIsPreviouslySca
     assert len(agent_mock) == 8
 
 
+def testAgentProcessMessage_whenOneSubnetWasProcessedBefore_scansRemainingSubnets(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    ipv4_msg2: message.Message,
+    mocker: plugin.MockerFixture,
+) -> None:
+    """A range split into subnets keeps scanning the other subnets when one was scanned before."""
+    scan_hosts_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_hosts",
+        return_value=(JSON_OUTPUT, HUMAN_OUTPUT),
+    )
+    nmap_test_agent.settings.args = [
+        utils_definitions.Arg(
+            name="max_network_mask_ipv4",
+            type="number",
+            value=json.dumps("32").encode(),
+        )
+    ]
+    nmap_test_agent.process(
+        message.Message.from_data(
+            selector="v3.asset.ip.v4",
+            data={"version": 4, "host": "192.168.0.0", "mask": "32"},
+        )
+    )
+
+    nmap_test_agent.process(ipv4_msg2)
+
+    assert [c.kwargs["hosts"] for c in scan_hosts_mock.call_args_list] == [
+        "192.168.0.0",
+        "192.168.0.1",
+        "192.168.0.2",
+        "192.168.0.3",
+    ]
+
+
 def testAgentEmitBannerScanDomain_withMultiplehostnames_reportVulnerabilities(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
@@ -1975,14 +2011,59 @@ def testNmapAgent_whenDomainsShareAnIp_discoversPortsOnceAndScansOnlyOpenPorts(
     assert any(m.selector == "v3.asset.domain_name.service" for m in agent_mock) is True
 
 
-def testNmapAgent_whenCachedIpHasNoOpenPorts_skipsServiceScan(
+def testNmapAgent_whenIpHasNoOpenPorts_doesNotCacheIpAndRetriesDiscovery(
+    nmap_test_agent: nmap_agent.NmapAgent,
+    agent_mock: list[message.Message],
+    agent_persist_mock: dict[str | bytes, str | bytes],
+    mocker: plugin.MockerFixture,
+) -> None:
+    """An empty discovery (host down, unreachable or timed out) is not cached, so the next
+    domain on the same IP runs the discovery again."""
+    mocker.patch(
+        "socket.getaddrinfo",
+        return_value=[
+            (socket.AF_INET6, socket.SOCK_STREAM, 6, "", ("2606:4700::6812:1005", 0)),
+        ],
+    )
+    discover_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=[]
+    )
+    scan_domain_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.scan_domain")
+
+    nmap_test_agent.process(
+        message.Message.from_data(
+            selector="v3.asset.domain_name", data={"name": "a.hosted.app"}
+        )
+    )
+    nmap_test_agent.process(
+        message.Message.from_data(
+            selector="v3.asset.domain_name", data={"name": "b.hosted.app"}
+        )
+    )
+
+    assert discover_mock.call_count == 2
+    assert (
+        nmap_test_agent.hash_get(
+            domain_scan.OPEN_PORTS_CACHE_KEY, "2606:4700::6812:1005"
+        )
+        is None
+    )
+    assert scan_domain_mock.call_count == 0
+    assert len(agent_mock) == 0
+
+
+def testNmapAgent_whenIpCachedWithNoOpenPorts_retriesDiscovery(
     nmap_test_agent: nmap_agent.NmapAgent,
     agent_mock: list[message.Message],
     agent_persist_mock: dict[str | bytes, str | bytes],
     domain_msg: message.Message,
     mocker: plugin.MockerFixture,
+    fake_output: None | dict[str, str],
+    tmp_path: pathlib.Path,
 ) -> None:
-    """An IP cached with no open ports (down or timed out) is not scanned again for any domain."""
+    """An empty entry left in the cache by an earlier version is ignored and the IP is
+    discovered again."""
+    mocker.patch.object(domain_scan, "HOSTS_FILE_PATH", str(tmp_path / "hosts"))
     mocker.patch(
         "socket.getaddrinfo",
         return_value=[
@@ -1990,14 +2071,22 @@ def testNmapAgent_whenCachedIpHasNoOpenPorts_skipsServiceScan(
         ],
     )
     nmap_test_agent.hash_add(domain_scan.OPEN_PORTS_CACHE_KEY, {"35.219.200.16": ""})
-    discover_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.discover_open_ports")
-    scan_domain_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.scan_domain")
+    discover_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=["443"]
+    )
+    scan_domain_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.scan_domain",
+        return_value=(fake_output, HUMAN_OUTPUT),
+    )
 
     nmap_test_agent.process(domain_msg)
 
-    assert discover_mock.call_count == 0
-    assert scan_domain_mock.call_count == 0
-    assert len(agent_mock) == 0
+    assert discover_mock.call_count == 1
+    assert scan_domain_mock.call_count == 1
+    assert (
+        nmap_test_agent.hash_get(domain_scan.OPEN_PORTS_CACHE_KEY, "35.219.200.16")
+        == b"443"
+    )
 
 
 def testNmapAgent_whenDiscoveryOutputCannotBeParsed_doesNotCacheIpAndSkipsDomain(

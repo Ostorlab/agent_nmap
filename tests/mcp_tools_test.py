@@ -66,7 +66,7 @@ def testScan_whenDomainsShareAnIp_discoversPortsOnceAndScansOnlyOpenPorts(
     assert hosts_file.read_text() == "127.0.0.1 localhost\n"
 
 
-def testScan_whenIpCachedWithNoOpenPorts_returnsNoServicesWithoutScanning(
+def testScan_whenIpCachedWithNoOpenPorts_retriesDiscovery(
     mocker: plugin.MockerFixture,
     agent_persist_mock: dict[str | bytes, Any],
 ) -> None:
@@ -76,13 +76,15 @@ def testScan_whenIpCachedWithNoOpenPorts_returnsNoServicesWithoutScanning(
         "socket.getaddrinfo",
         return_value=[(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("10.0.0.3", 0))],
     )
-    discover_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.discover_open_ports")
+    discover_mock = mocker.patch(
+        "agent.nmap_wrapper.NmapWrapper.discover_open_ports", return_value=[]
+    )
     scan_domain_mock = mocker.patch("agent.nmap_wrapper.NmapWrapper.scan_domain")
 
     services = scan("a.example.com")
 
     assert services == []
-    assert discover_mock.call_count == 0
+    assert discover_mock.call_count == 1
     assert scan_domain_mock.call_count == 0
 
 
